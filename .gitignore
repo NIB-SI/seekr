@@ -1,6 +1,9 @@
 packrat/lib*/
+doc/
 # R specific
-
+*.Rproj
+*.prj
+*.bak
 .Rproj.user
 .Rhistory
 .RData
