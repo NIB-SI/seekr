@@ -5,7 +5,8 @@ Version: 0.1.0
 Author: Andrej Blejec
 Authors@R: person("Andrej", "Blejec", email = "andrej.blejec@nib.com"
 Maintainer@R: person("Andrej", "Blejec", email = "andrej.blejec@nib.com"
-Description: The package provides several functions for support and use of pISA-tree.
+Description: The package provides several functions for support and 
+    use of pISA-tree.
 License: MIT
 Encoding: ASCII
 LazyData: true
