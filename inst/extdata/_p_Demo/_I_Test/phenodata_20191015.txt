@@ -1,0 +1,5 @@
+SampleID	SampleName	Date_of_change	AdditionalField1	Assay001
+SMPL001	Sample_001	2019-10-15	B1	x
+SMPL002	Sample_002	2019-10-15	B2	
+SMPL003	Sample_003	2019-10-15	B3	x
+SMPL004	Sample_004	2019-10-15	B4	

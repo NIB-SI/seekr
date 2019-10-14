@@ -1,0 +1,17 @@
+project:	_p_Demo 
+Short Name:	Demo
+Title:	Project demonstration
+Description:	This is a demo project for R package 'pisar'.
+pISA projects path:	D:/OMIKE/pISA
+Local pISA-tree organisation:	NIB
+pISA project creation date:	2019-10-15
+pISA project creator:	AB
+Project funding code:	*
+Project coordinator:	*
+Project partners:	*
+Project start date:	2018-01-01
+Project end date:	2021-12-31
+Principal investigator:	*
+License:	CC BY 4.0
+Sharing permission:	Private
+Upload to FAIRDOMHub:	Yes

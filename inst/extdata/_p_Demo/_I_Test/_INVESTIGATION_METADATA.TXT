@@ -1,0 +1,11 @@
+Investigation:	_I_Test 
+Short Name:	Test
+Title:	Test investigation
+Description:	Investigation - for demonstration purposes.
+Phenodata:	./phenodata_20191015.txt
+pISA Investigation creation date:	2019-10-15
+pISA Investigation creator:	AB
+Principal investigator:	*
+License:	CC BY 4.0
+Sharing permission:	Private
+Upload to FAIRDOMHub:	Yes

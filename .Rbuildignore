@@ -1,10 +1,10 @@
 ^packrat/
 ^\.Rprofile$
 #
-^.*\.Rproj$
+^.*\.Rproj.*$
 ^\.Rproj\.user$
 ^notes$
-^\\doc\\$
+doc/
 ^cran-comments\.md$
 ^\.travis\.yml$
 ^\.git.*$
@@ -13,3 +13,6 @@
 ^Rplots\.pdf$
 ^appveyor\.yml$
 ^codecov\.yml$
+^.*\.prj$
+^.*\.bak$
+^.*\.Rproj$
