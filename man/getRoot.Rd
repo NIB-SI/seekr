@@ -20,10 +20,12 @@ data frame with Key/value pairs
 Get root directory for pISA layer
 }
 \note{
-Argument ... not used.
+The path should be compliant with the pISA-tree structure.
+    Path defaults to the working directory, which is
+    usually in or below an assay. Argument ... is not used.
 }
 \examples{
-getRoot("p", path="d:/_p_prj/_I_inv/_S_st/_A_asy/other/doc")  
+getRoot("p", path="d:/_p_prj/_I_inv/_S_st/_A_asy/other/doc")
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

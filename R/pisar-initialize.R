@@ -6,8 +6,6 @@
 ###############################################
 
 
-## ----testing,echo=FALSE--------------------------------------------------
-.testing <- FALSE
 
 
 ## ----Package description-------------------------------------------------
@@ -107,14 +105,16 @@ fsummary(data.frame(x=rnorm(20),txt=sample(letters,20,rep=TRUE)))
 #'
 #' @param x character characteristic for pISA layer
 #' @param path path within the pISA-tree
-#' @param ... any other arguments 
+#' @param ... any other arguments
 #' @return data frame with Key/value pairs
 #' @export
-#' @note Argument ... not used.
+#' @note The path should be compliant with the pISA-tree structure.
+#'     Path defaults to the working directory, which is
+#'     usually in or below an assay. Argument ... is not used.
 #' @keywords pISA
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' getRoot("p", path="d:/_p_prj/_I_inv/_S_st/_A_asy/other/doc")  
+#' getRoot("p", path="d:/_p_prj/_I_inv/_S_st/_A_asy/other/doc")
 getRoot <- function(x="p",path=getwd(),...){
 dirs <- strsplit(path,"/")[[1]]
 nl <- length(dirs)-which(regexpr(paste0("_",x,"_"),dirs)>0)
@@ -122,7 +122,8 @@ if(length(nl)<=0) stop(paste("Path is not within a pISA-tree:\n"
         , path))
 paste(rep("..",nl),collapse="/")
 }
-getRoot("A", path="d:/_p_prj/_I_inv/_S_st/_A_asy/other/doc")
+
+
 
 
 ## ----readMeta------------------------------------------------------------
@@ -136,10 +137,14 @@ getRoot("A", path="d:/_p_prj/_I_inv/_S_st/_A_asy/other/doc")
 #' @keywords pISA
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \dontrun{
-#' .pISAloc <- system.file("extdata","_p_Demo",package="pisar")
-#' readMeta(.pISAloc)
-#' }
+#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
+#' oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+#' oldwd
+#' .aroot <- getRoot("A")
+#' .ameta <- readMeta(.aroot)
+#' .ameta
+#' setwd(oldwd)
+#'
 readMeta <- function(x=".",  ...){
 d <- tolower(dir(x))
 d
@@ -147,14 +152,14 @@ lfn <- d[regexpr(".*_metadata",d)>0]
 if(length(lfn)==0) warning("No metadata file found")
 if(length(lfn)>1) warning("More tha one metadata file found:", d)
 if(length(lfn)==1){
-  p <- read.table(file.path(x, lfn)
+  p <- rio::import(file.path(x, lfn)
   ,sep="\t", stringsAsFactors=FALSE, col.names=c("Key","Value"))
-class(p)<- c("Dlist", "pISAmeta", class(p))
+class(p)<- c("Dlist","pISAmeta",  class(p))
 } else {p = ""}
 return(p)
 }
 ##
-.pISAloc <- "../inst/extdata/_p_Demo"
+.pISAloc <- system.file("extdata","_p_Demo",package="pisar")
 readMeta(.pISAloc)
 
 
@@ -168,11 +173,36 @@ readMeta(.pISAloc)
 #' @keywords package
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' print(data.frame(Key=c("First","Second")
-#' , Value=c("Description 1", "Description 2"))
+#' .pISAloc <- system.file("extdata","_p_Demo",package="pisar")
+#' readMeta(.pISAloc)
 print.pISAmeta <- function(x,  ...){
     #if(inherits(x,"pISAmeta")
     print.Dlist(x)
     }
-readMeta(.pISAloc)
+## ----getMeta-------------------------------------------------------------
+#' Get metadata value
+#'
+#' @param x two column character data frame with Key / Value pairs
+#' @param item string, item name
+#' @param nl logical, expand backslash character for new lines
+#' @param ... any other arguments (not used at the moment)
+#' @return character string with key value
+#' @export
+#' @note Parameter item is matched exactly to the item names.
+#' @keywords pisa
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
+#' oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+#' oldwd
+#' .iroot <- getRoot("I")
+#' .idesc <- readMeta(.iroot)
+#' getMeta(.idesc, "Description")
+#' setwd(oldwd)
+getMeta <- function(x,item,nl=TRUE){
+item <- paste0(gsub(":","",item),":")
+ret <- unclass(x[match(item, x[,1]), 2])
+if(is.character(ret)&&nl) ret <- sub("\\\\n","\n",ret)
+return(ret)
+}
 

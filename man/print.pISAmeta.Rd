@@ -18,8 +18,8 @@ Print metadata object as Dlist
 Metadata table is printed in convenient Dlist form.
 }
 \examples{
-print(data.frame(Key=c("First","Second")
-, Value=c("Description 1", "Description 2"))
+.pISAloc <- system.file("extdata","_p_Demo",package="pisar")
+readMeta(.pISAloc)
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}
