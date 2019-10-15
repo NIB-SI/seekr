@@ -179,6 +179,9 @@ print.pISAmeta <- function(x,  ...){
     #if(inherits(x,"pISAmeta")
     print.Dlist(x)
     }
+
+
+
 ## ----getMeta-------------------------------------------------------------
 #' Get metadata value
 #'
@@ -205,4 +208,39 @@ ret <- unclass(x[match(item, x[,1]), 2])
 if(is.character(ret)&&nl) ret <- sub("\\\\n","\n",ret)
 return(ret)
 }
+
+
+
+
+
+
+## ----getLayer------------------------------------------------------------
+#' Get pISA layer name
+#'
+#' @param x layer character (one of p, I, S, or A)
+#' @param path, deafaults to working directory
+#' @return character string with layer name
+#' @export
+#' @note 
+#' @keywords pisa
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
+#' oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+#' oldwd
+#' .pname <- getLayer("p")
+#' .pname
+#' getLayer("I")
+#' getLayer("S")
+#' getLayer("A")
+getLayer <- function(x, path=getwd()){
+  loc <- strsplit(path,"/")[[1]]
+  lyr <- paste0("_",x,"_")
+  lname <- loc[regexpr(lyr,loc)==1]
+  if(length(lname)==0) {
+    lname <- ""
+    warning("No layer '", x, "' in path")
+    }
+  return(lname)
+  }
 
