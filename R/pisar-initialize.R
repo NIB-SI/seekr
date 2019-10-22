@@ -156,7 +156,7 @@ if(length(lfn)>1) warning("More tha one metadata file found:", d)
 if(length(lfn)==1){
   p <- rio::import(file.path(x, lfn)
   ,sep="\t", stringsAsFactors=FALSE, col.names=c("Key","Value"))
-class(p)<- c("Dlist","pISAmeta",  class(p))
+class(p)<- c("pISAmeta", "Dlist", class(p))
 } else {p = ""}
 return(p)
 }
@@ -169,6 +169,7 @@ readMeta(.pISAloc)
 #' Print metadata object as Dlist
 #'
 #' @param x metadata object, data.frame with two columns
+#' @param width estimated text width
 #' @param ... any other arguments
 #' @export
 #' @note Metadata table is printed in convenient Dlist form.
@@ -177,9 +178,20 @@ readMeta(.pISAloc)
 #' @examples
 #' .pISAloc <- system.file("extdata","_p_Demo",package="pisar")
 #' readMeta(.pISAloc)
-print.pISAmeta <- function(x,  ...){
+print.pISAmeta <- function(x, width = max(nchar(x[,1]))*3.5,  ...){
     #if(inherits(x,"pISAmeta")
-    print.Dlist(x)
+    #print(width)
+    #print.Dlist(x, width=width, ...)
+    width <- max(nchar(x[,1]))+1
+    key <- c(paste("",names(x)[1])
+           , paste0(rep("-",nchar(names(x)[1])),collapse="")
+           , x[,1])
+    key <- substr(paste(key,paste(rep(" ",15),collapse=" ")),1,width)
+    val <- c(paste("",names(x)[2])
+           , paste0(rep("-",nchar(names(x)[2])),collapse="")
+           , x[,2])
+    keyval <- paste0(key,val,"\n")
+    cat(keyval)
     }
 
 
@@ -290,12 +302,12 @@ out.path <- function(out.dir="../out", args="", which=1:length(args)) {
 #' @param addArgs character vector, additional arguments
 #' @param global if \code{TRUE} (default) auxiliary objects will be
 #'     created in the global environment (see note)
-#' @return a list with layer information components, possibly changing 
+#' @return a list with layer information components, possibly changing
 #' objects in the global environment (Se Note).
 #' @note If argument global is \code{TRUE} (default), auxiliary objects with
 #'     pISA related information will be created in the global environment.
-#'     Sometimes it is more convenient to use such object instead 
-#'     of the elements of the (invisibly) returned pisa list. 
+#'     Sometimes it is more convenient to use such object instead
+#'     of the elements of the (invisibly) returned pisa list.
 #'     The object are hidden (names start with dot); use
 #'     \code{ls(pattern="^\\.",all.names=TRUE)}
 #'     to get a full list of hiddent objects. The created objects are

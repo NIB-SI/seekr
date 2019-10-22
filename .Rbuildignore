@@ -16,3 +16,5 @@ doc/
 ^.*\.prj$
 ^.*\.bak$
 ^.*\.Rproj$
+^doc$
+^Meta$

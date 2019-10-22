@@ -15,7 +15,7 @@ pisa(path = getwd(), addArgs = NULL, global = TRUE)
 created in the global environment (see note)}
 }
 \value{
-a list with layer information components, possibly changing 
+a list with layer information components, possibly changing
 objects in the global environment (Se Note).
 }
 \description{
@@ -25,8 +25,8 @@ Extract pISA-tree details: name, root and metadata
 \note{
 If argument global is \code{TRUE} (default), auxiliary objects with
     pISA related information will be created in the global environment.
-    Sometimes it is more convenient to use such object instead 
-    of the elements of the (invisibly) returned pisa list. 
+    Sometimes it is more convenient to use such object instead
+    of the elements of the (invisibly) returned pisa list.
     The object are hidden (names start with dot); use
     \code{ls(pattern="^\\.",all.names=TRUE)}
     to get a full list of hiddent objects. The created objects are

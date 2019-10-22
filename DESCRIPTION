@@ -17,4 +17,5 @@ Imports:
     tools
 VignetteBuilder: knitr
 Suggests: 
+    knitr,
     rmarkdown
