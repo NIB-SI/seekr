@@ -1,5 +1,5 @@
 packrat/lib*/
-doc/
+#doc/
 # R specific
 *.Rproj
 *.prj
