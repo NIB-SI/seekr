@@ -1,0 +1,322 @@
+% -*- TeX:Rnw:UTF-8 -*-
+% ----------------------------------------------------------------
+% .R knitr file  ************************************************
+% ----------------------------------------------------------------
+%%
+<<echo=FALSE, include=FALSE>>=
+###############################################
+##                                           ##
+## (c) Andrej Blejec (andrej.blejec@nib.si)  ##
+##                                           ##
+###############################################
+cat("pISA initialize from project dir\n")
+.pISAloc <- "../../pISA/_p_tstapi"
+if(!exists(".pISAloc")) .pISAloc <- gsub("/_p_.*","",getwd())
+.pISAnet <- gsub(".*:","O:",.pISAloc)
+.pISAloc
+dir(.pISAloc)
+.pISAnet
+
+@
+
+<<echo=FALSE,results='hide'>>=
+options(width=70)
+# style_text(readLines("clipboard"))
+#setwd(.wd)
+#getwd()
+@
+
+<<my functions,echo=FALSE>>=
+my.write.table <- function(x, file="",label="", col.names=NA, sep="\t", meta = TRUE, ...){
+if(meta) {
+catln(
+  "# Object:\t", deparse(substitute(x)),
+"\n# Label:\t", label,
+"\n# File :\t", file,
+"\n# project :\t", getMeta(.pdesc,"project"),
+"\n# Investigation :\t", getMeta(.idesc,"Investigation"),
+"\n# Study :\t", getMeta(.sdesc,"Study"),
+"\n# Assay :\t", getMeta(.adesc,"Assay"),
+"\n# Report :\t", outputFile,
+"\n# Date:\t", as.character(Sys.Date()),
+"\n# "
+   , file=file)
+}
+#
+write.table(x, file=file, col.names=col.names, sep=sep, append =  meta, ...)
+catln(
+" Object:", deparse(substitute(x)),
+"\\\\\n  Label:", label,
+"\\\\\n  File :\\\\", paste0("\n\\href{run:"
+, gsub("\\\\","\\\\\\\\",normalizePath(file))
+, "}{",file,"}")
+)
+}
+#####
+my.head <- function(x, n=6, m=5, ...) {
+print(head(x[ ,1:min(ncol(x),m)], n, ...))
+dim(x)
+}
+head.list <- function(x, ...) lapply(x, head, ...)
+tail.list <- function(x, ...) lapply(x, tail, ...)
+catln <- function(...) cat(...,"\n")
+.test <- function(...) {if(.testing) {cat(" > > > ", deparse (substitute (...)), " = \n")
+print(...)
+}}
+.testing <- FALSE
+##bla
+##
+## View functions
+
+tl <- function(x,nr=6,nc=4){
+nr <- min(nr,nrow(x))
+nc <- min(nc,ncol(x))
+print(x[1:nr,1:nc])
+}
+##
+
+#' Output directory from arguments
+out.path <- function(out.dir="../out",args="",which=1:length(args)) {
+args[1] <- sub("\\..*","",basename(args[1]))
+out <- if(!all(c(args[which])=="")) file.path(out.dir,paste(c(args[which]),collapse="-")) else out.dir
+dir.create(out,showWarnings = FALSE)
+out
+}
+if(interactive()){
+out.path()
+out.path(args="")
+dir.exists("../out/xx-ena-dva")
+out.path(args=c("xx.txt","ena","dva"))
+dir.exists("../out/xx-ena-dva")
+unlink("../out/xx-ena-dva",recursive=TRUE)
+dir.exists("../out/xx-ena-dva")
+}
+@
+
+<<fct odds ratio,echo=FALSE,results='hide'>>=
+#' Odds ratio
+#'
+#' @param x numeric two way classification table (2x2)
+#' @param verbose logical if TRUE print additional information
+#' @return numeric a vector with odds ratio and confidence interval
+#' @export
+#' @note
+#' @references
+#' @keywords package
+#' @title
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' or(matrix(c(5,2,1,5),2,2),verbose=TRUE)
+or <- function(x,verbose=FALSE){
+if(verbose) print(addmargins(x))
+OR <- (x[1, 1] / x[1, 2]) / (x[2, 1] / x[2, 2])
+cil <- exp(log(OR)-1.96*sqrt(sum(1/x)))
+ciu <- exp(log(OR)+1.96*sqrt(sum(1/x)))
+return(c(or=OR,cil=cil,ciu=ciu))
+}
+or(matrix(c(5,2,1,5),2,2),verbose=TRUE)
+@
+
+% Auxiliary functions
+
+
+
+
+
+
+
+
+
+%% pISA information
+
+% Directories
+<<directories,,message=FALSE,warning=FALSE>>=
+.proot <- getRoot("p")
+dir(.proot,pattern="*.TXT")
+.iroot <- getRoot("I")   # removed _STUDIES and _ASSAYS
+dir(.iroot,pattern="*.TXT")
+.sroot <- getRoot("S")  # removed _ASSAYS
+dir(.sroot,"_*.TXT")
+.aroot <- getRoot("A")
+dir(.aroot,"_*.TXT")
+.pdesc <- readMeta(.proot)
+.idesc <- readMeta(.iroot)
+.sdesc <- readMeta(.sroot)
+.adesc <- readMeta(.aroot)
+@
+
+
+% \subsection{Links to files}
+
+<<,message=FALSE,warning=FALSE>>=
+getDesc <- function(x,field,nl=TRUE){
+field <- paste0(gsub(":","",field),":")
+ret <- x[x[,1]==field,2]
+if(is.character(ret)&&nl) ret <- sub("\\\\n","\n",ret)
+return(ret)
+}
+getDesc(.adesc,"Description",nl=FALSE)
+cat(getDesc(.adesc,"Description:"),"\n")
+.pfn <- getDesc(.idesc,"Phenodata:")
+.pfn
+@
+
+<<,message=FALSE,warning=FALSE>>=
+#' Get metadata value
+#'
+#' @param x two column character data frame with Item / Value pairs
+#' @param item string, item name
+#' @param nl logical, expand backslash character for new lines
+#' @param ... any other arguments (not used at the moment)
+#' @return character string with item value
+#' @export
+#' @note Parameter item is matched exactly to the item names.
+#' @keywords pisa
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' getMeta(.adesc, "Description")
+getMeta <- function(x,item,nl=TRUE){
+item <- paste0(gsub(":","",item),":")
+ret <- x[match(item, x[,1]), 2]
+if(is.character(ret)&&nl) ret <- sub("\\\\n","\n",ret)
+return(ret)
+}
+getDesc <- getMeta
+#
+getMeta(.adesc,"Description:",nl=FALSE)
+cat(getMeta(.adesc,"Description:"),"\n")
+(.pfn <- getMeta(.idesc,"Phenodata:"))
+(.pfn <- getMeta(.idesc,"Phenodata:"))
+(.ffn <- getMeta(.adesc,"Featuredata:"))
+@
+
+<<,message=FALSE,warning=FALSE>>=
+loc <- strsplit(getwd(),"/")[[1]]
+.pname <- .pName <- loc[regexpr("_p_",loc)==1]
+.iname <- .iName <- loc[regexpr("_I_",loc)==1]
+.sname <- .sName <- loc[regexpr("_S_",loc)==1]
+.aname <- .aName <- loc[regexpr("_A_",loc)==1]
+
+@
+
+<<>>=
+# Output directory - arguments are used to prepare the name
+(.inroot <- out.path(file.path(.aroot,"input")))
+(.reproot <- out.path(file.path(.aroot,"reports")))
+@
+
+<<>>=
+# Arguments from batch file
+#if(file.exists("../doc/ARGS.R")) source("../doc/ARGS.R") else
+#args <- rep("",6)
+#args
+@
+
+<<include=FALSE,message=FALSE,warnings=FALSE>>=
+#commandArgs(trailingOnly=FALSE)
+#args
+args <- commandArgs(trailingOnly = TRUE)
+if(length(args)==0) {
+    # interactive
+    args <- c("Interactive.Rnw",addArgs)
+    }
+if(any(args=="knit")) args <- c(args[1],addArgs) # call from WinEdt
+if(length(args)<2) {
+    # interactive or run.bat without arguments
+    args <- c(args,addArgs)
+    }
+##
+(outFn <- fileName(args[1]))
+(rnwFn <- args[1])
+if(length(args)>1) {
+    # NON NULL arguments
+    (outputFile <- paste0(outFn,"_", paste(args[-1],sep="_",collapse="-"),".pdf"))} else {
+    (outputFile <- paste0(outFn,".pdf"))
+    }
+(    outputFile <- file.path(.reproot,outputFile))
+    # clean file name, no special characters
+(    outputFile <- gsub("[(),]","",outputFile))
+    dump("outputFile","_outputFile.R")
+#
+(.oroot <- out.path(file.path(.aroot,"output"),args=args))
+(.oroot <- gsub("[:(),]","",.oroot))
+
+@
+
+
+
+
+
+<<>>=
+# options list
+pisa <- list()
+pisa$p$name <- .pName
+pisa$I$name <- .iName
+pisa$S$name <- .sName
+pisa$A$name <- .aName
+pisa$p$root <- .proot
+pisa$I$root <- .iroot
+pisa$S$root <- .sroot
+pisa$A$root <- .aroot
+pisa$p$meta <- .pdesc
+pisa$I$meta <- .idesc
+pisa$S$meta <- .sdesc
+pisa$A$meta <- .adesc
+pisa$oroot <- .oroot
+pisa$inroot <- .inroot
+pisa$reproot <- .reproot
+pisa$outputFile <- outputFile
+pisa$args <- args
+pisa$pfn <- .pfn
+pisa$ffn <- .ffn
+#
+str(pisa)
+names(pisa)
+dir(pisa$p$root)
+@
+
+<<>>=
+#' Get metadata value from the pISA options
+#'
+#' @param x either a one character pISA level or numeric index of the level.
+#'          p=1 and A=4.
+#' @param item string, item name
+#' @param nl logical, expand backslash character for new lines
+#' @param ... any other arguments (not used at the moment)
+#' @return character string with item value
+#' @export
+#' @note Parameter item is matched exactly to the item names.
+#' @references
+#' @keywords package
+#' @title
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' getMeta(4, "Description")
+getMeta2 <- function(x,item,nl=TRUE){
+if(is.numeric(x)) x <- c("p","I","S","A")[x]
+m <- pisa[[x]]$meta
+item <- paste0(gsub(":","",item),":")
+ret <- m[match(item, m[,1]), 2]
+if(is.character(ret)&&nl) ret <- sub("\\\\n","\n",ret)
+return(ret)
+}
+(getMeta2("A","Phenodata"))
+(getMeta2(4,"Phenodata"))
+(getMeta(.adesc,"Phenodata"))
+@
+
+<<>>=
+##-- Global assignment within a function:
+myf <- function(x) {
+    innerf <- function(x) assign("Global.res", x^2, pos = .GlobalEnv)
+    innerf(x+1)
+}
+myf(5)
+Global.res # 16
+@
+
+
+
+
+
+

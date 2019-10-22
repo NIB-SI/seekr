@@ -1,0 +1,253 @@
+% -*- TeX:Rnw:UTF-8 -*-
+% ----------------------------------------------------------------
+% .R knitr file  ************************************************
+% ----------------------------------------------------------------
+%%
+
+\section{Functions}
+
+
+\subsection{Package description}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#' pisar: pISA-tree support functions}
+\hlcom{#'}
+\hlcom{#' The package provides several functions for support}
+\hlcom{#' and use of pISA-tree.}
+\hlcom{#'}
+\hlcom{#' @section Usage:}
+\hlcom{#'}
+\hlcom{#' pISA-tree is a standardized directory tree}
+\hlcom{#' for storing projet information under ISA paradigm.}
+\hlcom{#' The set of functions have two fold purpose:}
+\hlcom{#'     1. To enable use of metadata for reproducible documents}
+\hlcom{#'     2. To enable automated upload to external repository}
+\hlcom{#' (FAIRDOMhub).}
+\hlcom{#'}
+\hlcom{#'}
+\hlcom{#' @docType package}
+\hlcom{#' @name pisar}
+\hlkwa{NULL}
+\end{alltt}
+\begin{verbatim}
+## NULL
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\subsection{Common parameters}
+
+\subsection{\fct{fileName}}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#' Extract file name}
+\hlcom{#'}
+\hlcom{#' Extract file name from a file path.}
+\hlcom{#'}
+\hlcom{#' @param x complete file path or  file.type name}
+\hlcom{#' @param ... any other arguments}
+\hlcom{#' @return File name (string)}
+\hlcom{#' @export}
+\hlcom{#' @note Parameter ... is ignored at this time.}
+\hlcom{#' @keywords file}
+\hlcom{#' @seealso \textbackslash{}code\{\textbackslash{}link\{fileType\}\}}
+\hlcom{#' @author Andrej Blejec \textbackslash{}email\{andrej.blejec@nib.si\}}
+\hlcom{#' @examples}
+\hlcom{#' fileName(".\textbackslash{}\textbackslash{}validation.Rnw")}
+\hlcom{#' fileName("./bla/validation.Rnw")}
+\hlcom{#' fileName("./validation.")}
+\hlcom{#' fileName("./validation")}
+\hlstd{fileName} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{,}\hlkwc{...}\hlstd{)\{}
+\hlkwd{gsub}\hlstd{(}\hlstr{"\textbackslash{}\textbackslash{}..*$"}\hlstd{,}\hlstr{""}\hlstd{,}\hlkwd{basename}\hlstd{(x))}
+\hlkwd{gsub}\hlstd{(}\hlstr{"(.*)\textbackslash{}\textbackslash{}.(.*)"}\hlstd{,}\hlstr{"\textbackslash{}\textbackslash{}1"}\hlstd{,}\hlkwd{basename}\hlstd{(x))}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+
+\subsection{\fct{fileType}}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#' Extract file type}
+\hlcom{#'}
+\hlcom{#' Extract file type from a file path.}
+\hlcom{#'}
+\hlcom{#' @param x complete file path or  file name}
+\hlcom{#' @param ... any other arguments}
+\hlcom{#' @return File type (string)}
+\hlcom{#' @export}
+\hlcom{#' @note Parameter ... is ignored at this time.}
+\hlcom{#' @keywords file}
+\hlcom{#' @author Andrej Blejec \textbackslash{}email\{andrej.blejec@nib.si\}}
+\hlcom{#' @examples}
+\hlcom{#' fileName(".\textbackslash{}\textbackslash{}validation.Rnw")}
+\hlcom{#' fileName("./bla/validation.Rnw")}
+\hlcom{#' fileName("./validation.")}
+\hlcom{#' fileName("./validation")}
+\hlstd{fileType} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{,}\hlkwc{...}\hlstd{)\{}
+\hlstd{type} \hlkwb{<-} \hlkwd{gsub}\hlstd{(}\hlstr{"(.*)\textbackslash{}\textbackslash{}.(.*)"}\hlstd{,}\hlstr{"\textbackslash{}\textbackslash{}2"}\hlstd{,}\hlkwd{basename}\hlstd{(x))}
+\hlkwa{if}\hlstd{(type}\hlopt{==}\hlstd{x)  type}  \hlkwb{<-} \hlstr{""}
+\hlkwd{return}\hlstd{(type)}
+\hlstd{\}}
+\hlkwd{fileType}\hlstd{(}\hlstr{"bla"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## [1] ""
+\end{verbatim}
+\begin{alltt}
+\hlkwd{fileType}\hlstd{(}\hlstr{"./bla.Rnw"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## [1] "Rnw"
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\subsection{\fct{fsummary}}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#' As factor summary of a data frame}
+\hlcom{#'}
+\hlcom{#' @param x data frame}
+\hlcom{#' @param ... any other arguments}
+\hlcom{#' @return summary object}
+\hlcom{#' @export}
+\hlcom{#' @note Argument ... not used}
+\hlcom{#' @keywords summary}
+\hlcom{#' @author Andrej Blejec \textbackslash{}email\{andrej.blejec@nib.si\}}
+\hlcom{#' @examples}
+\hlcom{#' fsummary(data.frame(x=rnorm(20),txt=sample(letters,20,rep=TRUE)))}
+\hlstd{fsummary} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{,}\hlkwc{...}\hlstd{)\{}
+    \hlstd{dims} \hlkwb{<-} \hlkwd{dimnames}\hlstd{(x)}
+    \hlstd{x} \hlkwb{<-} \hlkwd{apply}\hlstd{(x,}\hlnum{2}\hlstd{,factor)}
+    \hlkwd{dimnames}\hlstd{(x)} \hlkwb{<-} \hlstd{dims}
+    \hlkwd{summary}\hlstd{(x)}
+\hlstd{\}}
+\hlkwd{fsummary}\hlstd{(}\hlkwd{data.frame}\hlstd{(}\hlkwc{x}\hlstd{=}\hlkwd{rnorm}\hlstd{(}\hlnum{20}\hlstd{),}\hlkwc{txt}\hlstd{=}\hlkwd{sample}\hlstd{(letters,}\hlnum{20}\hlstd{,}\hlkwc{rep}\hlstd{=}\hlnum{TRUE}\hlstd{)))}
+\end{alltt}
+\begin{verbatim}
+##            x           txt    
+##  -0.05210036: 1   j      : 2  
+##  -0.05828761: 1   k      : 2  
+##  -0.13130099: 1   y      : 2  
+##  -0.19332720: 1   a      : 1  
+##  -0.35329858: 1   e      : 1  
+##  -0.41966193: 1   h      : 1  
+##  (Other)    :14   (Other):11
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\subsection{getRoot}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#' Get root directory for pISA layer}
+\hlcom{#'}
+\hlcom{#' @param x character characteristic for pISA layer}
+\hlcom{#' @param path path within the pISA-tree}
+\hlcom{#' @param ... any other arguments }
+\hlcom{#' @return data frame with Item/value pairs}
+\hlcom{#' @export}
+\hlcom{#' @note Argument ... not used.}
+\hlcom{#' @keywords pISA}
+\hlcom{#' @author Andrej Blejec \textbackslash{}email\{andrej.blejec@nib.si\}}
+\hlcom{#' @examples}
+\hlcom{#' getRoot("p", path="d:/_p_prj/_I_inv/_S_st/_A_asy/other/doc")  }
+\hlstd{getRoot} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{=}\hlstr{"p"}\hlstd{,}\hlkwc{path}\hlstd{=}\hlkwd{getwd}\hlstd{(),}\hlkwc{...}\hlstd{)\{}
+\hlstd{dirs} \hlkwb{<-} \hlkwd{strsplit}\hlstd{(path,}\hlstr{"/"}\hlstd{)[[}\hlnum{1}\hlstd{]]}
+\hlstd{nl} \hlkwb{<-} \hlkwd{length}\hlstd{(dirs)}\hlopt{-}\hlkwd{which}\hlstd{(}\hlkwd{regexpr}\hlstd{(}\hlkwd{paste0}\hlstd{(}\hlstr{"_"}\hlstd{,x,}\hlstr{"_"}\hlstd{),dirs)}\hlopt{>}\hlnum{0}\hlstd{)}
+\hlkwa{if}\hlstd{(}\hlkwd{length}\hlstd{(nl)}\hlopt{<=}\hlnum{0}\hlstd{)} \hlkwd{stop}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"Path is not within a pISA-tree:\textbackslash{}n"}
+        \hlstd{, path))}
+\hlkwd{paste}\hlstd{(}\hlkwd{rep}\hlstd{(}\hlstr{".."}\hlstd{,nl),}\hlkwc{collapse}\hlstd{=}\hlstr{"/"}\hlstd{)}
+\hlstd{\}}
+\hlkwd{getRoot}\hlstd{(}\hlstr{"A"}\hlstd{,} \hlkwc{path}\hlstd{=}\hlstr{"d:/_p_prj/_I_inv/_S_st/_A_asy/other/doc"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## [1] "../.."
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\subsection{readMeta}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#' Read metadata file from the given directory}
+\hlcom{#'}
+\hlcom{#' @param x file path to the pISA layer}
+\hlcom{#' @param ... any other arguments}
+\hlcom{#' @return data frame with Key/value pairs with class 'pISAmeta'}
+\hlcom{#' @export}
+\hlcom{#' @note Metadata table gets the class 'Dlist' to inherit a convenient print.}
+\hlcom{#' @references}
+\hlcom{#' @keywords package}
+\hlcom{#' @title}
+\hlcom{#' @author Andrej Blejec \textbackslash{}email\{andrej.blejec@nib.si\}}
+\hlcom{#' @examples}
+\hlcom{#' readMeta(".")}
+\hlstd{readMeta} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{=}\hlstr{"."}\hlstd{,}  \hlkwc{...}\hlstd{)\{}
+\hlstd{d} \hlkwb{<-} \hlkwd{tolower}\hlstd{(}\hlkwd{dir}\hlstd{(x))}
+\hlstd{d}
+\hlstd{lfn} \hlkwb{<-} \hlstd{d[}\hlkwd{regexpr}\hlstd{(}\hlstr{".*_metadata"}\hlstd{,d)}\hlopt{>}\hlnum{0}\hlstd{]}
+\hlkwa{if}\hlstd{(}\hlkwd{length}\hlstd{(lfn)}\hlopt{==}\hlnum{0}\hlstd{)} \hlkwd{stop}\hlstd{(}\hlstr{"No metadata file found"}\hlstd{)}
+\hlkwa{if}\hlstd{(}\hlkwd{length}\hlstd{(lfn)}\hlopt{>}\hlnum{1}\hlstd{)} \hlkwd{warning}\hlstd{(}\hlstr{"More tha one metadata file found:"}\hlstd{, d)}
+\hlstd{p} \hlkwb{<-} \hlkwd{read.table}\hlstd{(}\hlkwd{file.path}\hlstd{(x, lfn)}
+  \hlstd{,}\hlkwc{sep}\hlstd{=}\hlstr{"\textbackslash{}t"}\hlstd{,} \hlkwc{stringsAsFactors}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{col.names}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"Key"}\hlstd{,}\hlstr{"Value"}\hlstd{))}
+\hlkwd{class}\hlstd{(p)}\hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"Dlist"}\hlstd{,} \hlstr{"pISAmeta"}\hlstd{,} \hlkwd{class}\hlstd{(p))}
+\hlkwd{return}\hlstd{(p)}
+\hlstd{\}}
+\hlcom{##}
+\hlkwd{readMeta}\hlstd{(}\hlstr{"../../../"}\hlstd{)}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in scan(file = file, what = what, sep = sep, quote = quote, dec = dec, : line 1 did not have 2 elements}}\begin{alltt}
+\hlkwd{readMeta}\hlstd{(.pISAloc)}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in dir(x): object '.pISAloc' not found}}\end{kframe}
+\end{knitrout}
+
+\subsection{print.pISAmeta}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#' Print metadata object as Dlist}
+\hlcom{#'}
+\hlcom{#' @param x metadata object, data.frame with two columns}
+\hlcom{#' @param ... any other arguments}
+\hlcom{#' @return}
+\hlcom{#' @export}
+\hlcom{#' @note Metadata table is printed in convenient Dlist form.}
+\hlcom{#' @references}
+\hlcom{#' @keywords package}
+\hlcom{#' @title}
+\hlcom{#' @author Andrej Blejec \textbackslash{}email\{andrej.blejec@nib.si\}}
+\hlcom{#' @examples}
+\hlcom{#' print(data.frame(Key=c("First","Second")}
+\hlcom{#' , Value=c("Description 1", "Description 2"))}
+\hlstd{print.pISAmeta} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{,}  \hlkwc{...}\hlstd{)\{}
+    \hlcom{#if(inherits(x,"pISAmeta")}
+    \hlkwd{print.Dlist}\hlstd{(x)}
+    \hlstd{\}}
+\hlkwd{readMeta}\hlstd{(.pISAloc)}
+\end{alltt}
+
+
+{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in dir(x): object '.pISAloc' not found}}\end{kframe}
+\end{knitrout}
+
+
+

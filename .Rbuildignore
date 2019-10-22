@@ -4,7 +4,6 @@
 ^.*\.Rproj.*$
 ^\.Rproj\.user$
 ^notes$
-doc/
 ^cran-comments\.md$
 ^\.travis\.yml$
 ^\.git.*$
@@ -16,5 +15,4 @@ doc/
 ^.*\.prj$
 ^.*\.bak$
 ^.*\.Rproj$
-^doc$
 ^Meta$

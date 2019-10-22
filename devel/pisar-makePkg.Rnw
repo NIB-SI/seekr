@@ -1,0 +1,285 @@
+% -*- TeX:Rnw:UTF-8 -*-
+% ----------------------------------------------------------------
+% .R knitr file  ************************************************
+% ----------------------------------------------------------------
+%%
+% \VignetteEngine{knitr::knitr}
+% \VignetteIndexEntry{}
+% \VignetteDepends{}
+% \VignettePackage{}
+
+\documentclass[a4paper,12pt]{article}
+%\usepackage[slovene]{babel}
+\usepackage[utf8]{inputenc} %% must be here for Sweave encoding check
+\input{abpkg}
+\input{abcmd}
+\input{abpage}
+\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
+\usepackage{amsmath,amssymb}
+\usepackage{colortbl}
+
+\input{mysweave}
+
+<<include=FALSE>>=
+render_sweave()
+opts_chunk$set(fig.path='./figs/pisar-',concordance=TRUE,tidy=TRUE)
+@
+\setkeys{Gin}{width=0.8\textwidth}  % set graphicx parameter
+\usepackage{lmodern}
+\input{abfont}
+
+% ----------------------------------------------------------------
+\begin{document}
+%% Sweave settings for includegraphics default plot size (Sweave default is 0.8)
+%% notice this must be after begin{document}
+%%% \setkeys{Gin}{width=0.9\textwidth}
+% ----------------------------------------------------------------
+\title{Development of package \pkg{pisar}}
+\author{A. Blejec}
+%\address{}%
+%\email{}%
+%
+%\thanks{}%
+%\subjclass{}%
+%\keywords{}%
+
+%\date{}%
+%\dedicatory{}%
+%\commby{}%
+\maketitle
+% ----------------------------------------------------------------
+%\begin{abstract}
+%
+%\end{abstract}
+% ----------------------------------------------------------------
+\tableofcontents
+<<Author:,echo=FALSE>>=
+###############################################
+##                                           ##
+## (c) Andrej Blejec (andrej.blejec@nib.si)  ##
+##                                           ##
+###############################################
+@
+<<initialize,echo=FALSE,results='hide',message=FALSE>>=
+options(width=70)
+library(knitr)
+library(devtools)
+
+@
+
+\clearpage
+\section{Preparation}
+
+
+Set package source directory
+
+<<>>=
+purl <- TRUE
+(pkgPath <- gsub("/R/","/R/!packages/",dirname(getwd())))
+(pkgPath <- gsub("/R/","/R/!packages/",dirname(getwd())))
+(pkgName <- basename(dirname(getwd())))
+dir(pkgPath)
+dir(file.path(pkgPath,"R"))
+fctFile <- c("pisar-initialize.Rnw"
+    , "pisar-api.Rnw")
+(pkgFile <- gsub("\\.Rnw$","\\.R",fctFile))
+@
+
+Files and directories:\\[12pt]
+Original R source file(s): \url{\Sexpr{fctFile}}\\
+Package directory: \url{\Sexpr{pkgPath}}\\
+Package source file(s): \url{\Sexpr{pkgFile}}
+
+%\section{Function definitions}
+\clearpage
+%<<child=fctFile,eval=!purl>>=
+%@
+<<>>=
+childtxt <- ""
+@
+<<eval=FALSE>>=
+for (i in 1:length(fctFile)){
+    childtxt <- paste(childtxt
+   , knit_child(file.path("../doc",fctFile[i]), quiet=TRUE))
+}
+@
+\Sexpr{childtxt}
+\clearpage
+\section{Export as source for package}
+
+perform steps for building a package. Extract code, make documentation files (\file{*.Rd}), build a package.
+
+\subsection{Extract code}
+
+Code is extracted to \url{pkgPath}.
+%<<export to package,eval=purl>>=
+%getwd()
+%purl(file.path("../doc",fctFile),output=file.path(pkgPath,"R",pkgFile))
+%@
+
+<<export to package>>=
+childtxt <- ""
+for (i in 1:length(fctFile)) {
+cat(fctFile[i],"\n")
+childtxt <- paste(childtxt
+    , purl(file.path("../doc",fctFile[i])
+    , output=file.path(pkgPath,"R",pkgFile[i])))
+}
+dir(file.path(pkgPath,"R"))
+@
+\Sexpr{childtxt}
+
+\clearpage
+\subsection{Documentation}
+Probably not needed if we do the check?
+<<make documentation,eval=purl>>=
+devtools::document(pkgPath)
+usethis::use_package("knitr")
+usethis::use_package("rio")
+usethis::use_package("tools")
+
+@
+\clearpage
+\subsection{Check}
+<<check package,eval=purl>>=
+#system.time(check <- devtools::check(pkgPath))
+system.time(miss <- devtools::missing_s3(pkgPath))
+
+@
+\clearpage
+\subsection{Check results}
+<<>>=
+check()
+
+@
+\clearpage
+\subsection{Build a package}
+
+Build the package
+
+<<build package,eval=purl>>=
+devtools::build(pkgPath,manual=TRUE,quiet=FALSE)
+devtools::load_all()
+@
+
+
+
+Install
+
+<<install,eval=purl>>=
+devtools::install(pkgPath)
+## str(out)(shell(paste(
+## file.path(R.home("bin"),"Rcmd.exe"),
+## " INSTALL --no-multiarch --with-keep.source",
+## pkgPath)
+## ,intern=FALSE))
+@
+
+Load
+<<load,eval=purl>>=
+devtools::load_all()
+cat("Package:",pkgName,"\n")
+library(pkgName, character.only=TRUE)
+help(package=(pkgName))
+
+@
+
+\section{PDF documentation}
+
+<<>>=
+(pkgName <- basename(dirname(getwd())))
+(instPath <- find.package(pkgName))
+pdfFile <- file.path(getwd(),paste(pkgName,"pdf",sep="."))
+if(file.exists(pdfFile)) file.remove(pdfFile)
+system(paste(shQuote(file.path(R.home("bin"), "R")),
+    "CMD", "Rd2pdf", shQuote(instPath)))
+dir(pattern=pkgName)
+
+@
+
+<<>>=
+help(package=(pkgName), help_type="pdf")
+
+@
+
+Send package to R Windows builder
+
+<<eval=FALSE>>=
+devtools::build_win(pkgPath)
+
+@
+
+%<<child='encChild2.Rnw'>>=
+%@
+% ----------------------------------------------------------------
+%\bibliographystyle{chicago}
+%\addcontentsline{toc}{section}{\refname}
+%\bibliography{ab-general}
+%--------------------------------------------------------------
+
+%\clearpage
+%\appendix
+%\phantomsection\addcontentsline{toc}{section}{\appendixname}
+%\section{\R\ funkcije}
+%\input{}
+
+\clearpage
+\section*{SessionInfo}
+{\small
+<<sessionInfo,results='asis',echo=FALSE>>=
+cat(win.version(),"\n")
+toLatex(sessionInfo())
+cat("Project path:\\verb'",dirname(getwd()),"'\\\\\n")
+mainFile <- commandArgs(trailingOnly = TRUE)
+#
+mainFilePath <- file.path("../doc", mainFile[1])
+cat("Main file :\\verb'", mainFilePath, "'\n")
+#
+mainFile <- strsplit(mainFile,'.',fixed=TRUE)[[1]][1]
+projectName <- rev((strsplit(dirname(getwd()), "/"))[[1]])[1]
+#
+@
+
+\subsection*{View as vignette}
+Project files can be viewed by pasting this code to \R\ console:\\
+\begin{Schunk}
+\begin{Sinput}
+<<projectFiles,echo=FALSE,results='asis'>>=
+cat('> projectName <-"',projectName,'"; ',sep="")
+cat(' mainFile <-"',mainFile,'"',sep="")
+#
+@
+
+\end{Sinput}
+\end{Schunk}
+<<vignette,eval=FALSE>>=
+commandArgs()
+library(tkWidgets)
+openPDF(file.path(dirname(getwd()),"doc",
+paste(mainFile,"PDF",sep=".")))
+viewVignette("viewVignette", projectName, #
+file.path("../doc",paste(mainFile,"Rnw",sep=".")))
+#
+@
+
+\vfill \hrule \vspace{3pt} \footnotesize{
+%Revision \SVNId\hfill (c) A. Blejec%\input{../_COPYRIGHT.}
+%\SVNRevision ~/~ \SVNDate
+\noindent
+\texttt{Git Revision: \gitCommitterUnixDate \gitAbbrevHash{} (\gitCommitterDate)} \hfill \copyright A. Blejec\\
+\texttt{ \gitReferences} \hfill \verb'\Sexpr{mainFilePath}'\\
+
+}
+
+<<eval=TRUE,echo=FALSE>>=
+# getrootpath <- function() {
+# fp <- (strsplit(getwd(), "/"))[[1]]
+# file <- file.path(paste(fp[-length(fp)], collapse = "/"))
+# return(file)
+# }
+# fileName <- function(name="bla",ext="PDF") paste(name,ext,sep=".")
+@
+
+
+\end{document}
+% ----------------------------------------------------------------

@@ -1,0 +1,471 @@
+% -*- TeX:Rnw:UTF-8 -*-
+% ----------------------------------------------------------------
+% .R knitr file  ************************************************
+% ----------------------------------------------------------------
+%%
+<<author, echo=FALSE>>=
+###############################################
+##                                           ##
+## (c) Andrej Blejec (andrej.blejec@nib.si)  ##
+##                                           ##
+###############################################
+@
+\section{Functions}
+<<testing,echo=FALSE, purl=FALSE>>=
+.testing <- FALSE
+@
+
+\subsection{Package description}
+
+<<Package description>>=
+#' pisar: pISA-tree support functions
+#'
+#' The package provides several functions for support
+#' and use of pISA-tree.
+#'
+#' @section Usage:
+#'
+#' pISA-tree is a standardized directory tree
+#' for storing projet information under ISA paradigm.
+#' The set of functions have two fold purpose:
+#' \enumerate
+#'     \item To enable use of metadata for reproducible documents.
+#'     \item To enable automated upload to external repository.
+#' (FAIRDOMhub).
+#' }
+#'
+#' @docType package
+#' @name pisar
+NULL
+@
+
+\subsection{Common parameters}
+
+\subsection{\fct{fileName}}
+<<fileName>>=
+#' Extract file name
+#'
+#' Extract file name from a file path.
+#'
+#' @param x complete file path or  file.type name
+#' @param ... any other arguments
+#' @return File name (string)
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @keywords file
+#' @seealso \code{\link{fileType}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' fileName(".\\validation.Rnw")
+#' fileName("./bla/validation.Rnw")
+#' fileName("./validation.")
+#' fileName("./validation")
+fileName <- function(x,...){
+gsub("\\..*$","",basename(x))
+gsub("(.*)\\.(.*)","\\1",basename(x))
+}
+@
+
+
+\subsection{\fct{fileType}}
+
+<<fileType>>=
+#' Extract file type
+#'
+#' Extract file type from a file path.
+#'
+#' @param x complete file path or  file name
+#' @param ... any other arguments
+#' @return File type (string)
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @keywords file
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' fileName(".\\validation.Rnw")
+#' fileName("./bla/validation.Rnw")
+#' fileName("./validation.")
+#' fileName("./validation")
+fileType <- function(x,...){
+type <- gsub("(.*)\\.(.*)","\\2",basename(x))
+if(type==x)  type  <- ""
+return(type)
+}
+fileType("bla")
+fileType("./bla.Rnw")
+@
+
+\subsection{\fct{fsummary}}
+<<fsummary>>=
+#' As factor summary of a data frame
+#'
+#' @param x data frame
+#' @param ... any other arguments
+#' @return summary object
+#' @export
+#' @note Argument ... not used
+#' @keywords summary
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' fsummary(data.frame(x=rnorm(20),txt=sample(letters,20,rep=TRUE)))
+fsummary <- function(x,...){
+    dims <- dimnames(x)
+    x <- apply(x,2,factor)
+    dimnames(x) <- dims
+    summary(x)
+}
+fsummary(data.frame(x=rnorm(20),txt=sample(letters,20,rep=TRUE)))
+@
+
+\subsection{getRoot}
+
+<<getRoot>>=
+#' Get root directory for pISA layer
+#'
+#' @param x character characteristic for pISA layer
+#' @param path path within the pISA-tree
+#' @param ... any other arguments
+#' @return relative path to the layer directory (from working directory)
+#' @export
+#' @note The path should be compliant with the pISA-tree structure.
+#'     Path defaults to the working directory, which is
+#'     usually in or below an assay. Argument ... is not used.
+#' @keywords pISA
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' getRoot("p", path="d:/_p_prj/_I_inv/_S_st/_A_asy/other/doc")
+getRoot <- function(x="p",path=getwd(),...){
+dirs <- strsplit(path,"/")[[1]]
+nl <- length(dirs)-which(regexpr(paste0("_",x,"_"),dirs)>0)
+if(length(nl)<=0) stop(paste("Path is not within a pISA-tree:\n"
+        , path))
+paste(rep("..",nl),collapse="/")
+}
+@
+
+<<purl=FALSE>>=
+getRoot("A", path="d:/_p_prj/_I_inv/_S_st/_A_asy/other/doc")
+@
+
+\subsection{readMeta}
+
+<<readMeta>>=
+#' Read metadata file from the given directory
+#'
+#' @param x file path to the pISA layer
+#' @param ... any other arguments
+#' @return data frame with Key/value pairs with class 'pISAmeta'
+#' @export
+#' @note Metadata table gets the class 'Dlist' to inherit a convenient print.
+#' @keywords pISA
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
+#' oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+#' oldwd
+#' .aroot <- getRoot("A")
+#' .ameta <- readMeta(.aroot)
+#' .ameta
+#' setwd(oldwd)
+#' }
+readMeta <- function(x=".",  ...){
+d <- tolower(dir(x))
+d
+lfn <- d[regexpr(".*_metadata",d)>0]
+if(length(lfn)==0) warning("No metadata file found")
+if(length(lfn)>1) warning("More tha one metadata file found:", d)
+if(length(lfn)==1){
+  p <- rio::import(file.path(x, lfn)
+  ,sep="\t", stringsAsFactors=FALSE, col.names=c("Key","Value"))
+class(p)<- c("pISAmeta", "Dlist", class(p))
+} else {p = ""}
+return(p)
+}
+##
+.pISAloc <- system.file("extdata","_p_Demo",package="pisar")
+readMeta(.pISAloc)
+@
+
+\subsection{print.pISAmeta}
+
+<<print.pISAmeta>>=
+#' Print metadata object as Dlist
+#'
+#' @param x metadata object, data.frame with two columns
+#' @param width estimated text width
+#' @param ... any other arguments
+#' @export
+#' @note Metadata table is printed in convenient Dlist form.
+#' @keywords package
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' .pISAloc <- system.file("extdata","_p_Demo",package="pisar")
+#' readMeta(.pISAloc)
+print.pISAmeta <- function(x, width = max(nchar(x[,1]))*3.5,  ...){
+    #if(inherits(x,"pISAmeta")
+    #print(width)
+    #print.Dlist(x, width=width, ...)
+    width <- max(nchar(x[,1]))+1
+    key <- c(paste("",names(x)[1])
+           , paste0(rep("-",nchar(names(x)[1])),collapse="")
+           , x[,1])
+    key <- substr(paste(key,paste(rep(" ",15),collapse=" ")),1,width)
+    val <- c(paste("",names(x)[2])
+           , paste0(rep("-",nchar(names(x)[2])),collapse="")
+           , x[,2])
+    keyval <- paste0(key,val,"\n")
+    cat(keyval)
+    }
+
+@
+
+\subsection{getMeta}
+
+<<getMeta>>=
+#' Get metadata value
+#'
+#' @param x two column character data frame with Key / Value pairs
+#' @param item string, item name
+#' @param nl logical, expand backslash character for new lines
+#' @param ... any other arguments (not used at the moment)
+#' @return character string with key value
+#' @export
+#' @note Parameter item is matched exactly to the item names.
+#' @keywords pisa
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
+#' oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+#' oldwd
+#' .iroot <- getRoot("I")
+#' .imeta <- readMeta(.iroot)
+#' getMeta(.imeta, "Description")
+#' setwd(oldwd)
+#' }
+getMeta <- function(x,item,nl=TRUE){
+item <- paste0(gsub(":","",item),":")
+ret <- unclass(x[match(item, x[,1]), 2])
+if(is.character(ret)&&nl) ret <- sub("\\\\n","\n",ret)
+return(ret)
+}
+@
+
+<<purl=FALSE>>=
+getDesc <- getMeta
+#
+getMeta(.adesc,"Description:",nl=FALSE)
+cat(getMeta(.adesc,"Description:"),"\n")
+(.pfn <- getMeta(.idesc,"Phenodata:"))
+(.pfn <- getMeta(.idesc,"Phenodata:"))
+(.ffn <- getMeta(.adesc,"Featuredata:"))
+@
+
+<<purl=FALSE>>=
+#Example
+astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
+oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+oldwd
+.iroot <- getRoot("I")
+.imeta <- readMeta(.iroot)
+getMeta(.imeta, "Description")
+setwd(oldwd)
+@
+
+\subsection{getLayer}
+
+<<getLayer>>=
+#' Get pISA layer name
+#'
+#' @param x layer character (one of p, I, S, or A)
+#' @param path, deafaults to working directory
+#' @return character string with layer name
+#' @export
+#' @keywords pisa
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
+#' oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+#' oldwd
+#' .pname <- getLayer("p")
+#' .pname
+#' getLayer("I")
+#' getLayer("S")
+#' getLayer("A")
+#' }
+getLayer <- function(x, path=getwd()){
+  loc <- strsplit(path,"/")[[1]]
+  lyr <- paste0("_",x,"_")
+  lname <- loc[regexpr(lyr,loc)==1]
+  if(length(lname)==0) {
+    lname <- ""
+    warning("No layer '", x, "' in path")
+    }
+  return(lname)
+  }
+@
+\subsection{out.path}
+<<>>=
+#' Create output directory
+#'
+#' Create output directory, name it with appended arguments.
+#'
+#' @param out.dir character string, base output directory
+#' @param args  character vector, arguments used for sub-analysis
+#'     or from a batch call
+#' @param which numeric vector, which arguments to use
+#' @return directory name
+#' @note Directory is created
+#' @export
+#' @keywords pisa
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' out.path()
+#' out.path(args="")
+#' dir.exists("../out/xx-ena-dva")
+#' out.path(args=c("xx.txt","ena","dva"))
+#' dir.exists("../out/xx-ena-dva")
+#' unlink("../out/xx-ena-dva",recursive=TRUE)
+#' dir.exists("../out/xx-ena-dva")
+out.path <- function(out.dir="../out", args="", which=1:length(args)) {
+  args[1] <- sub("\\..*","",basename(args[1]))
+  out <- if(!all(c(args[which])=="")) file.path(out.dir,paste(c(args[which]),collapse="-")) else out.dir
+  dir.create(out,showWarnings = FALSE)
+  out
+}
+@
+
+\subsection{pisaIni}
+
+
+<<pisa>>=
+#' Extract pISA-tree details
+#'
+#' Extract pISA-tree details: name, root and metadata
+#'     for all layers above the current directory (below or in the Assay).
+#'
+#' @param path, defaults to working directory
+#' @param addArgs character vector, additional arguments
+#' @param global if \code{TRUE} (default) auxiliary objects will be
+#'     created in the global environment (see note)
+#' @return a list with layer information components, possibly changing
+#' objects in the global environment (Se Note).
+#' @note If argument global is \code{TRUE} (default), auxiliary objects with
+#'     pISA related information will be created in the global environment.
+#'     Sometimes it is more convenient to use such object instead
+#'     of the elements of the (invisibly) returned pisa list.
+#'     The object are hidden (names start with dot); use
+#'     \code{ls(pattern="^\\.",all.names=TRUE)}
+#'     to get a full list of hiddent objects. The created objects are
+#' \describe{
+#'     \item{.[pisa]name}{layer name}
+#'     \item{.[pisa]root}{layer path (relative to the working directory)}
+#'     \item{.[pisa]meta}{data frame with corresponding layer metadata}
+#'     \item{.oroot}{output directory path}
+#'     \item{.inroot}{input (data) directory path}
+#'     \item{.reproot}{report directory path}
+#'     \item{.reproot}{report directory path}
+#'     \item{.outputFile}{output file path and name}
+#'     \item{.args}{a vector of additional arguments (possibly from a batch call)}
+#'     \item{.pfn}{phenodata file path and name (relative to Investigation)}
+#'     \item{.ffn}{featuredata fiel path and name}
+#'     \item{.outfn}{output file basename (no type)}
+#'     \item{.rnwfn}{knitr source file name (*.Rnw or *.Rmd)}
+#' }
+#' @export
+#' @keywords pisa
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
+#' oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+#' oldwd
+#' pisa <- pisa(global=FALSE)
+#' str(pisa)
+#' names(pisa)
+#' dir(pisa$p$root)
+#' setwd(oldwd)
+#' }
+pisa <- function(path=getwd(), addArgs=NULL, global=TRUE){
+# options list
+if(global) pos = .GlobalEnv else pos = -1
+#
+assign(".proot", getRoot("p", path), pos=pos)
+assign(".iroot", getRoot("I", path), pos=pos)
+assign(".sroot", getRoot("S", path), pos=pos)
+assign(".aroot", getRoot("A", path), pos=pos)
+#
+assign(".pmeta", readMeta(.proot), pos=pos)
+assign(".imeta", readMeta(.iroot), pos=pos)
+assign(".smeta", readMeta(.sroot), pos=pos)
+assign(".ameta", readMeta(.aroot), pos=pos)
+#
+assign(".pname", getLayer("p", path), pos=pos)
+assign(".iname", getLayer("I", path), pos=pos)
+assign(".sname", getLayer("S", path), pos=pos)
+assign(".aname", getLayer("A", path), pos=pos)
+#
+assign(".pfn", getMeta(.imeta,"Phenodata:"), pos=pos)
+assign(".ffn", getMeta(.ameta,"Featuredata:"), pos=pos)
+#
+# Output directory - arguments are used to prepare the name
+.inroot <- out.path(file.path(.aroot,"input"))
+.reproot <- out.path(file.path(.aroot,"reports"))
+# Create output directory and aoutput file name
+args <- commandArgs(trailingOnly = TRUE)
+if(length(args)==0) {
+    # interactive
+    args <- c("Interactive.Rnw",addArgs)
+    }
+if(any(args=="knit")) args <- c(args[1],addArgs) # call from WinEdt
+if(length(args)<2) {
+    # interactive or run.bat without arguments
+    args <- c(args,addArgs)
+    }
+##
+assign(".outfn", fileName(args[1]), pos=pos)
+assign(".rnwfn", args[1], pos=pos)
+if(length(args)>1) {
+    # NON NULL arguments
+    (outputFile <- paste0(.outfn,"_", paste(args[-1],sep="_",collapse="-"),".pdf"))} else {
+    (outputFile <- paste0(.outfn,".pdf"))
+    }
+    outputFile <- file.path(.reproot,outputFile)
+    # clean file name, no special characters
+    assign("outputFile",gsub("[(),]","",outputFile), pos=pos)
+    dump("outputFile","_outputFile.R")
+#
+.oroot <- out.path(file.path(.aroot,"output"),args=args)
+assign(".oroot", gsub("[:(),]","",.oroot), pos=pos)
+#
+pisa <- list()
+pisa$p$name <- .pname
+pisa$I$name <- .iname
+pisa$S$name <- .sname
+pisa$A$name <- .aname
+pisa$p$root <- .proot
+pisa$I$root <- .iroot
+pisa$S$root <- .sroot
+pisa$A$root <- .aroot
+pisa$p$meta <- .pmeta
+pisa$I$meta <- .imeta
+pisa$S$meta <- .smeta
+pisa$A$meta <- .ameta
+pisa$oroot <- .oroot
+pisa$inroot <- .inroot
+pisa$reproot <- .reproot
+pisa$outputFile <- outputFile
+pisa$args <- args
+pisa$pfn <- .pfn
+pisa$ffn <- .ffn
+pisa$outfn <- .outfn
+pisa$rnwfn <- .rnwfn
+#
+invisible(pisa)
+}
+@
+
+
+
