@@ -14,7 +14,7 @@ getRoot(x = "p", path = getwd(), ...)
 \item{...}{any other arguments}
 }
 \value{
-data frame with Key/value pairs
+relative path to the layer directory (from working directory)
 }
 \description{
 Get root directory for pISA layer

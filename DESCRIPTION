@@ -15,3 +15,6 @@ Imports:
     knitr,
     rio,
     tools
+VignetteBuilder: knitr
+Suggests: 
+    rmarkdown

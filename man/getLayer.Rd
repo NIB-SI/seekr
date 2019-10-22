@@ -18,6 +18,7 @@ character string with layer name
 Get pISA layer name
 }
 \examples{
+\dontrun{
 astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
 oldwd <- setwd(system.file("extdata",astring,package="pisar"))
 oldwd
@@ -26,6 +27,7 @@ oldwd
 getLayer("I")
 getLayer("S")
 getLayer("A")
+}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

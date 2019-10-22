@@ -25,13 +25,15 @@ Get metadata value
 Parameter item is matched exactly to the item names.
 }
 \examples{
+\dontrun{
 astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
 oldwd <- setwd(system.file("extdata",astring,package="pisar"))
 oldwd
 .iroot <- getRoot("I")
-.idesc <- readMeta(.iroot)
-getMeta(.idesc, "Description")
+.imeta <- readMeta(.iroot)
+getMeta(.imeta, "Description")
 setwd(oldwd)
+}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

@@ -21,6 +21,7 @@ Read metadata file from the given directory
 Metadata table gets the class 'Dlist' to inherit a convenient print.
 }
 \examples{
+\dontrun{
 astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
 oldwd <- setwd(system.file("extdata",astring,package="pisar"))
 oldwd
@@ -28,7 +29,7 @@ oldwd
 .ameta <- readMeta(.aroot)
 .ameta
 setwd(oldwd)
-
+}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}
