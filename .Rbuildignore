@@ -1,5 +1,5 @@
 ^packrat/
-^.*/devel/
+.*/devel/
 ^\.Rprofile$
 #
 ^.*\.Rproj.*$
