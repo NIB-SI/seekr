@@ -7,12 +7,12 @@
 fileName(x, ...)
 }
 \arguments{
-\item{x}{complete file path or  file.type name}
+\item{x}{Complete file path or  file.type name.}
 
-\item{...}{any other arguments}
+\item{...}{Any other arguments.}
 }
 \value{
-File name (string)
+File name (string).
 }
 \description{
 Extract file name from a file path.

@@ -7,12 +7,12 @@
 fsummary(x, ...)
 }
 \arguments{
-\item{x}{data frame}
+\item{x}{Data frame.}
 
-\item{...}{any other arguments}
+\item{...}{Any other arguments.}
 }
 \value{
-summary object
+Summary object.
 }
 \description{
 As factor summary of a data frame

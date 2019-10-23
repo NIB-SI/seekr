@@ -1,4 +1,5 @@
 ^packrat/
+^devel/
 ^\.Rprofile$
 #
 ^.*\.Rproj.*$

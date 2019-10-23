@@ -7,11 +7,11 @@
 \method{print}{pISAmeta}(x, width = max(nchar(x[, 1])) * 3.5, ...)
 }
 \arguments{
-\item{x}{metadata object, data.frame with two columns}
+\item{x}{Metadata object, data.frame with two columns.}
 
-\item{width}{estimated text width}
+\item{width}{Estimated text width.}
 
-\item{...}{any other arguments}
+\item{...}{Any other arguments.}
 }
 \description{
 Print metadata object as Dlist

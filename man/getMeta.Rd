@@ -7,16 +7,16 @@
 getMeta(x, item, nl = TRUE)
 }
 \arguments{
-\item{x}{two column character data frame with Key / Value pairs}
+\item{x}{Two column character data frame with Key / Value pairs.}
 
-\item{item}{string, item name}
+\item{item}{String, item name.}
 
-\item{nl}{logical, expand backslash character for new lines}
+\item{nl}{Logical, expand backslash character for new lines.}
 
-\item{...}{any other arguments (not used at the moment)}
+\item{...}{Any other arguments (not used at the moment).}
 }
 \value{
-character string with key value
+Character string with key value.
 }
 \description{
 Get metadata value

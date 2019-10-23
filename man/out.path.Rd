@@ -7,15 +7,15 @@
 out.path(out.dir = "../out", args = "", which = 1:length(args))
 }
 \arguments{
-\item{out.dir}{character string, base output directory}
+\item{out.dir}{Character string, base output directory.}
 
-\item{args}{character vector, arguments used for sub-analysis
+\item{args}{Character vector, arguments used for sub-analysis.
 or from a batch call}
 
-\item{which}{numeric vector, which arguments to use}
+\item{which}{Numeric vector, which arguments to use.}
 }
 \value{
-directory name
+Directory name.
 }
 \description{
 Create output directory, name it with appended arguments.

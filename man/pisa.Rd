@@ -7,15 +7,15 @@
 pisa(path = getwd(), addArgs = NULL, global = TRUE)
 }
 \arguments{
-\item{path, }{defaults to working directory}
+\item{path}{Path to part of pISA-tree, defaults to working directory.}
 
-\item{addArgs}{character vector, additional arguments}
+\item{addArgs}{Character vector, additional arguments.}
 
-\item{global}{if \code{TRUE} (default) auxiliary objects will be
-created in the global environment (see note)}
+\item{global}{If \code{TRUE} (default) auxiliary objects will be
+created in the global environment (see note).}
 }
 \value{
-a list with layer information components, possibly changing
+A list with layer information components, possibly changing
 objects in the global environment (Se Note).
 }
 \description{

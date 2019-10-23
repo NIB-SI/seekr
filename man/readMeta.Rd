@@ -7,12 +7,12 @@
 readMeta(x = ".", ...)
 }
 \arguments{
-\item{x}{file path to the pISA layer}
+\item{x}{File path to the pISA layer.}
 
-\item{...}{any other arguments}
+\item{...}{Any other arguments.}
 }
 \value{
-data frame with Key/value pairs with class 'pISAmeta'
+Data frame with Key/value pairs with class 'pISAmeta'.
 }
 \description{
 Read metadata file from the given directory

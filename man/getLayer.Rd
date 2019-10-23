@@ -7,12 +7,12 @@
 getLayer(x, path = getwd())
 }
 \arguments{
-\item{x}{layer character (one of p, I, S, or A)}
+\item{x}{Layer character (one of p, I, S, or A).}
 
-\item{path, }{deafaults to working directory}
+\item{path}{Directory path, defaults to working directory.}
 }
 \value{
-character string with layer name
+Character string with layer name.
 }
 \description{
 Get pISA layer name

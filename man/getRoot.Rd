@@ -7,14 +7,14 @@
 getRoot(x = "p", path = getwd(), ...)
 }
 \arguments{
-\item{x}{character characteristic for pISA layer}
+\item{x}{Character characteristic for pISA layer (one of p, I, S, or A).}
 
-\item{path}{path within the pISA-tree}
+\item{path}{Path within the pISA-tree.}
 
-\item{...}{any other arguments}
+\item{...}{Any other arguments.}
 }
 \value{
-relative path to the layer directory (from working directory)
+Relative path to the layer directory (from working directory).
 }
 \description{
 Get root directory for pISA layer

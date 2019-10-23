@@ -35,9 +35,9 @@ NULL
 #'
 #' Extract file name from a file path.
 #'
-#' @param x complete file path or  file.type name
-#' @param ... any other arguments
-#' @return File name (string)
+#' @param x Complete file path or  file.type name.
+#' @param ... Any other arguments.
+#' @return File name (string).
 #' @export
 #' @note Parameter ... is ignored at this time.
 #' @keywords file
@@ -59,9 +59,9 @@ gsub("(.*)\\.(.*)","\\1",basename(x))
 #'
 #' Extract file type from a file path.
 #'
-#' @param x complete file path or  file name
-#' @param ... any other arguments
-#' @return File type (string)
+#' @param x Complete file path or  file name.
+#' @param ... Any other arguments.
+#' @return File type (string).
 #' @export
 #' @note Parameter ... is ignored at this time.
 #' @keywords file
@@ -83,9 +83,9 @@ fileType("./bla.Rnw")
 ## ----fsummary------------------------------------------------------------
 #' As factor summary of a data frame
 #'
-#' @param x data frame
-#' @param ... any other arguments
-#' @return summary object
+#' @param x Data frame.
+#' @param ... Any other arguments.
+#' @return Summary object.
 #' @export
 #' @note Argument ... not used
 #' @keywords summary
@@ -104,10 +104,10 @@ fsummary(data.frame(x=rnorm(20),txt=sample(letters,20,rep=TRUE)))
 ## ----getRoot-------------------------------------------------------------
 #' Get root directory for pISA layer
 #'
-#' @param x character characteristic for pISA layer
-#' @param path path within the pISA-tree
-#' @param ... any other arguments
-#' @return relative path to the layer directory (from working directory)
+#' @param x Character characteristic for pISA layer (one of p, I, S, or A).
+#' @param path Path within the pISA-tree.
+#' @param ... Any other arguments.
+#' @return Relative path to the layer directory (from working directory).
 #' @export
 #' @note The path should be compliant with the pISA-tree structure.
 #'     Path defaults to the working directory, which is
@@ -130,9 +130,9 @@ paste(rep("..",nl),collapse="/")
 ## ----readMeta------------------------------------------------------------
 #' Read metadata file from the given directory
 #'
-#' @param x file path to the pISA layer
-#' @param ... any other arguments
-#' @return data frame with Key/value pairs with class 'pISAmeta'
+#' @param x File path to the pISA layer.
+#' @param ... Any other arguments.
+#' @return Data frame with Key/value pairs with class 'pISAmeta'.
 #' @export
 #' @note Metadata table gets the class 'Dlist' to inherit a convenient print.
 #' @keywords pISA
@@ -168,9 +168,9 @@ readMeta(.pISAloc)
 ## ----print.pISAmeta------------------------------------------------------
 #' Print metadata object as Dlist
 #'
-#' @param x metadata object, data.frame with two columns
-#' @param width estimated text width
-#' @param ... any other arguments
+#' @param x Metadata object, data.frame with two columns.
+#' @param width Estimated text width.
+#' @param ... Any other arguments.
 #' @export
 #' @note Metadata table is printed in convenient Dlist form.
 #' @keywords package
@@ -199,11 +199,11 @@ print.pISAmeta <- function(x, width = max(nchar(x[,1]))*3.5,  ...){
 ## ----getMeta-------------------------------------------------------------
 #' Get metadata value
 #'
-#' @param x two column character data frame with Key / Value pairs
-#' @param item string, item name
-#' @param nl logical, expand backslash character for new lines
-#' @param ... any other arguments (not used at the moment)
-#' @return character string with key value
+#' @param x Two column character data frame with Key / Value pairs.
+#' @param item String, item name.
+#' @param nl Logical, expand backslash character for new lines.
+#' @param ... Any other arguments (not used at the moment).
+#' @return Character string with key value.
 #' @export
 #' @note Parameter item is matched exactly to the item names.
 #' @keywords pisa
@@ -233,9 +233,9 @@ return(ret)
 ## ----getLayer------------------------------------------------------------
 #' Get pISA layer name
 #'
-#' @param x layer character (one of p, I, S, or A)
-#' @param path, deafaults to working directory
-#' @return character string with layer name
+#' @param x Layer character (one of p, I, S, or A).
+#' @param path Directory path, defaults to working directory.
+#' @return Character string with layer name.
 #' @export
 #' @keywords pisa
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
@@ -267,11 +267,11 @@ getLayer <- function(x, path=getwd()){
 #'
 #' Create output directory, name it with appended arguments.
 #'
-#' @param out.dir character string, base output directory
-#' @param args  character vector, arguments used for sub-analysis
+#' @param out.dir Character string, base output directory.
+#' @param args  Character vector, arguments used for sub-analysis.
 #'     or from a batch call
-#' @param which numeric vector, which arguments to use
-#' @return directory name
+#' @param which Numeric vector, which arguments to use.
+#' @return Directory name.
 #' @note Directory is created
 #' @export
 #' @keywords pisa
@@ -298,11 +298,11 @@ out.path <- function(out.dir="../out", args="", which=1:length(args)) {
 #' Extract pISA-tree details: name, root and metadata
 #'     for all layers above the current directory (below or in the Assay).
 #'
-#' @param path, defaults to working directory
-#' @param addArgs character vector, additional arguments
-#' @param global if \code{TRUE} (default) auxiliary objects will be
-#'     created in the global environment (see note)
-#' @return a list with layer information components, possibly changing
+#' @param path Path to part of pISA-tree, defaults to working directory.
+#' @param addArgs Character vector, additional arguments.
+#' @param global If \code{TRUE} (default) auxiliary objects will be
+#'     created in the global environment (see note).
+#' @return A list with layer information components, possibly changing
 #' objects in the global environment (Se Note).
 #' @note If argument global is \code{TRUE} (default), auxiliary objects with
 #'     pISA related information will be created in the global environment.
