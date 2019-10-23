@@ -80,7 +80,8 @@ purl <- TRUE
 (pkgName <- basename(dirname(getwd())))
 dir(pkgPath)
 dir(file.path(pkgPath,"R"))
-fctFile <- c("pisar-initialize.Rnw"
+fctFile <- c(
+      "pisar-initialize.Rnw"
     , "pisar-api.Rnw")
 (pkgFile <- gsub("\\.Rnw$","\\.R",fctFile))
 @
@@ -100,7 +101,7 @@ childtxt <- ""
 <<eval=FALSE>>=
 for (i in 1:length(fctFile)){
     childtxt <- paste(childtxt
-   , knit_child(file.path("../doc",fctFile[i]), quiet=TRUE))
+   , knit_child(file.path("../devel",fctFile[i]), quiet=TRUE))
 }
 @
 \Sexpr{childtxt}
@@ -114,7 +115,7 @@ perform steps for building a package. Extract code, make documentation files (\f
 Code is extracted to \url{pkgPath}.
 %<<export to package,eval=purl>>=
 %getwd()
-%purl(file.path("../doc",fctFile),output=file.path(pkgPath,"R",pkgFile))
+%purl(file.path("../devel",fctFile),output=file.path(pkgPath,"R",pkgFile))
 %@
 
 <<export to package>>=
@@ -122,7 +123,7 @@ childtxt <- ""
 for (i in 1:length(fctFile)) {
 cat(fctFile[i],"\n")
 childtxt <- paste(childtxt
-    , purl(file.path("../doc",fctFile[i])
+    , purl(file.path("../devel",fctFile[i])
     , output=file.path(pkgPath,"R",pkgFile[i])))
 }
 dir(file.path(pkgPath,"R"))
@@ -150,7 +151,6 @@ system.time(miss <- devtools::missing_s3(pkgPath))
 \subsection{Check results}
 <<>>=
 check()
-
 @
 \clearpage
 \subsection{Build a package}
@@ -232,7 +232,7 @@ toLatex(sessionInfo())
 cat("Project path:\\verb'",dirname(getwd()),"'\\\\\n")
 mainFile <- commandArgs(trailingOnly = TRUE)
 #
-mainFilePath <- file.path("../doc", mainFile[1])
+mainFilePath <- file.path("../devel", mainFile[1])
 cat("Main file :\\verb'", mainFilePath, "'\n")
 #
 mainFile <- strsplit(mainFile,'.',fixed=TRUE)[[1]][1]
@@ -258,7 +258,7 @@ library(tkWidgets)
 openPDF(file.path(dirname(getwd()),"doc",
 paste(mainFile,"PDF",sep=".")))
 viewVignette("viewVignette", projectName, #
-file.path("../doc",paste(mainFile,"Rnw",sep=".")))
+file.path("../devel",paste(mainFile,"Rnw",sep=".")))
 #
 @
 

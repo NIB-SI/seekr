@@ -411,8 +411,8 @@ assign(".pfn", getMeta(.imeta,"Phenodata:"), pos=pos)
 assign(".ffn", getMeta(.ameta,"Featuredata:"), pos=pos)
 #
 # Output directory - arguments are used to prepare the name
-.inroot <- out.path(file.path(.aroot,"input"))
-.reproot <- out.path(file.path(.aroot,"reports"))
+assign(".inroot", out.path(file.path(.aroot,"input")), pos=pos)
+assign(".reproot", out.path(file.path(.aroot,"reports")), pos=pos)
 # Create output directory and aoutput file name
 args <- commandArgs(trailingOnly = TRUE)
 if(length(args)==0) {

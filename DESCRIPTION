@@ -14,7 +14,10 @@ RoxygenNote: 6.1.1
 Imports: 
     knitr,
     rio,
-    tools
+    tools,
+    RCurl,
+    httr,
+    jsonlite
 VignetteBuilder: knitr
 Suggests: 
     knitr,
