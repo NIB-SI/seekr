@@ -1,0 +1,855 @@
+---
+title: "Test API connection to FAIRDOMHub"
+author: 
+ - name: A. Blejec
+   email: ablejec@nib.si
+   affiliation: National Institute of Biology, Ljubljana, Slovenia
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+A former version of this document is available at Available at [RPubs](http://rpubs.com/ablejec/396238)
+
+# Introduction
+
+I will try to connect to the FAIRDOM SEEK with the collection of their APIs. 
+
+The API description with examples is available [here](https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.1#/people/updatePerson).
+
+It is also available in my Postman.
+
+My final goal is to enable upload/download from pISA-tree to FAIRDOMHub. This feature will be a part of the R package `pISAR` that will enable use of pISA structure and metafile information for reproducible statistical analyses.
+
+SEEK testing site is [here](https://testing.sysmo-db.org)
+
+Main FAIRdomHub URL and test site urls:
+```{r}
+mainurl <- "https://www.fairdomhub.org/"
+testurl <- "https://testing.sysmo-db.org"
+```
+
+My personal ids
+```{r}
+my_main_id <- 808
+my_test_id <- 368
+```
+
+
+I will use the testing site for the development and experiments:
+
+```{r}
+baseurl <- testurl
+myid <- my_test_id
+url(baseurl)
+```
+
+My test project id and pISA ids
+```{r}
+pid <- 54
+iid <- 76
+sid <- 82
+aid <- 374
+purl <- file.path(baseurl, "projects", pid)
+iurl <- file.path(baseurl, "investigations", iid)
+surl <- file.path(baseurl, "Studies", sid)
+aurl <- file.path(baseurl, "assays", aid)
+purl
+# "https://testing.sysmo-db.org/projects/54"
+url(purl)
+url(iurl)
+url(surl)
+url(aurl)
+
+```
+
+ Check the existence
+
+First check if the base URL exists. For this package `RCurl` can be used.
+
+```{r}
+library(RCurl)
+```
+
+
+```{r}
+(FAIRDOMExists = url.exists(baseurl))
+```
+# Package `httr`
+
+The use is described in [LockeData blog](https://itsalocke.com/blog/r-quick-tip-microsoft-cognitive-services-text-analytics-api/).
+
+This solution uses packages `httr` and `jsonlite` and is based on `libcurl` (the same is used by RCurl). Package `httr` has useful vignettes that were a good guide for the example below.
+
+```{r}
+library(httr)
+library(jsonlite)
+```
+
+## Get personal information
+
+```{r}
+
+r <- GET(file.path(baseurl,"people",myid),
+         add_headers(Accept="application/json"))
+names(r)
+r
+r$content
+```
+The response is structured and can be investigated with the helper functions. The response has three important parts: status, headers, and body.
+
+```{r}
+GET ("https://testing.sysmo-db.org/people/368")
+```
+
+
+### Status
+
+Check status
+
+```{r}
+http_status(r)
+```
+or just a status code
+
+```{r}
+r$status_code
+```
+
+### Body
+
+Body can be accessed with the function `content`
+
+```{r}
+cont <- content(r,"text")
+cont
+length(cont)
+```
+
+This gives us a text version of the JSON object. We can use built-in parsers to get other forms of data. We can parse the content into the R list object
+
+```{r}
+cont <- content(r,"parsed",type="application/json")
+cont
+```
+### The structure of the parsed response
+
+```{r}
+names(cont)
+cont$jsonapi
+names(cont$data)
+```
+
+Response elements
+
+```{r}
+cont$data$id
+```
+
+List the response content
+
+```{r}
+d <- cont$data
+for (nm in names(d)) {
+  cat("\n",nm,"--------------\n\n")
+  print(d[[nm]])
+}
+```
+
+Person data are in the *attributes* part
+
+Here is the first name of the person with id `r myid`
+
+```{r}
+cont$data$attributes$first_name
+```
+
+# Conclusion
+
+The rudimetary R read connection with FAIRDOMHub can be established using the package `httr`. From here it should be fairly possible to write the wrapper functions for easier usage.
+
+## Wrapper functions for `GET` and `content`
+
+```{r}
+# this function is equivaalent to a call:
+# curl -X GET "https://www.fairdomhub.org/what/id" -H  "accept: application/json"ž
+#
+myGET <- function(what, id,
+                   uri=baseurl, ... ){
+#                  uri="https://www.fairdomhub.org", ... ){
+  if(!missing(what)) uri <- paste0(uri,"/",what)
+  if(!missing(id)) uri <- paste0(uri,"/",id)
+  r <- GET(uri,
+         add_headers(Accept="application/json"))
+  cat("Status code:",r$status_code,"\n")
+  invisible(r)
+}
+
+myData <- function(r,
+                  part="attributes",
+                  type="application/json",  ...){
+  invisible(content(r,"parsed",type=type)$data[[part]])
+}
+myDatas <- function(r,part,
+                  type="application/json",  ...){
+  if(missing(part)) invisible(content(r,"parsed",type=type)$data) else
+  invisible(content(r,"parsed",type=type)$data[part])
+}
+
+```
+
+
+## Use of wrapper functions
+
+Get data for person `r myid`
+
+```{r}
+myid
+# https://www.fairdomhub.org/people/808
+r <- myGET("people",myid)
+r$status_code
+```
+
+Get the person `r myid` last name and tools
+
+```{r}
+myid
+myData(r)$last_name
+myData(r)$tools
+```
+
+Get person `r myid` institution id
+
+```{r}
+myData(r,"relationships")$institutions
+instID <- myData(r, "relationships")$institutions$data[[1]]$id
+instID
+```
+
+Get institution `\r instID` name. The details are in the *institutions* part.
+
+```{r}
+# https://www.fairdomhub.org/institutions/189
+rinst <- myGET("institutions",instID)
+myData(rinst)$title
+```
+
+Full institution description
+
+```{r}
+catln <- function(...) cat(...,"\n")
+d <- sapply(myData(rinst),catln)
+```
+
+
+### Search for a person
+
+```{r}
+myname <- "Andrej Blejec"
+r <- myGET("people")
+d <- myDatas(r)
+length(d)
+names(d[[1]])
+titles <- sapply(d,function(x) x$attributes$title)
+head(titles)
+d[[pmatch(myname,titles)]]
+id <- d[[pmatch(myname,titles)]]$id
+id
+```
+
+### Searh for a project
+
+```{r}
+myproject <- "testUpload"
+r <- myGET("projects")
+d <- myDatas(r)
+length(d)
+names(d[[1]])
+titles <- sapply(d,function(x) x$attributes$title)
+head(titles)
+loc <- pmatch(myproject,titles)
+d[[loc]]
+d[[loc]]$attributes$title
+id <- d[[loc]]$id
+pid <- id
+pid
+```
+
+### Searh for a investigation
+
+```{r}
+myinvestigation <- "Test1"
+r <- myGET("investigations")
+d <- myDatas(r)
+length(d)
+names(d[[1]])
+titles <- sapply(d,function(x) x$attributes$title)
+head(titles)
+loc <- pmatch(myinvestigation,titles)
+d[[loc]]
+d[[loc]]$attributes$title
+id <- d[[loc]]$id
+iid <- id
+iid
+```
+
+### GET an investigation
+
+```{r}
+extract <- function(x, what="relationships") lapply(x[[what]]
+                    , FUN=function(x) if(length(x$data)>0) {
+                      myDatas(myGET(x$data[[1]]$type, x$data[[1]]$id),"attributes") 
+                      } else NA )
+#extract <- function(x, what="relationships") lapply(x[[what]]
+#                    , FUN=function(x) length(x$data))
+
+```
+
+
+```{r}
+id
+r <- myGET("investigations", id)
+d <- myDatas(r)
+length(d)
+names(d)
+d$attributes$title
+d$attributes$description
+d$relationships
+a <- extract(d)
+str(a)
+names(a)
+for(nm in names(a)){
+cat("\n",nm,"\n")
+x <- d$relationships[[nm]]
+if(length(d$relationships[[nm]]$data)>0){
+a <- myGET(x$data[[1]]$type, x$data[[1]]$id)
+ad <- myDatas(a)
+print(ad$attributes$title)
+}
+}
+
+```
+
+List project data
+
+```{r}
+pid
+r <- myGET("projects",pid)
+d <- myDatas(r)
+length(d)
+names(d)
+d$attributes$title
+d$attributes$description
+d$relationships
+a <- extract(d)
+str(a)
+names(a)
+for(nm in names(a)){
+  cat("\n",nm,"\n")
+  x <- d$relationships[[nm]]
+  if(length(d$relationships[[nm]]$data)>0){
+    for(j in 1:length(x$data)){
+      a <- myGET(x$data[[j]]$type, x$data[[j]]$id)
+      ad <- myDatas(a)
+      print(ad$attributes$title)
+    }
+  }
+}
+
+```
+
+
+## PUT
+
+We need to create JSON objects
+
+### Create JSON object
+
+#### Investigation
+
+```
+{
+  "data": {
+    "type": "investigations",
+    "attributes": {
+      "title": "A Maximal Investigation",
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "809",
+              "type": "projects"
+            },
+            "access": "manage"
+          },
+          {
+            "resource": {
+              "id": "859",
+              "type": "projects"
+            },
+            "access": "manage"
+          }
+        ]
+      },
+      "description": "This is a more complex investigation",
+      "other_creators": "Max Blumenthal, Ed Snowden"
+    },
+    "relationships": {
+      "projects": {
+        "data": [
+          {
+            "id": "809",
+            "type": "projects"
+          },
+          {
+            "id": "859",
+            "type": "projects"
+          }
+        ]
+      },
+      "publications": {
+        "data": [
+          {
+            "id": "23",
+            "type": "publications"
+          }
+        ]
+      },
+      "creators": {
+        "data": [
+          {
+            "id": "555",
+            "type": "people"
+          }
+        ]
+      }
+    }
+  }
+}
+
+```
+
+```{r}
+ir <- fromJSON('{
+  "data": {
+    "type": "investigations",
+    "attributes": {
+      "title": "A Maximal Investigation",
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "809",
+              "type": "projects"
+            },
+            "access": "manage"
+          },
+          {
+            "resource": {
+              "id": "859",
+              "type": "projects"
+            },
+            "access": "manage"
+          }
+        ]
+      },
+      "description": "This is a more complex investigation",
+      "other_creators": "Max Blumenthal, Ed Snowden"
+    },
+    "relationships": {
+      "projects": {
+        "data": [
+          {
+            "id": "809",
+            "type": "projects"
+          },
+          {
+            "id": "859",
+            "type": "projects"
+          }
+        ]
+      },
+      "publications": {
+        "data": [
+          {
+            "id": "23",
+            "type": "publications"
+          }
+        ]
+      },
+      "creators": {
+        "data": [
+          {
+            "id": "555",
+            "type": "people"
+          }
+        ]
+      }
+    }
+  }
+}')
+str(ir)
+ij <- toJSON(ir)
+ij
+```
+
+```{r}
+I <- list(
+  data=list(
+    type="investigations"
+  , attributes=list(
+      title=paste("pISA code: Test upload from R - ", Sys.time())
+    , description="Uploaded from R"
+  )
+  , relationships=list(
+      projects=list(data=data.frame(id=pid, type="projects"))
+   ,  creators=list(data=data.frame(id=myid, type="people"))
+  )
+  )
+)
+I
+I <- toJSON(I)
+#I <- gsub("\\[","",I)
+#I <- gsub("\\]","",I)
+I <- gsub('("type":)\\[(".*")\\],"at','\\1\\2,"at', I)
+I <- gsub('("title":)\\[(".*")\\],"de','\\1\\2,"de', I)
+I <- gsub('("description":)\\[(".*")\\]},','\\1\\2},', I)         
+I
+```
+Or nicer:
+
+```{r}
+prettify(I)
+```
+
+Escape quotes - not a remedy, not needed
+```{r, eval =FALSE}
+II <- gsub('\\"','\\\\"',I)
+II
+```
+
+
+## Create new investigaton (POST)
+
+
+```{r}
+uri <- modify_url(baseurl,path="investigations")
+uri
+response <- POST(uri
+    , authenticate("ablejec","testni.1234",type = "basic")
+    , body = I
+    , encode="json"
+    , accept("application/json")
+    , content_type_json()
+    )
+res <- fromJSON(content(response, as = "text"))
+str(res)
+```
+
+Open in the web browser
+```{r}
+if(interactive()) shell.exec(file.path(res$data$meta$base_url,res$data$links$self))
+```
+
+
+
+```
+system('curl -X POST "https://testing.sysmo-db.org/investigations" -H  "accept: application/json" -H  "Content-Type: application/json" -u "ablejec:testni.1234" -d "{\"data\":{\"type\":\"investigations\",\"attributes\":{\"title\":\"Title 0.116822839947417\",\"description\":\"Description\"}},\"relationships\":{\"projects\":{\"id\":\"54\",\"type\":\"projects\"},\"creators\":{\"id\":368,\"type\":\"people\"}}}"')
+```
+
+```
+system('curl -X POST "https://testing.sysmo-db.org/investigations" -H  "accept: application/json" -H  "Content-Type: application/json" -u "ablejec:testni.1234" -d "{\"data\":{\"type\":\"investigations\",\"attributes\":{\"title\":\"Title 0.116822839947417\",\"description\":\"Description\"}},\"relationships\":{\"projects\":{\"id\":\"54\",\"type\":\"projects\"},\"creators\":{\"id\":368,\"type\":\"people\"}}}"')
+```
+
+
+
+From RCurl
+
+```{r}
+r <- myGET("investigations")
+d <- myDatas(r)
+length(d)
+names(d)
+d$attributes$title
+d$attributes$description
+d$relationships
+a <- extract(d)
+str(a)
+names(a)
+for(nm in names(a)){
+cat("\n",nm,"\n")
+x <- d$relationships[[nm]]
+if(length(d$relationships[[nm]]$data)>0){
+a <- myGET(x$data[[1]]$type, x$data[[1]]$id)
+ad <- myDatas(a)
+print(ad$attributes$title)
+}
+}
+```
+Tole deluje v Postman
+```
+{
+  "data": {
+    "type": "investigations",
+    "attributes": {
+      "title": "A Maximal Investigation",
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "54",
+              "type": "projects"
+            },
+            "access": "manage"
+          }
+        ]
+      },
+      "description": "This is a more complex investigation",
+      "other_creators": "Max Blumenthal, Ed Snowden"
+    },
+    "relationships": {
+      "projects": {
+        "data": [
+          {
+            "id": "54",
+            "type": "projects"
+          }
+        ]
+      },
+        "creators": {
+        "data": [
+          {
+            "id": "368",
+            "type": "people"
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+Tudi moj primer
+
+```
+{
+    "data": {
+        "type": "investigations",
+        "attributes": {
+            "title": "Title 0.4220704715696",
+            "description": "Description"
+        },
+        "relationships": {
+        "projects": {
+            "data": [
+                {
+                    "id": "54",
+                    "type": "projects"
+                }
+            ]
+        },
+        "creators": {
+            "data": [
+                {
+                    "id": "368",
+                    "type": "people"
+                }
+            ]
+        }
+    }
+    }
+    
+}
+```
+
+List project data
+
+```{r}
+pid
+r <- myGET("projects",pid)
+d <- myDatas(r)
+length(d)
+names(d)
+d$attributes$title
+d$attributes$description
+d$relationships
+a <- extract(d)
+str(a)
+names(a)
+for(nm in names(a)){
+  cat("\n",nm,"\n")
+  x <- d$relationships[[nm]]
+  if(length(d$relationships[[nm]]$data)>0){
+    for(j in 1:length(x$data)){
+      a <- myGET(x$data[[j]]$type, x$data[[j]]$id)
+      ad <- myDatas(a)
+      print(ad$attributes$title)
+    }
+  }
+}
+
+```
+
+## CReate and post documents
+
+```{r}
+document_skeleton <- '{
+  "data": {
+    "type": "documents",
+    "attributes": {
+      "title": "A Maximal Document",
+      "description": "This is the description",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "license": "CC-BY-4.0",
+      "other_creators": "John Smith, Jane Smith",
+      "content_blobs": [
+        {
+          "original_filename": "a_pdf_file.pdf",
+          "content_type": "application/pdf"
+        }
+      ],
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "359",
+              "type": "projects"
+            },
+            "access": "edit"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "creators": {
+        "data": [
+          {
+            "id": "234",
+            "type": "people"
+          }
+        ]
+      },
+      "projects": {
+        "data": [
+          {
+            "id": "359",
+            "type": "projects"
+          }
+        ]
+      },
+      "assays": {
+        "data": [
+          {
+            "id": "38",
+            "type": "assays"
+          }
+        ]
+      }
+    }
+  }
+}'
+document_skeleton
+II <- fromJSON(document_skeleton, simplifyVector = TRUE)
+II
+```
+
+
+```{r}
+content_type <- "text/plain"
+apath <- "D:/DEJAVNOSTI/OMIKE/pISA-projects/_p_biopharm.si/_I_Task1/_S_doktoratiUM/_A_080-LDA-Ref-R"
+original_filename <- "_ASSAY_METADATA.TXT"
+document_title <- paste("Assay metadata:",Sys.time())
+document_description <- "Details about assay"
+#
+II$data$attributes$title <- document_title
+II$data$attributes$description <- document_description
+II$data$relationships$creators$data$id <- myid
+II$data$relationships$creators$data
+II$data$relationships$projects$data$id <- pid
+II$data$relationships$projects$data
+II$data$attributes$policy$permissions$resource$id <- pid
+II$data$attributes$policy$permissions
+II$data$attributes$content_blobs$content_type <- content_type
+II$data$attributes$content_blobs$original_filename <- original_filename
+II$data$attributes$content_blobs
+II$data$attributes$other_creators <- ""
+II$data$attributes$tags <- c("pISA", "metadata")
+II$data$relationships$assays$data$id <- aid
+II
+I <- toJSON(II,auto_unbox = TRUE)
+I
+```
+
+## Create new document (POST)
+
+
+```{r}
+uri <- modify_url(baseurl,path="documents")
+uri
+response <- POST(uri
+    , authenticate("ablejec","testni.1234",type = "basic")
+    , body = I
+    , encode="json"
+    , accept("application/json")
+    , content_type_json()
+    )
+res <- fromJSON(content(response, as = "text"))
+str(res)
+res$data$id
+original_filename <- res$data$attributes$content_blobs$original_filename
+blob_link <- res$data$attributes$content_blobs$link
+blob_link
+```
+
+Open in the web browser
+```{r}
+if(interactive()) shell.exec(file.path(res$data$meta$base_url,res$data$links$self))
+```
+
+
+### Fill the content blob with data
+
+```{r}
+
+fpath <- file.path(apath, original_filename)
+file_content <- paste(readLines(fpath),collapse="\n")
+cat(file_content)
+```
+
+```{r}
+uri <- blob_link
+uri
+response <- PUT(uri
+    , authenticate("ablejec","testni.1234",type = "basic")
+    , body = upload_file(fpath)
+    , encode="json"
+    , accept("*.*")
+    )
+res <- fromJSON(content(response, as = "text"))
+str(res)
+```
+
+Open in the web browser
+```{r}
+if(interactive()) shell.exec(blob_link)
+```
+
+
+
+# Links
+
+[Best practices for API packages](https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html)
+

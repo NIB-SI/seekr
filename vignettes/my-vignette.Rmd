@@ -1,11 +1,19 @@
 ---
 title: "my-vignette"
+author: 
+ - name: A. Blejec
+   email: ablejec@nib.si
+   affiliation: National Institute of Biology, Ljubljana, Slovenia
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{my-vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+# Setting YAML
+
+Try different YMAL settings
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
