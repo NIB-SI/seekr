@@ -138,7 +138,10 @@ devtools::document(pkgPath)
 usethis::use_package("knitr")
 usethis::use_package("rio")
 usethis::use_package("tools")
-
+usethis::use_package('RCurl')
+usethis::use_package('httr')
+usethis::use_package('jsonlite')
+usethis::use_build_ignore(c("devel"))
 @
 \clearpage
 \subsection{Check}

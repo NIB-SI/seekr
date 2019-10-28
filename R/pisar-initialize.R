@@ -15,7 +15,6 @@
 #' and use of pISA-tree.
 #'
 #' @section Usage:
-#'
 #' pISA-tree is a standardized directory tree
 #' for storing projet information under ISA paradigm.
 #' The set of functions have two fold purpose:
