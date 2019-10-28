@@ -134,7 +134,7 @@ fhGET <- function(what, id,
 #' id
 #' }
 fhData <- function(r, part, ...){
-  jsn <- "application/json"                
+  jsn <- "application/json"
   if(missing(part)) invisible(content(r,"parsed",type=jsn)$data) else
   invisible(content(r,"parsed",type=jsn)$data[[part]])
 }
@@ -207,5 +207,449 @@ fhFindTitle <- function(part, id){
      # Set FAIRDOMhub user title
      return(c(id=id, type=part, title=d$title))
      }
+@
+
+<<fhCreate>>=
+#' Create pISA layer or *fh* component.
+#'
+#' @param part Components name (e.g. 'people', 'projets', ...).
+#' @param meta Data frame with pISA metadata or 
+#' a list with minimal information (Title, Description, *ToDo: add fields*).
+#' @return FAIRDOMhub created component.
+#' @note Upon success (status code 200) details 
+#' of newly created component can be used. Check status code.
+#' @export
+#' @keywords pisa
+#' @seealso \code{\link{fhGET}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \donotrun{
+#' fhCreate( part = "assay"
+#'   , meta= list(
+#'     Title="TestAssay"
+#'     , Description="Some description")
+#'     )
+#' }
+fhCreate <- function (part = "assay", meta){
+     
+
+@
+
+<<fhSkeleton>>=
+#' Create *fh* skeleton.
+#'
+#' Creates *fh* object with required structure.
+#'
+#' @param part Components name (e.g. 'people', 'projets', ...).
+#' @param meta Data frame with pISA metadata or
+#' a list with minimal information (Title, Description, *ToDo: add fields*).
+#' @return A list with the minimal information structure.
+#' @export
+#' @keywords pisa
+#' @seealso \code{\link{fhCreate}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \donotrun{
+#' require(jsonlite)
+#' sr <- fhSkeleton( part = "assay"
+#'   , meta= list(
+#'     Title="TestAssay"
+#'     , Description="Some description")
+#'     )
+#' str(sr)
+#' }
+fhSkeleton <- function (part = "assay", meta){
+sj <- switch( part
+, project =
+'{
+  "data": {
+    "type": "projects",
+    "attributes": {
+      "avatar": null,
+      "title": "Post Project Max",
+      "description": "A Taverna project",
+      "web_page": "http://www.taverna.org.uk",
+      "wiki_page": "http://www.mygrid.org.uk",
+      "default_license": "Other (Open)",
+      "default_policy": {
+        "access": "no_access",
+        "permissions": [
+          {
+            "resource": {
+              "id": "1273",
+              "type": "people"
+            },
+            "access": "manage"
+          },
+          {
+            "resource": {
+              "id": "1924",
+              "type": "projects"
+            },
+            "access": "download"
+          },
+          {
+            "resource": {
+              "id": "1297",
+              "type": "institutions"
+            },
+            "access": "view"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "programmes": {
+        "data": [
+          {
+            "id": "27",
+            "type": "programmes"
+          }
+        ]
+      },
+      "organisms": {
+        "data": [
+          {
+            "id": "5",
+            "type": "organisms"
+          }
+        ]
+      }
+    }
+  }
+}'
+, investigation =
+'{
+  "data": {
+    "type": "investigations",
+    "attributes": {
+      "title": "A Maximal Investigation",
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "809",
+              "type": "projects"
+            },
+            "access": "manage"
+          },
+          {
+            "resource": {
+              "id": "859",
+              "type": "projects"
+            },
+            "access": "manage"
+          }
+        ]
+      },
+      "description": "This is a more complex investigation",
+      "other_creators": "Max Blumenthal, Ed Snowden"
+    },
+    "relationships": {
+      "projects": {
+        "data": [
+          {
+            "id": "809",
+            "type": "projects"
+          },
+          {
+            "id": "859",
+            "type": "projects"
+          }
+        ]
+      },
+      "publications": {
+        "data": [
+          {
+            "id": "23",
+            "type": "publications"
+          }
+        ]
+      },
+      "creators": {
+        "data": [
+          {
+            "id": "555",
+            "type": "people"
+          }
+        ]
+      }
+    }
+  }
+}'
+, study = 
+'{
+  "data": {
+    "type": "studies",
+    "attributes": {
+      "title": "A Maximal Study",
+      "description": "The Study of many things",
+      "experimentalists": "Wet lab people",
+      "person_responsible_id": "1092",
+      "other_creators": "Marie Curie",
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "1672",
+              "type": "projects"
+            },
+            "access": "view"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "investigation": {
+        "data": {
+          "id": "243",
+          "type": "investigations"
+        }
+      },
+      "publications": {
+        "data": [
+          {
+            "id": "64",
+            "type": "publications"
+          }
+        ]
+      },
+      "creators": {
+        "data": [
+          {
+            "id": "1092",
+            "type": "people"
+          }
+        ]
+      }
+    }
+  }
+}'
+, assay = 
+'{
+  "data": {
+    "type": "assays",
+    "attributes": {
+      "title": "A Maximal experimental Assay",
+      "assay_class": {
+        "key": "EXP"
+      },
+      "assay_type": {
+        "uri": "http://jermontology.org/ontology/JERMOntology#Transcriptomics"
+      },
+      "technology_type": {
+        "uri": "http://jermontology.org/ontology/JERMOntology#RNA-Seq"
+      },
+      "other_creators": "Anonymous creator",
+      "description": "A Western Blot Assay",
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "442",
+              "type": "projects"
+            },
+            "access": "manage"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "study": {
+        "data": {
+          "id": "66",
+          "type": "studies"
+        }
+      },
+      "publications": {
+        "data": [
+          {
+            "id": "16",
+            "type": "publications"
+          }
+        ]
+      },
+      "organisms": {
+        "data": [
+          {
+            "id": "3",
+            "type": "organisms"
+          }
+        ]
+      },
+      "sops": {
+        "data": [
+          {
+            "id": "4",
+            "type": "sops"
+          }
+        ]
+      },
+      "models": {
+        "data": [
+          {
+            "id": "5",
+            "type": "models"
+          }
+        ]
+      },
+      "data_files": {
+        "data": [
+          {
+            "id": "16",
+            "type": "data_files"
+          }
+        ]
+      },
+      "documents": {
+        "data": [
+          {
+            "id": "32",
+            "type": "documents"
+          }
+        ]
+      },
+      "creators": {
+        "data": [
+          {
+            "id": "287",
+            "type": "people"
+          }
+        ]
+      }
+    }
+  }
+}'
+, document =
+'{
+  "data": {
+    "type": "documents",
+    "attributes": {
+      "title": "A Maximal Document",
+      "description": "This is the description",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "license": "CC-BY-4.0",
+      "other_creators": "John Smith, Jane Smith",
+      "content_blobs": [
+        {
+          "original_filename": "a_pdf_file.pdf",
+          "content_type": "application/pdf"
+        }
+      ],
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "359",
+              "type": "projects"
+            },
+            "access": "edit"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "creators": {
+        "data": [
+          {
+            "id": "234",
+            "type": "people"
+          }
+        ]
+      },
+      "projects": {
+        "data": [
+          {
+            "id": "359",
+            "type": "projects"
+          }
+        ]
+      },
+      "assays": {
+        "data": [
+          {
+            "id": "38",
+            "type": "assays"
+          }
+        ]
+      }
+    }
+  }
+}'
+, data_file =
+'{
+  "data": {
+    "type": "data_files",
+    "attributes": {
+      "title": "A Maximal Data File",
+      "description": "This is the description",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "license": "CC-BY-4.0",
+      "other_creators": "John Smith, Jane Smith",
+      "content_blobs": [
+        {
+          "original_filename": "a_pdf_file.pdf",
+          "content_type": "application/pdf"
+        }
+      ],
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "359",
+              "type": "projects"
+            },
+            "access": "edit"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "creators": {
+        "data": [
+          {
+            "id": "234",
+            "type": "people"
+          }
+        ]
+      },
+      "projects": {
+        "data": [
+          {
+            "id": "359",
+            "type": "projects"
+          }
+        ]
+      },
+      "assays": {
+        "data": [
+          {
+            "id": "38",
+            "type": "assays"
+          }
+        ]
+      }
+    }
+  }
+}'
+, '{"Error":"No such component"}'
+)
+sr <- fromJSON(sj, simplifyVector = TRUE)
+return(sr)
+}
+
+
+
 @
 
