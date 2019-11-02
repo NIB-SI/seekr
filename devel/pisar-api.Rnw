@@ -34,7 +34,8 @@ Main FAIRdomHub URL and test site urls:
 #'
 #' @param test If TRUE, test server will be used..
 #' @return A list with URL and user information. For side effect see Notes.
-#' @notes The returned list is added to the options list under name 'fhub'.
+#' @notes The returned list is added to the 
+#'      \code{options()} list under name 'fhub'.
 #' @export
 #' @keywords file
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
@@ -43,10 +44,16 @@ Main FAIRdomHub URL and test site urls:
 #' fhIni()
 #' options("fhub")
 #' #
-#' fhIni(FALSE)
+#' fhIni(test=FALSE)
 #' options("fhub")
 #' }
-fhIni <- function(test=TRUE){
+fhIni <- function(
+      prid = NULL
+    , pid = NULL
+    , iid = NULL
+    , sid = NULL
+    , aid = NULL
+    , test=TRUE){
 mainurl <- "https://www.fairdomhub.org/"
 testurl <- "https://testing.sysmo-db.org"
 # My personal ids
@@ -57,15 +64,24 @@ baseurl <- ifelse(test, testurl, mainurl)
 myid <- ifelse(test, my_test_id, my_main_id)
 usr <- ifelse(test, "ablejec", "ablejec")
 pwd <- ifelse(test, "testni.1234", "Abink.9912")
-tmp <- list(baseurl=baseurl, usr=usr, pwd=pwd, myid=myid)
-   options(fhub=tmp)
+tmp <- list(baseurl = baseurl
+   , usr = usr
+   , pwd = pwd
+   , myid = as.character(myid)
+   , prid = as.character(prid)
+   , pid = as.character(pid)
+   , iid = as.character(iid)
+   , sid = as.character(sid)
+   , aid = as.character(aid)
+   )
+   options(fhub = tmp)
 invisible(tmp)
 }
 @
 
 
 
-<<fhGET>>=
+<<fhGet>>=
 #' Get inormation from repository.
 #'
 #' @param what Type of information (e.g. "person").
@@ -85,7 +101,7 @@ invisible(tmp)
 #' names(r)
 #' r$status_code
 #' }
-fhGET <- function(what, id,
+fhGet <- function(what, id,
                    uri=options()$fhub$baseurl, ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
   if(!missing(what)) uri <- paste0(uri,"/",what)
@@ -101,7 +117,7 @@ fhGET <- function(what, id,
 #' Get content from an *fh* object.
 #'
 #' @param r Object retrieved by fhGET.
-#' @param part Name of the required element. If missing, a list with
+#' @param type Name of the required element. If missing, a list with
 #'     all relevant objects is returned.
 #' @return File name (string).
 #' @export
@@ -133,10 +149,11 @@ fhGET <- function(what, id,
 #' id <- d[[pmatch(myname,titles)]]$id
 #' id
 #' }
-fhData <- function(r, part, ...){
+fhData <- function(r, type, ...){
+  if(class(r)=="seek_api") r <- r$response
   jsn <- "application/json"
-  if(missing(part)) invisible(content(r,"parsed",type=jsn)$data) else
-  invisible(content(r,"parsed",type=jsn)$data[[part]])
+  if(missing(type)) invisible(content(r,"parsed",type=jsn)$data) else
+  invisible(content(r,"parsed",type=jsn)$data[[type]])
 }
 fhDatas <- fhData
 @
@@ -144,9 +161,9 @@ fhDatas <- fhData
 <<fhFindId>>=
 #' Get details of component with id from an *fh* object.
 #'
-#' @param part Components name (e.g. 'people', 'projets', ...).
+#' @param type Components name (e.g. 'people', 'projets', ...).
 #' @param title Character string with the identifier
-#'     of the component (Title part).
+#'     of the component (title part).
 #' @return FAIRDOMhub component identifier: id, type and title.
 #'     If argument title is missing, a data frame with identifiers
 #'     for all items is returned.
@@ -164,14 +181,14 @@ fhDatas <- fhData
 #' projects <- fhFindId("projects")
 #' head(projects)
 #' }
-fhFindId <- function(part, title){
-     r <- fhGET(part)
+fhFindId <- function(type, title){
+     r <- fhGET(type)
      d <- fhData(r)
      titles <- t(sapply(d,function(x) c(id=x$id, type=x$type, title=x$attributes$title)))
      # Get FAIRDOMhub user id
      if(!missing(title)){
        id <- d[[pmatch(title,titles[,"title"])]]$id
-       return(c(id=id,type=part, title=title))
+       return(c(id=id,type=type, title=title))
      } else {
      return(titles)
      }
@@ -181,7 +198,7 @@ fhFindId <- function(part, title){
 <<fhFindTitle>>=
 #' Get details of component with id from an *fh* object.
 #'
-#' @param part Components name (e.g. 'people', 'projets', ...).
+#' @param type Components name (e.g. 'people', 'projets', ...).
 #' @param id Character string with the identifier
 #'     of the component (id part).
 #' @return FAIRDOMhub component identifier: id, type and title.
@@ -200,23 +217,23 @@ fhFindId <- function(part, title){
 #' idNew
 #' all.equal(id, idNew)
 #' }
-fhFindTitle <- function(part, id){
+fhFindTitle <- function(type, id){
      id <- as.vector(id[1])
-     r <- fhGET(part, id )
+     r <- fhGET(type, id )
      d <- fhData(r, "attributes")
      # Set FAIRDOMhub user title
-     return(c(id=id, type=part, title=d$title))
+     return(c(id=id, type=type, title=d$title))
      }
 @
 
 <<fhCreate>>=
 #' Create pISA layer or *fh* component.
 #'
-#' @param part Components name (e.g. 'people', 'projets', ...).
-#' @param meta Data frame with pISA metadata or 
+#' @param type Component name (e.g. 'people', 'projets', ...).
+#' @param meta Data frame with pISA metadata or
 #' a list with minimal information (Title, Description, *ToDo: add fields*).
 #' @return FAIRDOMhub created component.
-#' @note Upon success (status code 200) details 
+#' @note Upon success (status code 200) details
 #' of newly created component can be used. Check status code.
 #' @export
 #' @keywords pisa
@@ -224,23 +241,167 @@ fhFindTitle <- function(part, id){
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
-#' fhCreate( part = "assay"
+#' if(FALSE)
+#' {
+#' fhIni(prid = 26, test=TRUE)
+#' options("fhub")
+#'  sp <- fhCreate( type = "projects"
 #'   , meta= list(
-#'     Title="TestAssay"
-#'     , Description="Some description")
+#'       Title=paste("Test project", Sys.time())
+#'     , Description="Testing of upload")
 #'     )
+#'  str(sp)
+#'  str(fhData(sp))
+#' # Add member manually
+#
+#'  fhIni(prid = 26, pid=104, test=TRUE)
+#'  options("fhub")
+#'  si <- fhCreate( type = "investigations"
+#'   , meta= list(
+#'       Title=paste("Test investigation", Sys.time())
+#'     , Description="Testing of upload")
+#'     )
+#'  str(si)
 #' }
-fhCreate <- function (part = "assay", meta){
-     
-
+#'
+#'  fhIni(prid = 26, pid=104, iid=fhData(si)$id, test=TRUE)
+#'  options("fhub")
+#'  ss <- fhCreate( type = "studies"
+#'   , meta= list(
+#'       Title=paste("Test study", Sys.time())
+#'     , Description="Testing of upload")
+#'     )
+#'  str(ss)
+#'  fhData(ss)$id
+#'
+#'  fhIni(prid = 26
+#'        , pid=104
+#'        , iid=fhData(si)$id
+#'        , sid=fhData(ss)$id
+#'        , test=TRUE)
+#'  options("fhub")
+#'  sa <- fhCreate( type = "assays"
+#'   , meta= list(
+#'       Title=paste("Test assay", Sys.time())
+#'     , Description="Testing of upload")
+#'     )
+#'  str(sa)
+#'  fhData(sa)$id
+#' }
+fhCreate <- function (type = "assays", meta){
+     myid <- options()$fhub$myid
+     prid <- options()$fhub$prid
+     pid <-  options()$fhub$pid
+     iid <-  options()$fhub$iid
+     sid <-  options()$fhub$sid
+     s <- fhSkeleton( type, meta)
+# Common fileds
+     s$data$attributes$title  <-  getMeta(meta,"Title")
+     s$data$attributes$description  <-  getMeta(meta, "Description")
+     #
+# Type specific fields
+     switch(s$data$type,
+     projects = {
+#       s$data$attributes$members$person_id <- myid
+#       s$data$attributes$members$institution_id <- 69
+       s$data$attributes$default_policy$permissions$resource$id <- myid
+       s$data$relationships$programmes$data$id <- prid
+       s$data$relationships$creators$data$id <- prid
+       
+       s$data$relationships$project_administrators$data$id <- myid
+       s$data$relationships$asset_housekeeper$data$id <- myid
+            }
+     , investigations = {
+        s$data$relationships$projects$data$id <- pid
+        s$data$attributes$policy$permissions$resource$id <- pid
+        s$data$relationships$creators$data$id <- myid
+        s$data$relationships$creators$data$type <- "people"   
+            }
+     , studies = {
+        s$data$relationships$investigation$data$id <-iid
+        s$data$attributes$person_responsible_id <- myid
+        s$data$attributes$policy$permissions$resource$id <- pid
+        s$data$relationships$creators$data$id <- myid
+        s$data$relationships$creators$data$type <- "people"
+            }
+     , assays = {
+        s$data$relationships$study$data$id <-sid
+        s$data$attributes$person_responsible_id <- myid
+        s$data$attributes$policy$permissions$resource$id <- pid
+        s$data$relationships$creators$data$id <- myid
+        s$data$relationships$creators$data$type <- "people"
+            }            
+     )
+     baseurl <- options()$fhub$baseurl
+     uri <- modify_url(baseurl,path=s$data$type)
+     I <- toJSON(s, auto_unbox=TRUE, pretty=TRUE)
+     print(str(s))
+     cat(I, "\n")
+     resp <- POST(uri
+         , authenticate(
+             options()$fhub$usr
+           , options()$fhub$pwd,type = "basic")
+         , body = I
+         , encode="json"
+         , accept("application/json")
+         , content_type_json()
+         )
+     #print(response)
+     parsed <- fhData(resp)
+     if (http_error(resp)) {
+     stop(
+      sprintf(
+        "GitHub API request failed [%s]\n%s\n<%s>",
+        status_code(resp),
+        resp$header$status,
+        "https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.1"
+      ),
+      call. = FALSE
+    )
+  }
+     structure(
+       list(
+         path = parsed$links,
+         url = modify_url(parsed$meta$base_url,path=parsed$links),
+         content = parsed,
+         response = response
+       ),
+       class = "seek_api"
+       )
+     }
+#
+print.seek_api <- function(x, content=FALSE){
+cat("Status:", x$response$headers$status, "\n")
+#if(x$response$status==200)
+{
+pr <- x$content
+cat("Object:", x$url,"\n")
+if(content) str(x$content)
+invisible(x)
+}
+}
 @
+
+\url{https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html}
+
+\url{https://docs.seek4science.org/tech/api/#section/Policy}
+
+The access may be one of (in order of increasing "power"):
+
+    no_access
+    view
+    download
+    edit
+    manage
+
+In addition a Policy may give special access to specific People, People working at an Institution or working on a Project.
 
 <<fhSkeleton>>=
 #' Create *fh* skeleton.
 #'
 #' Creates *fh* object with required structure.
 #'
-#' @param part Components name (e.g. 'people', 'projets', ...).
+#' @param type Component name (e.g. 'people', 'projets', ...).
 #' @param meta Data frame with pISA metadata or
 #' a list with minimal information (Title, Description, *ToDo: add fields*).
 #' @return A list with the minimal information structure.
@@ -251,126 +412,160 @@ fhCreate <- function (part = "assay", meta){
 #' @examples
 #' \donotrun{
 #' require(jsonlite)
-#' sr <- fhSkeleton( part = "assay"
-#'   , meta= list(
-#'     Title="TestAssay"
-#'     , Description="Some description")
-#'     )
-#' str(sr)
+#' meta= list(Title = "Test layer", Description = "Some description")
+#' type = "projects"
+#' sp <- fhSkeleton( type = type
+#'   , meta= meta
+#'   )
+#' str(sp)
+#' type = "investigations"
+#' si <- fhSkeleton( type = type
+#'   , meta= meta 
+#'   )
+#' str(si)
+#' type = "studies"
+#' ss <- fhSkeleton( type = type
+#'   , meta= meta
+#'   )
+#' str(ss)
+#' type = "assays"
+#' sa <- fhSkeleton( type = type
+#'   , meta= meta
+#'   )
+#' str(sa)
 #' }
-fhSkeleton <- function (part = "assay", meta){
-sj <- switch( part
-, project =
+#' }
+fhSkeleton <- function (type = "assay", meta){
+sj <- switch( type
+, projects =
 '{
   "data": {
     "type": "projects",
     "attributes": {
-      "avatar": null,
-      "title": "Post Project Max",
-      "description": "A Taverna project",
-      "web_page": "http://www.taverna.org.uk",
-      "wiki_page": "http://www.mygrid.org.uk",
-      "default_license": "Other (Open)",
+#      "avatar": null,
+      "title": "*",
+      "description": "*",
+      "web_page": "",
+      "wiki_page": "",
+      "default_license": "CC-BY-4.0",
       "default_policy": {
-        "access": "no_access",
+        "access": "download",
         "permissions": [
-          {
-            "resource": {
-              "id": "1273",
-              "type": "people"
-            },
-            "access": "manage"
-          },
-          {
-            "resource": {
-              "id": "1924",
-              "type": "projects"
-            },
-            "access": "download"
-          },
-          {
-            "resource": {
-              "id": "1297",
-              "type": "institutions"
-            },
-            "access": "view"
-          }
+                    {
+                        "resource": {
+                            "id": "*",
+                            "type": "people"
+                        },
+                        "access": "manage"
+                    }
+#          ,{
+#            "resource": {
+#              "id": "*",
+#              "type": "projects"
+#            },
+#            "access": "manage"
+#          }
+#         ,{
+#            "resource": {
+#              "id": "",
+#              "type": "institutions"
+#            },
+#            "access": "view"
+#          }
         ]
       }
+#      , "members": {
+#            "person_id": "*",
+#            "institution_id": "*"
+#      }
     },
     "relationships": {
       "programmes": {
         "data": [
           {
-            "id": "27",
+            "id": "*",
             "type": "programmes"
           }
         ]
-      },
-      "organisms": {
-        "data": [
+      }
+      , "creators": {
+                   "data": [
           {
-            "id": "5",
-            "type": "organisms"
+            "id": "*",
+            "type": "people"
+          }
+        ] 
+      }       
+      , "project_administrators": {
+                   "data": [
+          {
+            "id": "*",
+            "type": "people"
           }
         ]
-      }
+      },
+      "asset_housekeeper": {
+                "data": [
+                    {
+                        "id": "*",
+                        "type": "people"
+                    }
+                ]
+            }
+      
+#     , "organisms": {
+#        "data": [
+#          {
+#            "id": "*",
+#            "type": "organisms"
+#          }
+#        ]
+#      }
     }
   }
 }'
-, investigation =
+, investigations =
 '{
   "data": {
     "type": "investigations",
     "attributes": {
-      "title": "A Maximal Investigation",
+      "title": "*",
       "policy": {
         "access": "download",
         "permissions": [
           {
             "resource": {
-              "id": "809",
-              "type": "projects"
-            },
-            "access": "manage"
-          },
-          {
-            "resource": {
-              "id": "859",
+              "id": "*",
               "type": "projects"
             },
             "access": "manage"
           }
         ]
       },
-      "description": "This is a more complex investigation",
-      "other_creators": "Max Blumenthal, Ed Snowden"
+      "description": "*",
+      "other_creators": ""
     },
     "relationships": {
       "projects": {
         "data": [
           {
-            "id": "809",
-            "type": "projects"
-          },
-          {
-            "id": "859",
+            "id": "*",
             "type": "projects"
           }
         ]
       },
-      "publications": {
-        "data": [
-          {
-            "id": "23",
-            "type": "publications"
-          }
-        ]
-      },
+#      "publications": {
+#        "data": [
+#          {
+#            "id": "",
+#            "type": "publications"
+#          }
+#        ]
+#      },
       "creators": {
         "data": [
           {
-            "id": "555",
+            "id": "*",
             "type": "people"
           }
         ]
@@ -378,25 +573,25 @@ sj <- switch( part
     }
   }
 }'
-, study = 
+, studies =
 '{
   "data": {
     "type": "studies",
     "attributes": {
-      "title": "A Maximal Study",
-      "description": "The Study of many things",
-      "experimentalists": "Wet lab people",
-      "person_responsible_id": "1092",
-      "other_creators": "Marie Curie",
+      "title": "*",
+      "description": "*",
+      "experimentalists": "",
+      "person_responsible_id": "*",
+      "other_creators": "",
       "policy": {
         "access": "download",
         "permissions": [
           {
             "resource": {
-              "id": "1672",
+              "id": "*",
               "type": "projects"
             },
-            "access": "view"
+            "access": "manage"
           }
         ]
       }
@@ -404,22 +599,22 @@ sj <- switch( part
     "relationships": {
       "investigation": {
         "data": {
-          "id": "243",
+          "id": "*",
           "type": "investigations"
         }
-      },
-      "publications": {
+      }
+##       , "publications": {
+##         "data": [
+##           {
+##             "id": "",
+##             "type": "publications"
+##           }
+##         ]
+##       }
+      , "creators": {
         "data": [
           {
-            "id": "64",
-            "type": "publications"
-          }
-        ]
-      },
-      "creators": {
-        "data": [
-          {
-            "id": "1092",
+            "id": "*",
             "type": "people"
           }
         ]
@@ -427,29 +622,34 @@ sj <- switch( part
     }
   }
 }'
-, assay = 
+, assays =
 '{
   "data": {
     "type": "assays",
     "attributes": {
-      "title": "A Maximal experimental Assay",
+      "title": "*",
       "assay_class": {
-        "key": "EXP"
+        "title": "*",
+        "key": "*",
+        "description": ""
       },
       "assay_type": {
-        "uri": "http://jermontology.org/ontology/JERMOntology#Transcriptomics"
+        "label": "*",
+        "key": "*",
+        "uri": ""
       },
       "technology_type": {
-        "uri": "http://jermontology.org/ontology/JERMOntology#RNA-Seq"
+        "label": "*",
+        "uri": ""
       },
-      "other_creators": "Anonymous creator",
-      "description": "A Western Blot Assay",
+      "other_creators": "",
+      "description": "*",
       "policy": {
         "access": "download",
         "permissions": [
           {
             "resource": {
-              "id": "442",
+              "id": "*",
               "type": "projects"
             },
             "access": "manage"
@@ -460,62 +660,62 @@ sj <- switch( part
     "relationships": {
       "study": {
         "data": {
-          "id": "66",
+          "id": "*",
           "type": "studies"
         }
-      },
-      "publications": {
+      }
+##       , "publications": {
+##         "data": [
+##           {
+##             "id": "16",
+##             "type": "publications"
+##           }
+##         ]
+##       }
+##       , "organisms": {
+##         "data": [
+##           {
+##             "id": "3",
+##             "type": "organisms"
+##           }
+##         ]
+##       },
+##       "sops": {
+##         "data": [
+##           {
+##             "id": "4",
+##             "type": "sops"
+##           }
+##         ]
+##       },
+##       "models": {
+##         "data": [
+##           {
+##             "id": "5",
+##             "type": "models"
+##           }
+##         ]
+##       },
+##       "data_files": {
+##         "data": [
+##           {
+##             "id": "16",
+##             "type": "data_files"
+##           }
+##         ]
+##       },
+##       "documents": {
+##         "data": [
+##           {
+##             "id": "32",
+##             "type": "documents"
+##           }
+##         ]
+##       }
+      , "creators": {
         "data": [
           {
-            "id": "16",
-            "type": "publications"
-          }
-        ]
-      },
-      "organisms": {
-        "data": [
-          {
-            "id": "3",
-            "type": "organisms"
-          }
-        ]
-      },
-      "sops": {
-        "data": [
-          {
-            "id": "4",
-            "type": "sops"
-          }
-        ]
-      },
-      "models": {
-        "data": [
-          {
-            "id": "5",
-            "type": "models"
-          }
-        ]
-      },
-      "data_files": {
-        "data": [
-          {
-            "id": "16",
-            "type": "data_files"
-          }
-        ]
-      },
-      "documents": {
-        "data": [
-          {
-            "id": "32",
-            "type": "documents"
-          }
-        ]
-      },
-      "creators": {
-        "data": [
-          {
-            "id": "287",
+            "id": "*",
             "type": "people"
           }
         ]
@@ -523,7 +723,7 @@ sj <- switch( part
     }
   }
 }'
-, document =
+, documents =
 '{
   "data": {
     "type": "documents",
@@ -583,7 +783,7 @@ sj <- switch( part
     }
   }
 }'
-, data_file =
+, data_files =
 '{
   "data": {
     "type": "data_files",
@@ -643,13 +843,16 @@ sj <- switch( part
     }
   }
 }'
-, '{"Error":"No such component"}'
+, '{"Error":"No such type"}'
 )
+# keep uncommented lines
+sx <- unlist(strsplit(sj,"\n"))
+sx <- sx[!grepl("^#",sx)]
+sj <- paste(sx,collapse="\n")
+cat(sj,"\n")
 sr <- fromJSON(sj, simplifyVector = TRUE)
 return(sr)
 }
-
-
 
 @
 

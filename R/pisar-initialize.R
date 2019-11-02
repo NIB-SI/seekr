@@ -215,14 +215,33 @@ print.pISAmeta <- function(x, width = max(nchar(x[,1]))*3.5,  ...){
 #' .iroot <- getRoot("I")
 #' .imeta <- readMeta(.iroot)
 #' getMeta(.imeta, "Description")
+#' # list
+#' listmeta <- list(Title = "My title"
+#'    , Description = "A longer description")
+#' getMeta( listmeta, "Title")
+#' getMeta( listmeta, "Description")
 #' setwd(oldwd)
 #' }
-getMeta <- function(x,item,nl=TRUE){
+#' @rdname getMeta
+#' @export getMeta
+getMeta <- function (x, ...) {
+   UseMethod("getMeta", x)
+ }
+#' @rdname getMeta
+#' @export getMeta.default
+getMeta.default <- function(x,item,nl=TRUE){
 item <- paste0(gsub(":","",item),":")
 ret <- unclass(x[match(item, x[,1]), 2])
 if(is.character(ret)&&nl) ret <- sub("\\\\n","\n",ret)
 return(ret)
 }
+#' @rdname getMeta
+#' @export getMeta.list
+getMeta.list <- function(x,...){
+   nm <- paste0(gsub(":","",names(x)),":")
+   x <- data.frame(Key=nm,Value=unlist(x), stringsAsFactors=FALSE)
+   getMeta(x, ...)
+   }
 
 
 

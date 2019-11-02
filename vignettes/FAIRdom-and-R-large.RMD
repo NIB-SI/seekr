@@ -25,6 +25,8 @@ The API description with examples is available [here](https://app.swaggerhub.com
 
 It is also available in my Postman.
 
+ANother useful resource is [JSON API to FAIRDOM SEEK](https://docs.seek4science.org/tech/api/)
+
 My final goal is to enable upload/download from pISA-tree to FAIRDOMHub. This feature will be a part of the R package `pISAR` that will enable use of pISA structure and metafile information for reproducible statistical analyses.
 
 SEEK testing site is [here](https://testing.sysmo-db.org)

@@ -116,7 +116,7 @@ fhGET <- function(what, id,
 #' id
 #' }
 fhData <- function(r, part, ...){
-  jsn <- "application/json"                
+  jsn <- "application/json"
   if(missing(part)) invisible(content(r,"parsed",type=jsn)$data) else
   invisible(content(r,"parsed",type=jsn)$data[[part]])
 }
@@ -189,4 +189,476 @@ fhFindTitle <- function(part, id){
      # Set FAIRDOMhub user title
      return(c(id=id, type=part, title=d$title))
      }
+
+
+## ----fhCreate------------------------------------------------------------
+#' Create pISA layer or *fh* component.
+#'
+#' @param type Component name (e.g. 'people', 'projets', ...).
+#' @param meta Data frame with pISA metadata or
+#' a list with minimal information (Title, Description, *ToDo: add fields*).
+#' @return FAIRDOMhub created component.
+#' @note Upon success (status code 200) details
+#' of newly created component can be used. Check status code.
+#' @export
+#' @keywords pisa
+#' @seealso \code{\link{fhGET}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \donotrun{
+#' si <- fhCreate( type = "investigations"
+#'   , meta= list(
+#'       Title="Test Investigation"
+#'     , Description="Some description")
+#'     )
+#'  str(si)
+#'  sp <- fhCreate( type = "projects"
+#'   , meta= list(
+#'       Title="Test Project"
+#'     , Description="Some description")
+#'     )
+#'  str(sp)
+#' }
+fhCreate <- function (type = "assays", meta){
+     s <- fhSkeleton( type, meta)
+     s$data$attributes$title  <-  getMeta(meta,"Title")
+     s$data$attributes$description  <-  getMeta(meta, "Description")
+     s$data$relationships$creators$data$id <- myid
+     #
+     switch(s$data$type,
+     investigations = {
+             s$data$relationships$projects$data$id <- pid
+             s$data$attributes$policy$permissions$resource$id <- pid
+             }
+     , projects = {
+             s$data$relationships$programmes$data$id <- 26
+             s$data$attributes$policy$permissions$resource$id <- pid
+             }
+     )
+     uri <- modify_url(baseurl,path=s$data$type)
+     I <- toJSON(s, auto_unbox=TRUE)
+     print(str(s))
+     print(I)
+     response <- POST(uri
+         , authenticate("ablejec","testni.1234",type = "basic")
+         , body = I
+         , encode="json"
+         , accept("application/json")
+         , content_type_json()
+         )
+     print(response$status)
+     #res <- fromJSON(content(response, as = "text"))
+     return(response)
+     }
+
+
+## ----fhSkeleton----------------------------------------------------------
+#' Create *fh* skeleton.
+#'
+#' Creates *fh* object with required structure.
+#'
+#' @param type Component name (e.g. 'people', 'projets', ...).
+#' @param meta Data frame with pISA metadata or
+#' a list with minimal information (Title, Description, *ToDo: add fields*).
+#' @return A list with the minimal information structure.
+#' @export
+#' @keywords pisa
+#' @seealso \code{\link{fhCreate}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \donotrun{
+#' require(jsonlite)
+#' type = "investigations"
+#' meta= list(Title = "TestAssay", Description = "Some description")
+#' sr <- fhSkeleton( type = type
+#'   , meta= meta 
+#'   )
+#' str(sr)
+#' }
+fhSkeleton <- function (type = "assay", meta){
+sj <- switch( type
+, projects =
+'{
+  "data": {
+    "type": "projects",
+    "attributes": {
+      "avatar": null,
+      "title": "*",
+      "description": "*",
+      "web_page": "",
+      "wiki_page": "",
+      "default_license": "GPLv3",
+      "default_policy": {
+        "access": "view",
+        "permissions": [
+          {
+            "resource": {
+              "id": "*",
+              "type": "people"
+            },
+            "access": "manage"
+          },
+          {
+            "resource": {
+              "id": "*",
+              "type": "projects"
+            },
+            "access": "edit"
+          },
+          {
+            "resource": {
+              "id": "",
+              "type": "institutions"
+            },
+            "access": "view"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "programmes": {
+        "data": [
+          {
+            "id": "*",
+            "type": "programmes"
+          }
+        ]
+      },
+      "organisms": {
+        "data": [
+          {
+            "id": "*",
+            "type": "organisms"
+          }
+        ]
+      }
+    }
+  }
+}'
+, investigations =
+'{
+  "data": {
+    "type": "investigations",
+    "attributes": {
+      "title": "*",
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "*",
+              "type": "projects"
+            },
+            "access": "manage"
+          }
+        ]
+      },
+      "description": "*",
+      "other_creators": ""
+    },
+    "relationships": {
+      "projects": {
+        "data": [
+          {
+            "id": "*",
+            "type": "projects"
+          }
+        ]
+      },
+#      "publications": {
+#        "data": [
+#          {
+#            "id": "",
+#            "type": "publications"
+#          }
+#        ]
+#      },
+      "creators": {
+        "data": [
+          {
+            "id": "*",
+            "type": "people"
+          }
+        ]
+      }
+    }
+  }
+}'
+, studies =
+'{
+  "data": {
+    "type": "studies",
+    "attributes": {
+      "title": "*",
+      "description": "*",
+      "experimentalists": "",
+      "person_responsible_id": "*",
+      "other_creators": "",
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "*",
+              "type": "projects"
+            },
+            "access": "view"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "investigation": {
+        "data": {
+          "id": "*",
+          "type": "investigations"
+        }
+      },
+      "publications": {
+        "data": [
+          {
+            "id": "",
+            "type": "publications"
+          }
+        ]
+      },
+      "creators": {
+        "data": [
+          {
+            "id": "*",
+            "type": "people"
+          }
+        ]
+      }
+    }
+  }
+}'
+, assays =
+'{
+  "data": {
+    "type": "assays",
+    "attributes": {
+      "title": "A Maximal experimental Assay",
+      "assay_class": {
+        "key": "EXP"
+      },
+      "assay_type": {
+        "uri": "http://jermontology.org/ontology/JERMOntology#Transcriptomics"
+      },
+      "technology_type": {
+        "uri": "http://jermontology.org/ontology/JERMOntology#RNA-Seq"
+      },
+      "other_creators": "Anonymous creator",
+      "description": "A Western Blot Assay",
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "442",
+              "type": "projects"
+            },
+            "access": "manage"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "study": {
+        "data": {
+          "id": "66",
+          "type": "studies"
+        }
+      },
+      "publications": {
+        "data": [
+          {
+            "id": "16",
+            "type": "publications"
+          }
+        ]
+      },
+      "organisms": {
+        "data": [
+          {
+            "id": "3",
+            "type": "organisms"
+          }
+        ]
+      },
+      "sops": {
+        "data": [
+          {
+            "id": "4",
+            "type": "sops"
+          }
+        ]
+      },
+      "models": {
+        "data": [
+          {
+            "id": "5",
+            "type": "models"
+          }
+        ]
+      },
+      "data_files": {
+        "data": [
+          {
+            "id": "16",
+            "type": "data_files"
+          }
+        ]
+      },
+      "documents": {
+        "data": [
+          {
+            "id": "32",
+            "type": "documents"
+          }
+        ]
+      },
+      "creators": {
+        "data": [
+          {
+            "id": "287",
+            "type": "people"
+          }
+        ]
+      }
+    }
+  }
+}'
+, documents =
+'{
+  "data": {
+    "type": "documents",
+    "attributes": {
+      "title": "A Maximal Document",
+      "description": "This is the description",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "license": "CC-BY-4.0",
+      "other_creators": "John Smith, Jane Smith",
+      "content_blobs": [
+        {
+          "original_filename": "a_pdf_file.pdf",
+          "content_type": "application/pdf"
+        }
+      ],
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "359",
+              "type": "projects"
+            },
+            "access": "edit"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "creators": {
+        "data": [
+          {
+            "id": "234",
+            "type": "people"
+          }
+        ]
+      },
+      "projects": {
+        "data": [
+          {
+            "id": "359",
+            "type": "projects"
+          }
+        ]
+      },
+      "assays": {
+        "data": [
+          {
+            "id": "38",
+            "type": "assays"
+          }
+        ]
+      }
+    }
+  }
+}'
+, data_files =
+'{
+  "data": {
+    "type": "data_files",
+    "attributes": {
+      "title": "A Maximal Data File",
+      "description": "This is the description",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "license": "CC-BY-4.0",
+      "other_creators": "John Smith, Jane Smith",
+      "content_blobs": [
+        {
+          "original_filename": "a_pdf_file.pdf",
+          "content_type": "application/pdf"
+        }
+      ],
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "359",
+              "type": "projects"
+            },
+            "access": "edit"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "creators": {
+        "data": [
+          {
+            "id": "234",
+            "type": "people"
+          }
+        ]
+      },
+      "projects": {
+        "data": [
+          {
+            "id": "359",
+            "type": "projects"
+          }
+        ]
+      },
+      "assays": {
+        "data": [
+          {
+            "id": "38",
+            "type": "assays"
+          }
+        ]
+      }
+    }
+  }
+}'
+, '{"Error":"No such component"}'
+)
+# keep uncommented lines
+sx <- unlist(strsplit(sj,"\n"))
+sx <- sx[!grepl("^#",sx)]
+sj <- paste(sx,collapse="\n")
+sr <- fromJSON(sj, simplifyVector = TRUE)
+return(sr)
+}
+
+
+
 
