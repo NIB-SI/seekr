@@ -79,16 +79,109 @@ invisible(tmp)
 }
 @
 
+<<fhParse>>=
+#' Parse the response from SEEK API
+#'
+#' @param resp Response from SEEK API.
+#' @return An object (list) of class \code{seek_api}.
+#' @export
+#' @seealso \code{\link{fhGget ...}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \donotrun{
+#' fhIni()
+#' options()$fhub$myid
+#' r <- fhGet("people",options()$fhub$myid)
+#' names(r)
+#' r$response$status_code
+#' status_code(r$response)
+#' names(r$content)
+#' r
+#' r <- fhGet("people")
+#' length(r$content)
+#' names(r$content)
+#' r$content[[1]]
+#' r
+#' }
+fhParse <- function(resp, ...){
+    jsn <- "application/json"
+    parsed <- invisible(content(resp,"parsed",type=jsn)$data)
+     if (http_error(resp)) {
+     stop(
+      sprintf(
+        "GitHub API request failed [%s]\n%s\n<%s>",
+        status_code(resp),
+        resp$header$status,
+        "https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.1"
+      ),
+      call. = FALSE
+    )
+  }
+  if(length(parsed$meta$base_url)!=1) url <- "" else
+  url <- modify_url(parsed$meta$base_url,path=parsed$links)
+  ret <-    structure(
+       list(
+         path = parsed$links,
+         url = url,
+         content = parsed,
+         response = response
+       ),
+       class = "seek_api"
+       )
+  return(ret)
+}
+@
+
+<<print.seek_api>>=
+#' Print method for seek_api object
+#'
+#' @param x Object of class \code{seek_api}.
+#' @param content If FALSE (default), content is no printed.
+#' @return An object (list) of class \code{seek_api}.
+#' @export
+#' @seealso \code{\link{fhParse ...}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \donotrun{
+#' fhIni()
+#' options()$fhub$myid
+#' r <- fhGet("people",options()$fhub$myid)
+#' # Print contents
+#' print( r, TRUE)
+#' # Short version, default
+#' r
+#' r$response$status_code
+#' status_code(r$response)
+#' }
+#'
+print.seek_api <- function(x, content=FALSE){
+cat("Status:", x$response$headers$status, "\n")
+#if(x$response$status==200)
+{
+pr <- x$content
+cat("Object:", x$url,"\n")
+cat("Path  :", x$path$self,"\n")
+cat("Title :", x$content$attributes$title, "\n")
+if(content) {
+cat(rep("-",20),"\n\n")
+ str(x$content)
+ }
+invisible(x)
+}
+}
+@
+
+
 
 
 <<fhGet>>=
 #' Get inormation from repository.
 #'
-#' @param what Type of information (e.g. "person").
+#' @param type Type of information (e.g. "person").
 #' @param id Repository id of an item.
 #' @param uri Repository base address (URI)..
-#' @return File name (string).
-#' @export
+#' @return An object (list) of class \code{seek_api}.
+#' @export 
 #' @note Parameter ... is ignored at this time.
 #' @keywords file
 #' @seealso \code{\link{get ...}}
@@ -97,26 +190,31 @@ invisible(tmp)
 #' \donotrun{
 #' fhIni()
 #' options()$fhub$myid
-#' r <- fhGET("people",options()$fhub$myid)
+#' r <- fhGet("people",options()$fhub$myid)
 #' names(r)
-#' r$status_code
+#' r$response$status_code
+#' status_code(r$response)
+#' r
 #' }
-fhGet <- function(what, id,
+fhGet <- function(type, id,
                    uri=options()$fhub$baseurl, ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
-  if(!missing(what)) uri <- paste0(uri,"/",what)
+  if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
-  r <- GET(uri,
+  resp <- GET(uri,
          add_headers(Accept="application/json"))
   # cat("Status code:",r$status_code,"\n")
-  invisible(r)
+  parsed <- fhParse(resp)
+  return(parsed)
 }
+#
+
 @
 
 <<fhData>>=
 #' Get content from an *fh* object.
 #'
-#' @param r Object retrieved by fhGET.
+#' @param r Object retrieved by fhGet.
 #' @param type Name of the required element. If missing, a list with
 #'     all relevant objects is returned.
 #' @return File name (string).
@@ -129,13 +227,13 @@ fhGet <- function(what, id,
 #' \donotrun{
 #' fhIni()
 #' options()$fhub$myid
-#' r <- fhGET("people",options()$fhub$myid)
+#' r <- fhGet("people",options()$fhub$myid)
 #' d <- fhData(r)
 #' names(d)
 #' d$last_name
 #' fhData(r)$tools
 #' # Get list of people
-#' r <- fhGET("people")
+#' r <- fhGet("people")
 #' d <- fhData(r)
 #' length(d)
 #' names(d)
@@ -149,11 +247,11 @@ fhGet <- function(what, id,
 #' id <- d[[pmatch(myname,titles)]]$id
 #' id
 #' }
-fhData <- function(r, type, ...){
+fhData <- function(r, node, ...){
   if(class(r)=="seek_api") r <- r$response
   jsn <- "application/json"
-  if(missing(type)) invisible(content(r,"parsed",type=jsn)$data) else
-  invisible(content(r,"parsed",type=jsn)$data[[type]])
+  if(missing(node)) invisible(content(r,"parsed",type=jsn)$data) else
+  invisible(content(r,"parsed",type=jsn)$data[[node]])
 }
 fhDatas <- fhData
 @
@@ -182,7 +280,7 @@ fhDatas <- fhData
 #' head(projects)
 #' }
 fhFindId <- function(type, title){
-     r <- fhGET(type)
+     r <- fhGet(type)
      d <- fhData(r)
      titles <- t(sapply(d,function(x) c(id=x$id, type=x$type, title=x$attributes$title)))
      # Get FAIRDOMhub user id
@@ -219,7 +317,7 @@ fhFindId <- function(type, title){
 #' }
 fhFindTitle <- function(type, id){
      id <- as.vector(id[1])
-     r <- fhGET(type, id )
+     r <- fhGet(type, id )
      d <- fhData(r, "attributes")
      # Set FAIRDOMhub user title
      return(c(id=id, type=type, title=d$title))
@@ -237,7 +335,7 @@ fhFindTitle <- function(type, id){
 #' of newly created component can be used. Check status code.
 #' @export
 #' @keywords pisa
-#' @seealso \code{\link{fhGET}}
+#' @seealso \code{\link{fhGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
@@ -263,15 +361,16 @@ fhFindTitle <- function(type, id){
 #'     )
 #'  str(si)
 #' }
-#'
-#'  fhIni(prid = 26, pid=104, iid=fhData(si)$id, test=TRUE)
+#'  iid=fhData(si)$id
+#'  iid <- 115
+#'  fhIni(prid = 26, pid=104, iid=iid, test=TRUE)
 #'  options("fhub")
 #'  ss <- fhCreate( type = "studies"
 #'   , meta= list(
 #'       Title=paste("Test study", Sys.time())
 #'     , Description="Testing of upload")
 #'     )
-#'  str(ss)
+#'  ss
 #'  fhData(ss)$id
 #'
 #'  fhIni(prid = 26
@@ -346,40 +445,8 @@ fhCreate <- function (type = "assays", meta){
          , accept("application/json")
          , content_type_json()
          )
-     #print(response)
-     parsed <- fhData(resp)
-     if (http_error(resp)) {
-     stop(
-      sprintf(
-        "GitHub API request failed [%s]\n%s\n<%s>",
-        status_code(resp),
-        resp$header$status,
-        "https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.1"
-      ),
-      call. = FALSE
-    )
-  }
-     structure(
-       list(
-         path = parsed$links,
-         url = modify_url(parsed$meta$base_url,path=parsed$links),
-         content = parsed,
-         response = response
-       ),
-       class = "seek_api"
-       )
+     fhParse(resp)
      }
-#
-print.seek_api <- function(x, content=FALSE){
-cat("Status:", x$response$headers$status, "\n")
-#if(x$response$status==200)
-{
-pr <- x$content
-cat("Object:", x$url,"\n")
-if(content) str(x$content)
-invisible(x)
-}
-}
 @
 
 \url{https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html}
