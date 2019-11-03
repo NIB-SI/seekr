@@ -109,7 +109,7 @@ fhParse <- function(resp, ...){
      if (http_error(resp)) {
      stop(
       sprintf(
-        "GitHub API request failed [%s]\n%s\n<%s>",
+        "SEEK API request failed [%s]\n%s\n<%s>",
         status_code(resp),
         resp$header$status,
         "https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.1"
@@ -228,7 +228,7 @@ fhGet <- function(type, id,
 #' fhIni()
 #' options()$fhub$myid
 #' r <- fhGet("people",options()$fhub$myid)
-#' d <- fhData(r)
+#' d <- fhData(r,"attributes")
 #' names(d)
 #' d$last_name
 #' fhData(r)$tools
@@ -252,6 +252,12 @@ fhData <- function(r, node, ...){
   jsn <- "application/json"
   if(missing(node)) invisible(content(r,"parsed",type=jsn)$data) else
   invisible(content(r,"parsed",type=jsn)$data[[node]])
+}
+fhData <- function(r, node, ...){
+  if(class(r)=="seek_api") r <- r$content
+  jsn <- "application/json"
+  if(missing(node)) invisible(r) else
+  invisible(r[[node]])
 }
 fhDatas <- fhData
 @
@@ -324,144 +330,6 @@ fhFindTitle <- function(type, id){
      }
 @
 
-<<fhCreate>>=
-#' Create pISA layer or *fh* component.
-#'
-#' @param type Component name (e.g. 'people', 'projets', ...).
-#' @param meta Data frame with pISA metadata or
-#' a list with minimal information (Title, Description, *ToDo: add fields*).
-#' @return FAIRDOMhub created component.
-#' @note Upon success (status code 200) details
-#' of newly created component can be used. Check status code.
-#' @export
-#' @keywords pisa
-#' @seealso \code{\link{fhGet}}
-#' @author Andrej Blejec \email{andrej.blejec@nib.si}
-#' @examples
-#' \donotrun{
-#' if(FALSE)
-#' {
-#' fhIni(prid = 26, test=TRUE)
-#' options("fhub")
-#'  sp <- fhCreate( type = "projects"
-#'   , meta= list(
-#'       Title=paste("Test project", Sys.time())
-#'     , Description="Testing of upload")
-#'     )
-#'  str(sp)
-#'  str(fhData(sp))
-#' # Add member manually
-#
-#'  fhIni(prid = 26, pid=104, test=TRUE)
-#'  options("fhub")
-#'  si <- fhCreate( type = "investigations"
-#'   , meta= list(
-#'       Title=paste("Test investigation", Sys.time())
-#'     , Description="Testing of upload")
-#'     )
-#'  str(si)
-#' }
-#'  iid=fhData(si)$id
-#'  iid <- 115
-#'  fhIni(prid = 26, pid=104, iid=iid, test=TRUE)
-#'  options("fhub")
-#'  ss <- fhCreate( type = "studies"
-#'   , meta= list(
-#'       Title=paste("Test study", Sys.time())
-#'     , Description="Testing of upload")
-#'     )
-#'  ss
-#'  fhData(ss)$id
-#'
-#'  fhIni(prid = 26
-#'        , pid=104
-#'        , iid=fhData(si)$id
-#'        , sid=fhData(ss)$id
-#'        , test=TRUE)
-#'  options("fhub")
-#'  sa <- fhCreate( type = "assays"
-#'   , meta= list(
-#'       Title=paste("Test assay", Sys.time())
-#'     , Description="Testing of upload")
-#'     )
-#'  str(sa)
-#'  fhData(sa)$id
-#' }
-fhCreate <- function (type = "assays", meta){
-     myid <- options()$fhub$myid
-     prid <- options()$fhub$prid
-     pid <-  options()$fhub$pid
-     iid <-  options()$fhub$iid
-     sid <-  options()$fhub$sid
-     s <- fhSkeleton( type, meta)
-# Common fileds
-     s$data$attributes$title  <-  getMeta(meta,"Title")
-     s$data$attributes$description  <-  getMeta(meta, "Description")
-     #
-# Type specific fields
-     switch(s$data$type,
-     projects = {
-#       s$data$attributes$members$person_id <- myid
-#       s$data$attributes$members$institution_id <- 69
-       s$data$attributes$default_policy$permissions$resource$id <- myid
-       s$data$relationships$programmes$data$id <- prid
-       s$data$relationships$creators$data$id <- prid
-       
-       s$data$relationships$project_administrators$data$id <- myid
-       s$data$relationships$asset_housekeeper$data$id <- myid
-            }
-     , investigations = {
-        s$data$relationships$projects$data$id <- pid
-        s$data$attributes$policy$permissions$resource$id <- pid
-        s$data$relationships$creators$data$id <- myid
-        s$data$relationships$creators$data$type <- "people"   
-            }
-     , studies = {
-        s$data$relationships$investigation$data$id <-iid
-        s$data$attributes$person_responsible_id <- myid
-        s$data$attributes$policy$permissions$resource$id <- pid
-        s$data$relationships$creators$data$id <- myid
-        s$data$relationships$creators$data$type <- "people"
-            }
-     , assays = {
-        s$data$relationships$study$data$id <-sid
-        s$data$attributes$person_responsible_id <- myid
-        s$data$attributes$policy$permissions$resource$id <- pid
-        s$data$relationships$creators$data$id <- myid
-        s$data$relationships$creators$data$type <- "people"
-            }            
-     )
-     baseurl <- options()$fhub$baseurl
-     uri <- modify_url(baseurl,path=s$data$type)
-     I <- toJSON(s, auto_unbox=TRUE, pretty=TRUE)
-     print(str(s))
-     cat(I, "\n")
-     resp <- POST(uri
-         , authenticate(
-             options()$fhub$usr
-           , options()$fhub$pwd,type = "basic")
-         , body = I
-         , encode="json"
-         , accept("application/json")
-         , content_type_json()
-         )
-     fhParse(resp)
-     }
-@
-
-\url{https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html}
-
-\url{https://docs.seek4science.org/tech/api/#section/Policy}
-
-The access may be one of (in order of increasing "power"):
-
-    no_access
-    view
-    download
-    edit
-    manage
-
-In addition a Policy may give special access to specific People, People working at an Institution or working on a Project.
 
 <<fhSkeleton>>=
 #' Create *fh* skeleton.
@@ -696,20 +564,20 @@ sj <- switch( type
     "attributes": {
       "title": "*",
       "assay_class": {
-        "title": "*",
-        "key": "*",
+        "title": "",
+        "key": "EXP",
         "description": ""
       },
       "assay_type": {
-        "label": "*",
-        "key": "*",
-        "uri": ""
-      },
-      "technology_type": {
-        "label": "*",
-        "uri": ""
-      },
-      "other_creators": "",
+        "label": "",
+        "key": ""
+##      , "uri": ""
+      }
+##      , "technology_type": {
+##        "label": "*",
+##        "uri": ""
+##      }
+      , "other_creators": "",
       "description": "*",
       "policy": {
         "access": "download",
@@ -916,10 +784,155 @@ sj <- switch( type
 sx <- unlist(strsplit(sj,"\n"))
 sx <- sx[!grepl("^#",sx)]
 sj <- paste(sx,collapse="\n")
-cat(sj,"\n")
 sr <- fromJSON(sj, simplifyVector = TRUE)
 return(sr)
 }
 
 @
+
+<<fhCreate>>=
+#' Create pISA layer or *fh* component.
+#'
+#' @param type Component name (e.g. 'people', 'projets', ...).
+#' @param meta Data frame with pISA metadata or
+#' a list with minimal information (Title, Description, *ToDo: add fields*).
+#' @return FAIRDOMhub created component.
+#' @note Upon success (status code 200) details
+#' of newly created component can be used. Check status code.
+#' @export
+#' @keywords pisa
+#' @seealso \code{\link{fhGet}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \donotrun{
+#' if(FALSE)
+#' {
+#' fhIni(prid = 26, test=TRUE)
+#' options("fhub")
+#'  sp <- fhCreate( type = "projects"
+#'   , meta= list(
+#'       Title=paste("Test project", Sys.time())
+#'     , Description="Testing of upload")
+#'     )
+#'  str(sp)
+#'  str(fhData(sp))
+#' # Add member manually
+#
+#'  fhIni(prid = 26, pid=104, test=TRUE)
+#'  options("fhub")
+#'  si <- fhCreate( type = "investigations"
+#'   , meta= list(
+#'       Title=paste("Test investigation", Sys.time())
+#'     , Description="Testing of upload")
+#'     )
+#'  si
+#'  fhData(si)$id
+#' }
+#'  iid=fhData(si)$id
+#'  iid <- 115
+#'  fhIni(prid = 26, pid=104, iid=iid, test=TRUE)
+#'  options("fhub")
+#'  ss <- fhCreate( type = "studies"
+#'   , meta= list(
+#'       Title=paste("Test study", Sys.time())
+#'     , Description="Testing of upload")
+#'     )
+#'  ss
+#'  fhData(ss)$id
+#'
+#'  fhIni(prid = 26
+#'        , pid=104
+#'        , iid=fhData(si)$id
+#'        , sid=fhData(ss)$id
+#'        , test=TRUE)
+#'  options("fhub")
+#'  sa <- fhCreate( type = "assays"
+#'   , meta= list(
+#'       Title=paste("Test assay", Sys.time())
+#'     , Description="Testing of upload")
+#'     )
+#'  #str(sa)
+#'  sa
+#'  fhData(sa)$id
+#' }
+fhCreate <- function (type = "assays", meta){
+     myid <- options()$fhub$myid
+     prid <- options()$fhub$prid
+     pid <-  options()$fhub$pid
+     iid <-  options()$fhub$iid
+     sid <-  options()$fhub$sid
+     s <- fhSkeleton( type, meta)
+# Common fileds
+     s$data$attributes$title  <-  getMeta(meta,"Title")
+     s$data$attributes$description  <-  getMeta(meta, "Description")
+     #
+# Type specific fields
+     switch(s$data$type,
+     projects = {
+#       s$data$attributes$members$person_id <- myid
+#       s$data$attributes$members$institution_id <- 69
+       s$data$attributes$default_policy$permissions$resource$id <- myid
+       s$data$relationships$programmes$data$id <- prid
+       s$data$relationships$creators$data$id <- prid
+
+       s$data$relationships$project_administrators$data$id <- myid
+       s$data$relationships$asset_housekeeper$data$id <- myid
+            }
+     , investigations = {
+        s$data$relationships$projects$data$id <- pid
+        s$data$attributes$policy$permissions$resource$id <- pid
+        s$data$relationships$creators$data$id <- myid
+        s$data$relationships$creators$data$type <- "people"
+            }
+     , studies = {
+        s$data$relationships$investigation$data$id <-iid
+        s$data$attributes$person_responsible_id <- myid
+        s$data$attributes$policy$permissions$resource$id <- pid
+        s$data$relationships$creators$data$id <- myid
+        s$data$relationships$creators$data$type <- "people"
+            }
+     , assays = {
+        s$data$relationships$study$data$id <-sid
+        s$data$attributes$person_responsible_id <- myid
+        s$data$attributes$policy$permissions$resource$id <- pid
+        s$data$relationships$creators$data$id <- myid
+        s$data$relationships$creators$data$type <- "people"
+        s$data$attributes$assay_class$title <- ""
+        s$data$attributes$assay_class$key <- "EXP"
+#        s$data$attributes$assay_class$key <- "MODEL"        
+        s$data$attributes$assay_class$description <- ""
+        s$data$attributes$assay_type$label <- ""
+        s$data$attributes$assay_type$key <- ""
+            }
+     )
+     baseurl <- options()$fhub$baseurl
+     uri <- modify_url(baseurl,path=s$data$type)
+     I <- toJSON(s, auto_unbox=TRUE, pretty=TRUE)
+     cat(I, "\n")
+     resp <- POST(uri
+         , authenticate(
+             options()$fhub$usr
+           , options()$fhub$pwd,type = "basic")
+         , body = I
+         , encode="json"
+         , accept("application/json")
+         , content_type_json()
+         )
+     fhParse(resp)
+     }
+@
+
+\url{https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html}
+
+\url{https://docs.seek4science.org/tech/api/#section/Policy}
+
+The access may be one of (in order of increasing "power"):
+
+    no_access
+    view
+    download
+    edit
+    manage
+
+In addition a Policy may give special access to specific People, People working at an Institution or working on a Project.
 
