@@ -4,7 +4,8 @@
 \alias{fhIni}
 \title{Initialize FAIRDOMhub information}
 \usage{
-fhIni(test = TRUE)
+fhIni(prid = NULL, pid = NULL, iid = NULL, sid = NULL,
+  aid = NULL, test = TRUE)
 }
 \arguments{
 \item{test}{If TRUE, test server will be used..}
@@ -20,7 +21,7 @@ Define FAIRDOMhub URL and user data
 fhIni()
 options("fhub")
 #
-fhIni(FALSE)
+fhIni(test=FALSE)
 options("fhub")
 }
 }

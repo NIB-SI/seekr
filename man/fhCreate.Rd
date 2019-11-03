@@ -24,22 +24,58 @@ of newly created component can be used. Check status code.
 }
 \examples{
 \\donotrun{
-si <- fhCreate( type = "investigations"
-  , meta= list(
-      Title="Test Investigation"
-    , Description="Some description")
-    )
- str(si)
+if(FALSE)
+{
+fhIni(prid = 26, test=TRUE)
+options("fhub")
  sp <- fhCreate( type = "projects"
   , meta= list(
-      Title="Test Project"
-    , Description="Some description")
+      Title=paste("Test project", Sys.time())
+    , Description="Testing of upload")
     )
  str(sp)
+ str(fhData(sp))
+# Add member manually
+ fhIni(prid = 26, pid=104, test=TRUE)
+ options("fhub")
+ si <- fhCreate( type = "investigations"
+  , meta= list(
+      Title=paste("Test investigation", Sys.time())
+    , Description="Testing of upload")
+    )
+ si
+ fhData(si)$id
+}
+ iid=fhData(si)$id
+ iid <- 115
+ fhIni(prid = 26, pid=104, iid=iid, test=TRUE)
+ options("fhub")
+ ss <- fhCreate( type = "studies"
+  , meta= list(
+      Title=paste("Test study", Sys.time())
+    , Description="Testing of upload")
+    )
+ ss
+ fhData(ss)$id
+
+ fhIni(prid = 26
+       , pid=104
+       , iid=fhData(si)$id
+       , sid=fhData(ss)$id
+       , test=TRUE)
+ options("fhub")
+ sa <- fhCreate( type = "assays"
+  , meta= list(
+      Title=paste("Test assay", Sys.time())
+    , Description="Testing of upload")
+    )
+ #str(sa)
+ sa
+ fhData(sa)$id
 }
 }
 \seealso{
-\code{\link{fhGET}}
+\code{\link{fhGet}}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

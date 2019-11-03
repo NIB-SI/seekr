@@ -4,13 +4,13 @@
 \alias{fhFindId}
 \title{Get details of component with id from an *fh* object.}
 \usage{
-fhFindId(part, title)
+fhFindId(type, title)
 }
 \arguments{
-\item{part}{Components name (e.g. 'people', 'projets', ...).}
+\item{type}{Components name (e.g. 'people', 'projets', ...).}
 
 \item{title}{Character string with the identifier
-of the component (Title part).}
+of the component (title part).}
 }
 \value{
 FAIRDOMhub component identifier: id, type and title.

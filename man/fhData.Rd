@@ -4,12 +4,12 @@
 \alias{fhData}
 \title{Get content from an *fh* object.}
 \usage{
-fhData(r, part, ...)
+fhData(r, node, ...)
 }
 \arguments{
-\item{r}{Object retrieved by fhGET.}
+\item{r}{Object retrieved by fhGet.}
 
-\item{part}{Name of the required element. If missing, a list with
+\item{type}{Name of the required element. If missing, a list with
 all relevant objects is returned.}
 }
 \value{
@@ -25,13 +25,13 @@ Parameter ... is ignored at this time.
 \\donotrun{
 fhIni()
 options()$fhub$myid
-r <- fhGET("people",options()$fhub$myid)
-d <- fhData(r)
+r <- fhGet("people",options()$fhub$myid)
+d <- fhData(r,"attributes")
 names(d)
 d$last_name
 fhData(r)$tools
 # Get list of people
-r <- fhGET("people")
+r <- fhGet("people")
 d <- fhData(r)
 length(d)
 names(d)

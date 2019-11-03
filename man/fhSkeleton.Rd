@@ -18,17 +18,6 @@ A list with the minimal information structure.
 \description{
 Creates *fh* object with required structure.
 }
-\examples{
-\\donotrun{
-require(jsonlite)
-type = "investigations"
-meta= list(Title = "TestAssay", Description = "Some description")
-sr <- fhSkeleton( type = type
-  , meta= meta 
-  )
-str(sr)
-}
-}
 \seealso{
 \code{\link{fhCreate}}
 }

@@ -4,10 +4,10 @@
 \alias{fhFindTitle}
 \title{Get details of component with id from an *fh* object.}
 \usage{
-fhFindTitle(part, id)
+fhFindTitle(type, id)
 }
 \arguments{
-\item{part}{Components name (e.g. 'people', 'projets', ...).}
+\item{type}{Components name (e.g. 'people', 'projets', ...).}
 
 \item{id}{Character string with the identifier
 of the component (id part).}
