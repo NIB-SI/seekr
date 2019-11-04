@@ -983,3 +983,7 @@ if(interactive()) shell.exec(item_link)
 
 [Best practices for API packages](https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html)
 
+```{r}
+GET()
+```
+

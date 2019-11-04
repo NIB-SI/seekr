@@ -24,6 +24,8 @@ of newly created component can be used. Check status code.
 }
 \examples{
 \\donotrun{
+fhLog("Start testing log", append=FALSE)
+fhTime()
 if(FALSE)
 {
 fhIni(prid = 26, test=TRUE)

@@ -248,6 +248,8 @@ getMeta.list <- function(x,...){
 
 
 
+
+
 ## ----getLayer------------------------------------------------------------
 #' Get pISA layer name
 #'
@@ -356,6 +358,10 @@ out.path <- function(out.dir="../out", args="", which=1:length(args)) {
 #' str(pisa)
 #' names(pisa)
 #' dir(pisa$p$root)
+#' # Set pisa options
+#' options(pisa=pisa(global=FALSE))
+#' # Access details with $ 
+#' options()$pisa$p$root
 #' setwd(oldwd)
 #' }
 pisa <- function(path=getwd(), addArgs=NULL, global=TRUE){

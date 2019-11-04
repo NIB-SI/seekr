@@ -18,7 +18,7 @@ library(httr)
 #'
 #' @param test If TRUE, test server will be used..
 #' @return A list with URL and user information. For side effect see Notes.
-#' @notes The returned list is added to the 
+#' @notes The returned list is added to the
 #'      \code{options()} list under name 'fhub'.
 #' @export
 #' @keywords file
@@ -108,7 +108,7 @@ fhParse <- function(resp, ...){
          path = parsed$links,
          url = url,
          content = parsed,
-         response = response
+         response = resp
        ),
        class = "seek_api"
        )
@@ -162,7 +162,7 @@ invisible(x)
 #' @param id Repository id of an item.
 #' @param uri Repository base address (URI)..
 #' @return An object (list) of class \code{seek_api}.
-#' @export 
+#' @export
 #' @note Parameter ... is ignored at this time.
 #' @keywords file
 #' @seealso \code{\link{get ...}}
@@ -182,10 +182,15 @@ fhGet <- function(type, id,
 #                  uri="https://www.fairdomhub.org", ... ){
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
+  ua <- user_agent("https://github.com/ablejec/pisar")
+  t0 <- fhLog("fhGet - ")
   resp <- GET(uri,
-         add_headers(Accept="application/json"))
+         add_headers(Accept="application/json")
+         , ua
+         )
   # cat("Status code:",r$status_code,"\n")
   parsed <- fhParse(resp)
+         fhTime( resp$headers$status, parsed$url)
   return(parsed)
 }
 #
@@ -335,7 +340,7 @@ fhFindTitle <- function(type, id){
 #' str(sp)
 #' type = "investigations"
 #' si <- fhSkeleton( type = type
-#'   , meta= meta 
+#'   , meta= meta
 #'   )
 #' str(si)
 #' type = "studies"
@@ -409,8 +414,8 @@ sj <- switch( type
             "id": "*",
             "type": "people"
           }
-        ] 
-      }       
+        ]
+      }
       , "project_administrators": {
                    "data": [
           {
@@ -427,7 +432,7 @@ sj <- switch( type
                     }
                 ]
             }
-      
+
 #     , "organisms": {
 #        "data": [
 #          {
@@ -769,6 +774,41 @@ return(sr)
 }
 
 
+## ----fhLog---------------------------------------------------------------
+#' Writes a note to a log file.
+#'
+#' @param ... Objects to form a line.
+#' @param file Log file name.
+#' @param append Control append/rewrite mode.
+#' @return System time of invoking..
+#' @export
+#' @keywords pisa
+#' @seealso \code{\link{fhGet}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' tst <- function(){
+#'    t0 <- fhLog("Test", "writing to logfile", file="")
+#'    Sys.sleep(1)
+#'    fhTime(123,file="")
+#' }
+#' tst()
+#' rm(tst)
+#'
+#' @rdname fhLog
+#' @export fhLog
+fhLog <- function( ..., file="FAIRDOM.log",append=TRUE){
+   cat(paste(Sys.time(),...), file=file, append=append)
+   Sys.time()
+   }
+#' @rdname fhLog
+#' @export fhTime
+#fhTime <- function(...) cat("\n",file="FAIRDOM.txt", append=TRUE)
+fhTime <- function(..., file="FAIRDOM.log"){
+   tx <- dynGet("t0")
+   cat(... , "(", round(Sys.time()-tx,3),"s )\n", file=file, append=TRUE)
+   }
+   
+
 
 ## ----fhCreate------------------------------------------------------------
 #' Create pISA layer or *fh* component.
@@ -785,6 +825,8 @@ return(sr)
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
+#' fhLog("Start testing log", append=FALSE)
+#' fhTime()
 #' if(FALSE)
 #' {
 #' fhIni(prid = 26, test=TRUE)
@@ -879,7 +921,7 @@ fhCreate <- function (type = "assays", meta){
         s$data$relationships$creators$data$type <- "people"
         s$data$attributes$assay_class$title <- ""
         s$data$attributes$assay_class$key <- "EXP"
-#        s$data$attributes$assay_class$key <- "MODEL"        
+#        s$data$attributes$assay_class$key <- "MODEL"
         s$data$attributes$assay_class$description <- ""
         s$data$attributes$assay_type$label <- ""
         s$data$attributes$assay_type$key <- ""
@@ -889,6 +931,8 @@ fhCreate <- function (type = "assays", meta){
      uri <- modify_url(baseurl,path=s$data$type)
      I <- toJSON(s, auto_unbox=TRUE, pretty=TRUE)
      cat(I, "\n")
+     ua <- user_agent("https://github.com/ablejec/pisar")
+     t0 <- fhLog("fhCreate -")
      resp <- POST(uri
          , authenticate(
              options()$fhub$usr
@@ -897,7 +941,10 @@ fhCreate <- function (type = "assays", meta){
          , encode="json"
          , accept("application/json")
          , content_type_json()
+         , ua
          )
-     fhParse(resp)
+     parsed <- fhParse(resp)
+     fhTime( resp$headers$status, parsed$url)
+     parsed
      }
 
