@@ -270,7 +270,7 @@ getMeta.list <- function(x,...){
    }
 @
 
-možno tudi 
+možno tudi
 \hyperref{takole}{https://stackoverflow.com/questions/7198758/roxygen2-how-to-properly-document-s3-methods/7199577}
 
 
@@ -325,6 +325,8 @@ setwd(oldwd)
 #' getLayer("I")
 #' getLayer("S")
 #' getLayer("A")
+#' if(interactive()) setwd(oldwd)
+#' getwd()
 #' }
 getLayer <- function(x, path=getwd()){
   loc <- strsplit(path,"/")[[1]]
@@ -419,7 +421,7 @@ out.path <- function(out.dir="../out", args="", which=1:length(args)) {
 #' dir(pisa$p$root)
 #' # Set pisa options
 #' options(pisa=pisa(global=FALSE))
-#' # Access details with $ 
+#' # Access details with $
 #' options()$pisa$p$root
 #' setwd(oldwd)
 #' }

@@ -1,4 +1,5 @@
-2019-11-04 13:56:10 Start testing log2019-11-04 13:56:11 fhCreate -200 OK https://testing.sysmo-db.org/studies/118 ( 0.565 s )
-2019-11-04 13:56:12 fhCreate -200 OK https://testing.sysmo-db.org/assays/398 ( 0.484 s )
-... round(Sys.time()-tx,3)s
-2019-11-04 14:16:12 fhGet - 200 OK https://testing.sysmo-db.org/people/368 ( 0.345 s )
+2019-11-05 13:21:00 fhGet -  https://testing.sysmo-db.org/people/386 
+2019-11-05 13:21:17 fhGet -  https://testing.sysmo-db.org/people/368 
+2019-11-05 13:21:17 200 OK 0.30000000000291 https://testing.sysmo-db.org/people/368 
+2019-11-05 13:22:08 fhGet -  https://testing.sysmo-db.org/people/368 
+2019-11-05 13:22:09 200 OK 0.31 https://testing.sysmo-db.org/people/368 

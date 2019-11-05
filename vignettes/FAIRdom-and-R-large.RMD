@@ -841,8 +841,8 @@ contentType <- function(x){
   switch(tolower(fileType(x))
          , txt  = "text/plain"
          , rnw  = "text/plain"
-         , rmd  = "text/plain"
-         , md   = "text/plain"
+         , rmd  = "text/markdown"
+         , md   = "text/markdown"
          , csv  = "text/plain"
          , tsv  = "text/plain"
          , bat  = "text/plain"
