@@ -4,6 +4,7 @@ packrat/lib*/
 *.Rproj
 *.prj
 *.bak
+*.log
 .Rproj.user
 .Rhistory
 .RData

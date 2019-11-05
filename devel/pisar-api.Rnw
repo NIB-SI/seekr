@@ -101,11 +101,13 @@ invisible(tmp)
 #' length(r$content)
 #' names(r$content)
 #' r$content[[1]]
+#' names(r)
 #' r
 #' }
 fhParse <- function(resp, ...){
     jsn <- "application/json"
     parsed <- invisible(content(resp,"parsed",type=jsn)$data)
+    if(class(parsed$content) %in% "raw") parsed$content <- rawToChar(parsed$content)
      if (http_error(resp)) {
      stop(
       sprintf(
@@ -121,14 +123,18 @@ fhParse <- function(resp, ...){
   url <- modify_url(parsed$meta$base_url,path=parsed$links)
   ret <-    structure(
        list(
-         path = parsed$links,
-         url = url,
-         content = parsed,
-         response = resp
+          id = parsed$id
+        , path = parsed$links$self
+        , url = url
+        , status = resp$status_code
+        , title = parsed$content$attributes$title
+        , content = parsed
+        , response = resp
        ),
        class = "seek_api"
        )
   return(ret)
+  
 }
 @
 
@@ -160,7 +166,7 @@ cat("Status:", x$response$headers$status, "\n")
 {
 pr <- x$content
 cat("Object:", x$url,"\n")
-cat("Path  :", x$path$self,"\n")
+cat("Path  :", x$path,"\n")
 cat("Title :", x$content$attributes$title, "\n")
 if(content) {
 cat(rep("-",20),"\n\n")
@@ -832,9 +838,6 @@ return(sr)
 fhLog <- function( ..., file="FAIRDOM.log",append=TRUE){
    cat(paste(Sys.time(),..., "\n"), file=file, append=append)
    }
-#' @rdname fhLog
-#' @export fhTime
-fhTime <- function(...) cat("\n",file="FAIRDOM.txt", append=TRUE)
 @
 
 <<>>=
@@ -856,6 +859,7 @@ contentType <- function(x){
   switch(tolower(fileType(x))
          , txt  = "text/plain"
          , rnw  = "text/plain"
+         , log  = "text/plain"        
          , rmd  = "text/markdown"
          , md   = "text/markdown"
          , csv  = "text/plain"
@@ -868,7 +872,7 @@ contentType <- function(x){
          , docx = "application/msword"
          , xls  = "application/excel"
          , xlsx = "application/excel"
-         , tex  = "application/x-tex"
+         , tex  = "text/plain"
          , gz   = "application/x-gz"
          , tar  = "application/x-tar"
          , jpg  = "image/jpeg"
@@ -986,8 +990,7 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      iid <-  options()$fhub$iid
      sid <-  options()$fhub$sid
      aid <-  options()$fhub$aid
-     s <- fhSkeleton( type, meta)
-     print(type)
+     s <- fhSkeleton(type, meta)
 # Common fileds
      s$data$attributes$title  <-  getMeta(meta,"Title")
      s$data$attributes$description  <-  getMeta(meta, "Description")
@@ -1040,7 +1043,7 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
         s$data$relationships$projects$data$id <- pid
         s$data$relationships$assays$data$id <- aid            
       }
-      , documents = {      
+      , documents = {    
         document_title <- paste0("/",file)
         document_description <- ""
         content_type <- contentType(file)
@@ -1068,10 +1071,13 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      baseurl <- options()$fhub$baseurl
      uri <- modify_url(baseurl,path=s$data$type)
      I <- toJSON(s, auto_unbox=TRUE, pretty=TRUE)
-     cat(I, "\n")
+     #
+     # For testing: list JSON object
+     #     cat(I, "\n")
+     #
      ua <- user_agent("https://github.com/ablejec/pisar")
      fhLog("fhCreate", uri)
-     system.time(resp <- POST(uri
+     fht <- system.time(resp <- POST(uri
          , authenticate(
              options()$fhub$usr
            , options()$fhub$pwd
@@ -1086,7 +1092,7 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      parsed <- fhParse(resp)
      fhLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
 # Upload file blob     
-     if(s$data$type %in% c("data_files", "documents")){
+     if(FALSE&&s$data$type %in% c("data_files", "documents")){
      fhLog("Upload file:", file)
      res <- parsed$content
      original_filename <- res$attributes$content_blobs[[1]]$original_filename
@@ -1118,7 +1124,72 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      }
      parsed
 }
+#fhCreate("documents",meta,file=file)
+
 @
+
+<<fhUpload>>=
+<<>>=
+#' Upload file.
+#'
+#' Upload file to a crerated object of type 'documents' or 'data_files'.
+#'
+#' @param object A previously created SEEK component.
+#'     Must be one of 'documents' or 'data_files'.
+#' @param file File name with path, relative to layer.
+#' @return FAIRDOMhub created component.
+#' @note Upon success (status code 200) details
+#' of newly created component can be used. Check status code.
+#' @export
+#' @keywords pisa
+#' @seealso \code{\link{fhCreate}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' file <- dir()[1]
+#' file
+#' fhd <- fhCreate("documents",meta,file=file)
+#' fhd
+#' sd <- fhUpload(fhd, file)
+#' 
+fhUpload <- function( object, file){
+     if(object$content$type %in% c("data_files", "documents")){
+     fhLog("Upload file:", file)
+     res <- object$content
+     original_filename <- res$attributes$content_blobs[[1]]$original_filename
+     blob_link <- res$attributes$content_blobs[[1]]$link
+     # Fill the content blob with data
+     uri <- blob_link
+     fpath <- file.path(".",file)
+     if(file.exists(fpath)) {
+     fhLog("fhUpload",uri)
+     fht=-1
+     fht <- system.time(
+     resp <- PUT(uri
+        , authenticate(
+             options()$fhub$usr
+           , options()$fhub$pwd
+           , type = "basic"
+        )
+    , body = upload_file(fpath)
+    , encode="json"
+    , accept("*.*")
+    ))
+    print(resp)
+    fs <- round(as.numeric(rawToChar(sd$content))/1024^2,3)
+    file_size <- paste0(fpath, " | ", fs,"MB")
+    } else {
+    resp_blob <- paste("Error: File not found:" ,fpath)
+    }
+    fhLog( resp$headers$status
+         , round(fht["elapsed"],2)
+         , file_size
+         , object$url)
+}
+  resp
+}
+@
+
+
 
 \url{https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html}
 
