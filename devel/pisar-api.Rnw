@@ -201,6 +201,8 @@ invisible(x)
 #' r$response$status_code
 #' status_code(r$response)
 #' r
+#' Non existent user
+#' fhGet("people",0)
 #' }
 fhGet <- function(type, id,
                    uri=options()$fhub$baseurl, ... ){
@@ -215,9 +217,15 @@ fhGet <- function(type, id,
          , ua
          )
   )
-  # cat("Status code:",r$status_code,"\n")
+  cat("Status code:",resp$status_code,"\n")
+
+  if( resp$status_code < 300) {
   parsed <- fhParse(resp)
   fhLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
+  } else {
+  parsed <- resp$status_code
+  fhLog( resp$headers$status, round(fht["elapsed"],2))
+  }
   return(parsed)
 }
 #
@@ -284,6 +292,7 @@ fhDatas <- fhData
 #' @return FAIRDOMhub component identifier: id, type and title.
 #'     If argument title is missing, a data frame with identifiers
 #'     for all items is returned.
+#' @note If item is not found, value 0 is returned as id.
 #' @export
 #' @keywords pisa
 #' @seealso \code{\link{fhFindTitle}}
@@ -294,6 +303,8 @@ fhDatas <- fhData
 #' id <- fhFindId("people","Guest")
 #' id
 #' fhFindTitle("people",id)
+#' # does not exist
+#' fhFindId("people","No User")
 #' # List of projects
 #' projects <- fhFindId("projects")
 #' head(projects)
@@ -305,6 +316,7 @@ fhFindId <- function(type, title){
      # Get FAIRDOMhub user id
      if(!missing(title)){
        id <- d[[pmatch(title,titles[,"title"])]]$id
+       if(is.null(id)) id <- 0
        return(c(id=id,type=type, title=title))
      } else {
      return(titles)
@@ -320,7 +332,8 @@ fhFindId <- function(type, title){
 #'     of the component (id part).
 #' @return FAIRDOMhub component identifier: id, type and title.
 #'     If argument title is missing, a data frame with identifiers
-#'     for all items is returned.
+#'     for all items is returned. See note.
+#' @note If item is not found, empty string is returned as title.
 #' @export
 #' @keywords pisa
 #' @seealso \code{\link{fhFindTitle}}
@@ -333,13 +346,19 @@ fhFindId <- function(type, title){
 #' idNew <- fhFindTitle("people", id[1])
 #' idNew
 #' all.equal(id, idNew)
+#' fhFindTitle("people",0)
 #' }
 fhFindTitle <- function(type, id){
      id <- as.vector(id[1])
      r <- fhGet(type, id )
+     if( class(r)=="integer" && r > 300) {
+     title <- ""
+     } else {
      d <- fhData(r, "attributes")
+     title <- d$title
      # Set FAIRDOMhub user title
-     return(c(id=id, type=type, title=d$title))
+     }
+     return(c(id=id, type=type, title=title))
      }
 @
 
@@ -1129,7 +1148,6 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
 @
 
 <<fhUpload>>=
-<<>>=
 #' Upload file.
 #'
 #' Upload file to a crerated object of type 'documents' or 'data_files'.
