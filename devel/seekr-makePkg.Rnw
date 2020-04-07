@@ -22,7 +22,7 @@
 
 <<include=FALSE>>=
 render_sweave()
-opts_chunk$set(fig.path='./figs/pisar-',concordance=TRUE,tidy=TRUE)
+opts_chunk$set(fig.path='./figs/seekr-',concordance=TRUE,tidy=TRUE)
 @
 \setkeys{Gin}{width=0.8\textwidth}  % set graphicx parameter
 \usepackage{lmodern}
@@ -34,7 +34,7 @@ opts_chunk$set(fig.path='./figs/pisar-',concordance=TRUE,tidy=TRUE)
 %% notice this must be after begin{document}
 %%% \setkeys{Gin}{width=0.9\textwidth}
 % ----------------------------------------------------------------
-\title{Development of package \pkg{pisar}}
+\title{Development of R package \pkg{seekr}}
 \author{A. Blejec}
 %\address{}%
 %\email{}%
@@ -81,9 +81,10 @@ purl <- TRUE
 dir(pkgPath)
 dir(file.path(pkgPath,"R"))
 fctFile <- c(
-      "pisar-initialize.Rnw"
-    , "pisar-api.Rnw")
+#      "seekr-initialize.Rnw" ,
+      "seekr-api.Rnw")
 (pkgFile <- gsub("\\.Rnw$","\\.R",fctFile))
+
 @
 
 Files and directories:\\[12pt]
@@ -124,9 +125,11 @@ for (i in 1:length(fctFile)) {
 cat(fctFile[i],"\n")
 childtxt <- paste(childtxt
     , purl(file.path("../devel",fctFile[i])
-    , output=file.path(pkgPath,"R",pkgFile[i])))
+    , output=file.path(pkgPath,"R",pkgFile[i]))
+    )
 }
 dir(file.path(pkgPath,"R"))
+
 @
 \Sexpr{childtxt}
 
@@ -141,6 +144,7 @@ usethis::use_package("tools")
 usethis::use_package('RCurl')
 usethis::use_package('httr')
 usethis::use_package('jsonlite')
+usethis::use_package('pisar')
 usethis::use_build_ignore(c("devel"))
 @
 \clearpage

@@ -1,33 +1,17 @@
-% -*- TeX:Rnw:UTF-8 -*-
-% ----------------------------------------------------------------
-% .R knitr file  ************************************************
-% ----------------------------------------------------------------
-%%
-<<c,echo=FALSE>>=
+## ----c,echo=FALSE--------------------------------------------------------
 ###############################################
 ##                                           ##
 ## (c) Andrej Blejec (andrej.blejec@nib.si)  ##
 ##                                           ##
 ###############################################
 #
-@
-<<d,echo=FALSE,results='hide'>>=
+
+## ----d,echo=FALSE,results='hide'-----------------------------------------
 options(width=70)
 library(httr)
-@
-
-\section{Functions for upload to FAIRDOMhub}
-
-A collection of functions to work with SEEK API.
-Communication with FAIRDOMhub is established via package \pkg{httr}.
-
-\subsection{Server location and authentication}
 
 
-The location of receiving server is expected to be in a global environment and named \code{baseurl}.
-
-Main FAIRdomHub URL and test site urls:
-<<fhIni>>=
+## ----skIni---------------------------------------------------------------
 #' Initialize FAIRDOMhub information
 #'
 #' Define FAIRDOMhub URL and user data
@@ -41,13 +25,13 @@ Main FAIRdomHub URL and test site urls:
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' fhIni()
+#' skIni()
 #' options("fhub")
 #' #
-#' fhIni(test=FALSE)
+#' skIni(test=FALSE)
 #' options("fhub")
 #' }
-fhIni <- function(
+skIni <- function(
       prid = NULL
     , pid = NULL
     , iid = NULL
@@ -77,34 +61,34 @@ tmp <- list(baseurl = baseurl
    options(fhub = tmp)
 invisible(tmp)
 }
-@
 
-<<fhParse>>=
+
+## ----skParse-------------------------------------------------------------
 #' Parse the response from SEEK API
 #'
 #' @param resp Response from SEEK API.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
-#' @seealso \code{\link{fhGget ...}}
+#' @seealso \code{\link{skGget ...}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
-#' fhIni()
+#' skIni()
 #' options()$fhub$myid
-#' r <- fhGet("people",options()$fhub$myid)
+#' r <- skGet("people",options()$fhub$myid)
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
 #' names(r$content)
 #' r
-#' r <- fhGet("people")
+#' r <- skGet("people")
 #' length(r$content)
 #' names(r$content)
 #' r$content[[1]]
 #' names(r)
 #' r
 #' }
-fhParse <- function(resp, ...){
+skParse <- function(resp, ...){
     jsn <- "application/json"
     parsed <- invisible(content(resp,"parsed",type=jsn)$data)
     if(class(parsed$content) %in% "raw") parsed$content <- rawToChar(parsed$content)
@@ -134,24 +118,24 @@ fhParse <- function(resp, ...){
        class = "seek_api"
        )
   return(ret)
-  
-}
-@
 
-<<print.seek_api>>=
+}
+
+
+## ----print.seek_api------------------------------------------------------
 #' Print method for seek_api object
 #'
 #' @param x Object of class \code{seek_api}.
 #' @param content If FALSE (default), content is no printed.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
-#' @seealso \code{\link{fhParse ...}}
+#' @seealso \code{\link{skParse ...}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
-#' fhIni()
+#' skIni()
 #' options()$fhub$myid
-#' r <- fhGet("people",options()$fhub$myid)
+#' r <- skGet("people",options()$fhub$myid)
 #' # Print contents
 #' print( r, TRUE)
 #' # Short version, default
@@ -175,12 +159,9 @@ cat(rep("-",20),"\n\n")
 invisible(x)
 }
 }
-@
 
 
-
-
-<<fhGet>>=
+## ----skGet---------------------------------------------------------------
 #' Get inormation from repository.
 #'
 #' @param type Type of information (e.g. "person").
@@ -194,23 +175,23 @@ invisible(x)
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
-#' fhIni()
+#' skIni()
 #' options()$fhub$myid
-#' r <- fhGet("people",options()$fhub$myid)
+#' r <- skGet("people",options()$fhub$myid)
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
 #' r
 #' Non existent user
-#' fhGet("people",0)
+#' skGet("people",0)
 #' }
-fhGet <- function(type, id,
+skGet <- function(type, id,
                    uri=options()$fhub$baseurl, ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
   ua <- user_agent("https://github.com/ablejec/pisar")
-  fhLog("fhGet", uri)
+  skLog("skGet", uri)
   fht <- system.time(
   resp <- GET(uri,
          add_headers(Accept="application/json")
@@ -220,22 +201,22 @@ fhGet <- function(type, id,
   cat("Status code:",resp$status_code,"\n")
 
   if( resp$status_code < 300) {
-  parsed <- fhParse(resp)
-  fhLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
+  parsed <- skParse(resp)
+  skLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
   } else {
   parsed <- resp$status_code
-  fhLog( resp$headers$status, round(fht["elapsed"],2))
+  skLog( resp$headers$status, round(fht["elapsed"],2))
   }
   return(parsed)
 }
 #
 
-@
 
-<<fhData>>=
+
+## ----skData--------------------------------------------------------------
 #' Get content from an *fh* object.
 #'
-#' @param r Object retrieved by fhGet.
+#' @param r Object retrieved by skGet.
 #' @param type Name of the required element. If missing, a list with
 #'     all relevant objects is returned.
 #' @return File name (string).
@@ -246,16 +227,16 @@ fhGet <- function(type, id,
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
-#' fhIni()
+#' skIni()
 #' options()$fhub$myid
-#' r <- fhGet("people",options()$fhub$myid)
-#' d <- fhData(r,"attributes")
+#' r <- skGet("people",options()$fhub$myid)
+#' d <- skData(r,"attributes")
 #' names(d)
 #' d$last_name
-#' fhData(r)$tools
+#' skData(r)$tools
 #' # Get list of people
-#' r <- fhGet("people")
-#' d <- fhData(r)
+#' r <- skGet("people")
+#' d <- skData(r)
 #' length(d)
 #' names(d)
 #' names(d[[1]])
@@ -268,22 +249,22 @@ fhGet <- function(type, id,
 #' id <- d[[pmatch(myname,titles)]]$id
 #' id
 #' }
-fhData <- function(r, node, ...){
+skData <- function(r, node, ...){
   if(class(r)=="seek_api") r <- r$response
   jsn <- "application/json"
   if(missing(node)) invisible(content(r,"parsed",type=jsn)$data) else
   invisible(content(r,"parsed",type=jsn)$data[[node]])
 }
-fhData <- function(r, node, ...){
+skData <- function(r, node, ...){
   if(class(r)=="seek_api") r <- r$content
   jsn <- "application/json"
   if(missing(node)) invisible(r) else
   invisible(r[[node]])
 }
-fhDatas <- fhData
-@
+skDatas <- skData
 
-<<fhFindId>>=
+
+## ----skFindId------------------------------------------------------------
 #' Get details of component with id from an *fh* object.
 #'
 #' @param type Components name (e.g. 'people', 'projets', ...).
@@ -295,23 +276,23 @@ fhDatas <- fhData
 #' @note If item is not found, value 0 is returned as id.
 #' @export
 #' @keywords pisa
-#' @seealso \code{\link{fhFindTitle}}
+#' @seealso \code{\link{skFindTitle}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
-#' fhIni()
-#' id <- fhFindId("people","Guest")
+#' skIni()
+#' id <- skFindId("people","Guest")
 #' id
-#' fhFindTitle("people",id)
+#' skFindTitle("people",id)
 #' # does not exist
-#' fhFindId("people","No User")
+#' skFindId("people","No User")
 #' # List of projects
-#' projects <- fhFindId("projects")
+#' projects <- skFindId("projects")
 #' head(projects)
 #' }
-fhFindId <- function(type, title){
-     r <- fhGet(type)
-     d <- fhData(r)
+skFindId <- function(type, title){
+     r <- skGet(type)
+     d <- skData(r)
      titles <- t(sapply(d,function(x) c(id=x$id, type=x$type, title=x$attributes$title)))
      # Get FAIRDOMhub user id
      if(!missing(title)){
@@ -322,9 +303,9 @@ fhFindId <- function(type, title){
      return(titles)
      }
 }
-@
 
-<<fhFindTitle>>=
+
+## ----skFindTitle---------------------------------------------------------
 #' Get details of component with id from an *fh* object.
 #'
 #' @param type Components name (e.g. 'people', 'projets', ...).
@@ -336,34 +317,33 @@ fhFindId <- function(type, title){
 #' @note If item is not found, empty string is returned as title.
 #' @export
 #' @keywords pisa
-#' @seealso \code{\link{fhFindTitle}}
+#' @seealso \code{\link{skFindTitle}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
-#' fhIni()
-#' id <- fhFindId("people","Guest")
+#' skIni()
+#' id <- skFindId("people","Guest")
 #' id
-#' idNew <- fhFindTitle("people", id[1])
+#' idNew <- skFindTitle("people", id[1])
 #' idNew
 #' all.equal(id, idNew)
-#' fhFindTitle("people",0)
+#' skFindTitle("people",0)
 #' }
-fhFindTitle <- function(type, id){
+skFindTitle <- function(type, id){
      id <- as.vector(id[1])
-     r <- fhGet(type, id )
+     r <- skGet(type, id )
      if( class(r)=="integer" && r > 300) {
      title <- ""
      } else {
-     d <- fhData(r, "attributes")
+     d <- skData(r, "attributes")
      title <- d$title
      # Set FAIRDOMhub user title
      }
      return(c(id=id, type=type, title=title))
      }
-@
 
 
-<<fhSkeleton>>=
+## ----skSkeleton----------------------------------------------------------
 #' Create *fh* skeleton.
 #'
 #' Creates *fh* object with required structure.
@@ -374,44 +354,44 @@ fhFindTitle <- function(type, id){
 #' @return A list with the minimal information structure.
 #' @export
 #' @keywords pisa
-#' @seealso \code{\link{fhCreate}}
+#' @seealso \code{\link{skCreate}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
 #' require(jsonlite)
 #' meta= list(Title = "Test layer", Description = "Some description")
 #' type = "projects"
-#' sp <- fhSkeleton( type = type
+#' sp <- skSkeleton( type = type
 #'   , meta= meta
 #'   )
 #' str(sp)
 #' type = "investigations"
-#' si <- fhSkeleton( type = type
+#' si <- skSkeleton( type = type
 #'   , meta= meta
 #'   )
 #' str(si)
 #' type = "studies"
-#' ss <- fhSkeleton( type = type
+#' ss <- skSkeleton( type = type
 #'   , meta= meta
 #'   )
 #' str(ss)
 #' type = "assays"
-#' sa <- fhSkeleton( type = type
+#' sa <- skSkeleton( type = type
 #'   , meta= meta
 #'   )
 #' str(sa)
 #' }
 #'
 #' type = "data_files"
-#' file = 
-#' sdata <- fhSkeleton( type = type
+#' file =
+#' sdata <- skSkeleton( type = type
 #'   , meta= meta
 #'   )
 #' str(sdata)
 #' }
 #'
 #' }
-fhSkeleton <- function (type = "assay", meta, file){
+skSkeleton <- function (type = "assay", meta, file){
 sj <- switch( type
 , projects =
 '{
@@ -828,10 +808,9 @@ sj <- paste(sx,collapse="\n")
 sr <- fromJSON(sj, simplifyVector = TRUE)
 return(sr)
 }
-@
 
 
-<<fhLog>>=
+## ----skLog---------------------------------------------------------------
 #' Writes a note to a log file.
 #'
 #' @param ... Objects to form a line.
@@ -840,33 +819,33 @@ return(sr)
 #' @return System time of invoking..
 #' @export
 #' @keywords pisa
-#' @seealso \code{\link{fhGet}}
+#' @seealso \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' tst <- function(){
-#'   fhLog("Test", "writing to logfile", file="")
+#'   skLog("Test", "writing to logfile", file="")
 #'   fht <- system.time(Sys.sleep(1))
-#'   fhLog( "Time:", round(fht["elapsed"],2))
+#'   skLog( "Time:", round(fht["elapsed"],2))
 
 #' }
 #' tst()
 #' rm(tst)
 #'
-#' @rdname fhLog
-#' @export fhLog
-fhLog <- function( ..., file="FAIRDOM.log",append=TRUE){
+#' @rdname skLog
+#' @export skLog
+skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
    cat(paste(Sys.time(),..., "\n"), file=file, append=append)
    }
-@
 
-<<>>=
+
+## ------------------------------------------------------------------------
 #' Determine MIME type for file.
 #'
 #' @param File name.
 #' @return MIME type string.
 #' @export
 #' @keywords pisa
-#' @seealso 
+#' @seealso
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' contentType("bla.txt")
@@ -878,7 +857,7 @@ contentType <- function(x){
   switch(tolower(fileType(x))
          , txt  = "text/plain"
          , rnw  = "text/plain"
-         , log  = "text/plain"        
+         , log  = "text/plain"
          , rmd  = "text/markdown"
          , md   = "text/markdown"
          , csv  = "text/plain"
@@ -902,16 +881,14 @@ contentType <- function(x){
          , "application/octet-stream"
          )
 }
-@
 
 
-
-<<fhCreate>>=
+## ----skCreate------------------------------------------------------------
 #' Create pISA layer or *fh* component.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
 #' @param meta Data frame with pISA metadata or
-#'     a list with minimal information (Title, 
+#'     a list with minimal information (Title,
 #'     Description, *ToDo: add fields*).
 #' @param class Assay class key string.
 #'     Possible values are 'EXP' and 'MODEL'.
@@ -921,52 +898,52 @@ contentType <- function(x){
 #' of newly created component can be used. Check status code.
 #' @export
 #' @keywords pisa
-#' @seealso \code{\link{fhGet}}
+#' @seealso \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \donotrun{
 #' if(FALSE)
 #' {
-#' fhIni(prid = 26, test=TRUE)
+#' skIni(prid = 26, test=TRUE)
 #' options("fhub")
-#'  sp <- fhCreate( type = "projects"
+#'  sp <- skCreate( type = "projects"
 #'   , meta= list(
 #'       Title=paste("Test project", Sys.time())
 #'     , Description="Testing of upload")
 #'     )
 #'  str(sp)
-#'  str(fhData(sp))
+#'  str(skData(sp))
 #' # Add member manually
 #
-#'  fhIni(prid = 26, pid=104, test=TRUE)
+#'  skIni(prid = 26, pid=104, test=TRUE)
 #'  options("fhub")
-#'  si <- fhCreate( type = "investigations"
+#'  si <- skCreate( type = "investigations"
 #'   , meta= list(
 #'       Title=paste("Test investigation", Sys.time())
 #'     , Description="Testing of upload")
 #'     )
 #'  si
-#'  fhData(si)$id
+#'  skData(si)$id
 #'
-#'  iid=fhData(si)$id
+#'  iid=skData(si)$id
 #'  iid <- 115
-#'  fhIni(prid = 26, pid=104, iid=iid, test=TRUE)
+#'  skIni(prid = 26, pid=104, iid=iid, test=TRUE)
 #'  options("fhub")
-#'  ss <- fhCreate( type = "studies"
+#'  ss <- skCreate( type = "studies"
 #'   , meta= list(
 #'       Title=paste("Test study", Sys.time())
 #'     , Description="Testing of upload")
 #'     )
 #'  ss
-#'  fhData(ss)$id
+#'  skData(ss)$id
 #'
-#'  fhIni(prid = 26
+#'  skIni(prid = 26
 #'        , pid=104
-#'        , iid=fhData(si)$id
-#'        , sid=fhData(ss)$id
+#'        , iid=skData(si)$id
+#'        , sid=skData(ss)$id
 #'        , test=TRUE)
 #'  options("fhub")
-#'  sa <- fhCreate( type = "assays"
+#'  sa <- skCreate( type = "assays"
 #'   , meta= list(
 #'       Title=paste("Test assay", Sys.time())
 #'     , Description="Testing of upload")
@@ -984,10 +961,10 @@ contentType <- function(x){
 #' .aroot <- getRoot("A")
 #' .ameta  <- readMeta()
 #'  file <- "input/README.MD"
-#'  fhIni(prid = 26, pid=104, iid=115 , sid=117 , aid=401, test=TRUE)
+#'  skIni(prid = 26, pid=104, iid=115 , sid=117 , aid=401, test=TRUE)
 #'  type <- "data_files"
 #'  type <- "documents"
-#'  sdat <- fhCreate( type = type
+#'  sdat <- skCreate( type = type
 #'   , meta= list(
 #'       Title=paste("Test assay", Sys.time())
 #'     , Description="Testing of upload")
@@ -995,21 +972,21 @@ contentType <- function(x){
 #'     )
 #'  #str(sdat)
 #'  sdat
-#'  fhData(sdat)$id
+#'  skData(sdat)$id
 #' if(interactive()) setwd(oldwd)
 #' getwd()
 #' res <- sdat$content
 #' item_link <- file.path(res$meta$base_url,res$links$self)
-#' if(interactive()) shell.exec(item_link) 
+#' if(interactive()) shell.exec(item_link)
 #' }
-fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
+skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      myid <- options()$fhub$myid
      prid <- options()$fhub$prid
      pid <-  options()$fhub$pid
      iid <-  options()$fhub$iid
      sid <-  options()$fhub$sid
      aid <-  options()$fhub$aid
-     s <- fhSkeleton(type, meta)
+     s <- skSkeleton(type, meta)
 # Common fileds
      s$data$attributes$title  <-  getMeta(meta,"Title")
      s$data$attributes$description  <-  getMeta(meta, "Description")
@@ -1060,9 +1037,9 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$projects$data$id <- pid
-        s$data$relationships$assays$data$id <- aid            
+        s$data$relationships$assays$data$id <- aid
       }
-      , documents = {    
+      , documents = {
         document_title <- paste0("/",file)
         document_description <- ""
         content_type <- contentType(file)
@@ -1085,7 +1062,7 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
         s$data$attributes$content_blobs
         s$data$attributes$other_creators <- ""
         s$data$attributes$tags <- c("pISA", tags)
-      }     
+      }
      )
      baseurl <- options()$fhub$baseurl
      uri <- modify_url(baseurl,path=s$data$type)
@@ -1095,7 +1072,7 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      #     cat(I, "\n")
      #
      ua <- user_agent("https://github.com/ablejec/pisar")
-     fhLog("fhCreate", uri)
+     skLog("skCreate", uri)
      fht <- system.time(resp <- POST(uri
          , authenticate(
              options()$fhub$usr
@@ -1108,19 +1085,19 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
          , ua
          )
          )
-     parsed <- fhParse(resp)
-     fhLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
-# Upload file blob     
+     parsed <- skParse(resp)
+     skLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
+# Upload file blob
      if(FALSE&&s$data$type %in% c("data_files", "documents")){
-     fhLog("Upload file:", file)
+     skLog("Upload file:", file)
      res <- parsed$content
      original_filename <- res$attributes$content_blobs[[1]]$original_filename
      blob_link <- res$attributes$content_blobs[[1]]$link
      # Fill the content blob with data
      uri <- blob_link
-     fpath <- file.path(".",.aroot, file) 
+     fpath <- file.path(".",.aroot, file)
      if(file.exists(fpath)) {
-     fhLog("fhUpload",uri)
+     skLog("skUpload",uri)
      fht <- system.time(
      resp_blob <- PUT(uri
          , authenticate(
@@ -1136,18 +1113,18 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
     resp_blob <- paste(fpath, " | File size:", resp_blob)
     } else {
     resp_blob <- paste("Error: File not found:" ,fpath)
-    fhLog( resp_blob$headers$status
+    skLog( resp_blob$headers$status
          , round(fht["elapsed"],2)
-         , parsed$url)  
+         , parsed$url)
      }
      }
      parsed
 }
-#fhCreate("documents",meta,file=file)
+#skCreate("documents",meta,file=file)
 
-@
 
-<<fhUpload>>=
+
+## ----skUpload------------------------------------------------------------
 #' Upload file.
 #'
 #' Upload file to a crerated object of type 'documents' or 'data_files'.
@@ -1160,18 +1137,18 @@ fhCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
 #' of newly created component can be used. Check status code.
 #' @export
 #' @keywords pisa
-#' @seealso \code{\link{fhCreate}}
+#' @seealso \code{\link{skCreate}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' file <- dir()[1]
 #' file
-#' fhd <- fhCreate("documents",meta,file=file)
+#' fhd <- skCreate("documents",meta,file=file)
 #' fhd
-#' sd <- fhUpload(fhd, file)
-#' 
-fhUpload <- function( object, file){
+#' sd <- skUpload(fhd, file)
+#'
+skUpload <- function( object, file){
      if(object$content$type %in% c("data_files", "documents")){
-     fhLog("Upload file:", file)
+     skLog("Upload file:", file)
      res <- object$content
      original_filename <- res$attributes$content_blobs[[1]]$original_filename
      blob_link <- res$attributes$content_blobs[[1]]$link
@@ -1179,7 +1156,7 @@ fhUpload <- function( object, file){
      uri <- blob_link
      fpath <- file.path(".",file)
      if(file.exists(fpath)) {
-     fhLog("fhUpload",uri)
+     skLog("skUpload",uri)
      fht=-1
      fht <- system.time(
      resp <- PUT(uri
@@ -1198,28 +1175,11 @@ fhUpload <- function( object, file){
     } else {
     resp_blob <- paste("Error: File not found:" ,fpath)
     }
-    fhLog( resp$headers$status
+    skLog( resp$headers$status
          , round(fht["elapsed"],2)
          , file_size
          , object$url)
 }
   resp
 }
-@
-
-
-
-\url{https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html}
-
-\url{https://docs.seek4science.org/tech/api/#section/Policy}
-
-The access may be one of (in order of increasing "power"):
-
-    no_access
-    view
-    download
-    edit
-    manage
-
-In addition a Policy may give special access to specific People, People working at an Institution or working on a Project.
 
