@@ -45,8 +45,9 @@ my_test_id <- 368
 I will use the testing site for the development and experiments:
 
 ```{r}
-baseurl <- testurl
-myid <- my_test_id
+siteid <- 1
+(baseurl <- c(mainurl, testurl)[siteid])
+(myid <- c(my_main_id, my_test_id)[siteid])
 url(baseurl)
 ```
 
@@ -79,7 +80,7 @@ library(RCurl)
 
 
 ```{r}
-(FAIRDOMExists = url.exists(baseurl))
+(FAIRDOMExists <-  url.exists(baseurl))
 ```
 # Package `httr`
 
@@ -105,7 +106,8 @@ r$content
 The response is structured and can be investigated with the helper functions. The response has three important parts: status, headers, and body.
 
 ```{r}
-GET ("https://testing.sysmo-db.org/people/368")
+# GET ("https://testing.sysmo-db.org/people/368")
+GET(paste0(baseurl,"/people/",myid))
 ```
 
 
@@ -501,7 +503,7 @@ ij <- toJSON(ir)
 ij
 ```
 
-```{r}
+```{r, eval=FALSE}
 I <- list(
   data=list(
     type="investigations"

@@ -81,9 +81,10 @@ purl <- TRUE
 dir(pkgPath)
 dir(file.path(pkgPath,"R"))
 fctFile <- c(
-      "seekr-initialize.Rnw"
-    , "seekr-api.Rnw")
+#      "seekr-initialize.Rnw" ,
+      "seekr-api.Rnw")
 (pkgFile <- gsub("\\.Rnw$","\\.R",fctFile))
+
 @
 
 Files and directories:\\[12pt]
@@ -124,9 +125,11 @@ for (i in 1:length(fctFile)) {
 cat(fctFile[i],"\n")
 childtxt <- paste(childtxt
     , purl(file.path("../devel",fctFile[i])
-    , output=file.path(pkgPath,"R",pkgFile[i])))
+    , output=file.path(pkgPath,"R",pkgFile[i]))
+    )
 }
 dir(file.path(pkgPath,"R"))
+
 @
 \Sexpr{childtxt}
 
@@ -141,6 +144,7 @@ usethis::use_package("tools")
 usethis::use_package('RCurl')
 usethis::use_package('httr')
 usethis::use_package('jsonlite')
+usethis::use_package('pisar')
 usethis::use_build_ignore(c("devel"))
 @
 \clearpage
