@@ -1,6 +1,6 @@
 Package: seekr
 Type: Package
-Title: seekr: R interface for SEEK API (connection to FAIRDONHub)
+Title: seekr: R interface for SEEK API (connection to FAIRDOMHub)
 Version: 0.1.0.9000
 Authors@R: person("Andrej", "Blejec", email = "andrej.blejec@nib.com"
     ,   role = c("aut", "cre"))
