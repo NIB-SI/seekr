@@ -214,7 +214,7 @@ skGet <- function(type, id,
 
 
 ## ----skData--------------------------------------------------------------
-#' Get content from an *fh* object.
+#' Get content from an *sk* object.
 #'
 #' @param r Object retrieved by skGet.
 #' @param type Name of the required element. If missing, a list with
@@ -265,7 +265,7 @@ skDatas <- skData
 
 
 ## ----skFindId------------------------------------------------------------
-#' Get details of component with id from an *fh* object.
+#' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projets', ...).
 #' @param title Character string with the identifier
@@ -306,7 +306,7 @@ skFindId <- function(type, title){
 
 
 ## ----skFindTitle---------------------------------------------------------
-#' Get details of component with id from an *fh* object.
+#' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projets', ...).
 #' @param id Character string with the identifier
@@ -344,9 +344,9 @@ skFindTitle <- function(type, id){
 
 
 ## ----skSkeleton----------------------------------------------------------
-#' Create *fh* skeleton.
+#' Create *sk* skeleton.
 #'
-#' Creates *fh* object with required structure.
+#' Creates *sk* object with required structure.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
 #' @param meta Data frame with pISA metadata or
@@ -884,7 +884,7 @@ contentType <- function(x){
 
 
 ## ----skCreate------------------------------------------------------------
-#' Create pISA layer or *fh* component.
+#' Create pISA layer or *sk* component.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
 #' @param meta Data frame with pISA metadata or
