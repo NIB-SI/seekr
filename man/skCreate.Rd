@@ -2,10 +2,9 @@
 % Please edit documentation in R/seekr-api.R
 \name{skCreate}
 \alias{skCreate}
-\title{Create pISA layer or *fh* component.}
+\title{Create pISA layer or *sk* component.}
 \usage{
-skCreate(type = "assays", meta = list(), class = "EXP",
-  file = "NA.TXT")
+skCreate(type = "assays", meta = list(), class = "EXP", file = "NA.TXT")
 }
 \arguments{
 \item{type}{Component name (e.g. 'people', 'projets', ...).}
@@ -23,14 +22,14 @@ Possible values are 'EXP' and 'MODEL'.}
 FAIRDOMhub created component.
 }
 \description{
-Create pISA layer or *fh* component.
+Create pISA layer or *sk* component.
 }
 \note{
 Upon success (status code 200) details
 of newly created component can be used. Check status code.
 }
 \examples{
-\\donotrun{
+\donotrun{
 if(FALSE)
 {
 skIni(prid = 26, test=TRUE)

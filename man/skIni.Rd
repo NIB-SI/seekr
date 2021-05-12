@@ -4,8 +4,7 @@
 \alias{skIni}
 \title{Initialize FAIRDOMhub information}
 \usage{
-skIni(prid = NULL, pid = NULL, iid = NULL, sid = NULL,
-  aid = NULL, test = TRUE)
+skIni(prid = NULL, pid = NULL, iid = NULL, sid = NULL, aid = NULL, test = TRUE)
 }
 \arguments{
 \item{test}{If TRUE, test server will be used..}

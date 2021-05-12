@@ -2,7 +2,7 @@
 % Please edit documentation in R/seekr-api.R
 \name{skData}
 \alias{skData}
-\title{Get content from an *fh* object.}
+\title{Get content from an *sk* object.}
 \usage{
 skData(r, node, ...)
 }
@@ -16,13 +16,13 @@ all relevant objects is returned.}
 File name (string).
 }
 \description{
-Get content from an *fh* object.
+Get content from an *sk* object.
 }
 \note{
 Parameter ... is ignored at this time.
 }
 \examples{
-\\donotrun{
+\donotrun{
 skIni()
 options()$fhub$myid
 r <- skGet("people",options()$fhub$myid)
