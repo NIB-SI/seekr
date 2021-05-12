@@ -146,6 +146,7 @@ usethis::use_package('httr')
 usethis::use_package('jsonlite')
 usethis::use_package('pisar')
 usethis::use_build_ignore(c("devel"))
+usethis::use_package('pisar')
 @
 \clearpage
 \subsection{Check}
@@ -158,6 +159,7 @@ system.time(miss <- devtools::missing_s3(pkgPath))
 \subsection{Check results}
 <<>>=
 check()
+
 @
 \clearpage
 \subsection{Build a package}

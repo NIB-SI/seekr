@@ -34,7 +34,7 @@ r
 }
 }
 \seealso{
-\code{\link{skGget ...}}
+\code{\link{skGet}}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

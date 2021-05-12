@@ -47,7 +47,7 @@ id
 }
 }
 \seealso{
-\code{\link{get ...}}
+\code{\link{get}}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

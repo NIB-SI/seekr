@@ -32,7 +32,7 @@ status_code(r$response)
 
 }
 \seealso{
-\code{\link{skParse ...}}
+\code{\link{skParse}}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

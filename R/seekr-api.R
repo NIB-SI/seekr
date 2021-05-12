@@ -1,4 +1,4 @@
-## ----c,echo=FALSE--------------------------------------------------------------------------
+## ----c,echo=FALSE---------------------------------------------------
 ###############################################
 ##                                           ##
 ## (c) Andrej Blejec (andrej.blejec@nib.si)  ##
@@ -6,12 +6,12 @@
 ###############################################
 #
 
-## ----d,echo=FALSE,results='hide'-----------------------------------------------------------
+## ----d,echo=FALSE,results='hide'------------------------------------
 options(width=70)
 library(httr)
 
 
-## ----skIni---------------------------------------------------------------------------------
+## ----skIni----------------------------------------------------------
 #' Initialize FAIRDOMhub information
 #'
 #' Define FAIRDOMhub URL and user data
@@ -63,13 +63,13 @@ invisible(tmp)
 }
 
 
-## ----skParse-------------------------------------------------------------------------------
+## ----skParse--------------------------------------------------------
 #' Parse the response from SEEK API
 #'
 #' @param resp Response from SEEK API.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
-#' @seealso \code{\link{skGget ...}}
+#' @seealso \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -122,14 +122,14 @@ skParse <- function(resp, ...){
 }
 
 
-## ----print.seek_api------------------------------------------------------------------------
+## ----print.seek_api-------------------------------------------------
 #' Print method for seek_api object
 #'
 #' @param x Object of class \code{seek_api}.
 #' @param content If FALSE (default), content is no printed.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
-#' @seealso \code{\link{skParse ...}}
+#' @seealso \code{\link{skParse}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -161,7 +161,7 @@ invisible(x)
 }
 
 
-## ----skGet---------------------------------------------------------------------------------
+## ----skGet----------------------------------------------------------
 #' Get inormation from repository.
 #'
 #' @param type Type of information (e.g. "person").
@@ -171,7 +171,7 @@ invisible(x)
 #' @export
 #' @note Parameter ... is ignored at this time.
 #' @keywords file
-#' @seealso \code{\link{get ...}}
+#' @seealso \code{\link{get}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -213,7 +213,7 @@ skGet <- function(type, id,
 
 
 
-## ----skData--------------------------------------------------------------------------------
+## ----skData---------------------------------------------------------
 #' Get content from an *fh* object.
 #'
 #' @param r Object retrieved by skGet.
@@ -223,7 +223,7 @@ skGet <- function(type, id,
 #' @export
 #' @note Parameter ... is ignored at this time.
 #' @keywords file
-#' @seealso \code{\link{get ...}}
+#' @seealso \code{\link{get}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -264,7 +264,7 @@ skData <- function(r, node, ...){
 skDatas <- skData
 
 
-## ----skFindId------------------------------------------------------------------------------
+## ----skFindId-------------------------------------------------------
 #' Get details of component with id from an *fh* object.
 #'
 #' @param type Components name (e.g. 'people', 'projets', ...).
@@ -305,7 +305,7 @@ skFindId <- function(type, title){
 }
 
 
-## ----skFindTitle---------------------------------------------------------------------------
+## ----skFindTitle----------------------------------------------------
 #' Get details of component with id from an *fh* object.
 #'
 #' @param type Components name (e.g. 'people', 'projets', ...).
@@ -343,7 +343,7 @@ skFindTitle <- function(type, id){
      }
 
 
-## ----skSkeleton----------------------------------------------------------------------------
+## ----skSkeleton-----------------------------------------------------
 #' Create *fh* skeleton.
 #'
 #' Creates *fh* object with required structure.
@@ -808,7 +808,7 @@ return(sr)
 }
 
 
-## ----skLog---------------------------------------------------------------------------------
+## ----skLog----------------------------------------------------------
 #' Writes a note to a log file.
 #'
 #' @param ... Objects to form a line.
@@ -836,7 +836,7 @@ skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
    }
 
 
-## ------------------------------------------------------------------------------------------
+## -------------------------------------------------------------------
 #' Determine MIME type for file.
 #'
 #' @param File name.
@@ -881,7 +881,7 @@ contentType <- function(x){
 }
 
 
-## ----skCreate------------------------------------------------------------------------------
+## ----skCreate-------------------------------------------------------
 #' Create pISA layer or *fh* component.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
@@ -1122,7 +1122,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
 
 
 
-## ----skUpload------------------------------------------------------------------------------
+## ----skUpload-------------------------------------------------------
 #' Upload file.
 #'
 #' Upload file to a crerated object of type 'documents' or 'data_files'.
