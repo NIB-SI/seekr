@@ -1,4 +1,4 @@
-## ----c,echo=FALSE--------------------------------------------------------
+## ----c,echo=FALSE--------------------------------------------------------------------------
 ###############################################
 ##                                           ##
 ## (c) Andrej Blejec (andrej.blejec@nib.si)  ##
@@ -6,19 +6,19 @@
 ###############################################
 #
 
-## ----d,echo=FALSE,results='hide'-----------------------------------------
+## ----d,echo=FALSE,results='hide'-----------------------------------------------------------
 options(width=70)
 library(httr)
 
 
-## ----skIni---------------------------------------------------------------
+## ----skIni---------------------------------------------------------------------------------
 #' Initialize FAIRDOMhub information
 #'
 #' Define FAIRDOMhub URL and user data
 #'
 #' @param test If TRUE, test server will be used..
 #' @return A list with URL and user information. For side effect see Notes.
-#' @notes The returned list is added to the
+#' @note The returned list is added to the
 #'      \code{options()} list under name 'fhub'.
 #' @export
 #' @keywords file
@@ -63,7 +63,7 @@ invisible(tmp)
 }
 
 
-## ----skParse-------------------------------------------------------------
+## ----skParse-------------------------------------------------------------------------------
 #' Parse the response from SEEK API
 #'
 #' @param resp Response from SEEK API.
@@ -72,7 +72,7 @@ invisible(tmp)
 #' @seealso \code{\link{skGget ...}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -122,17 +122,17 @@ skParse <- function(resp, ...){
 }
 
 
-## ----print.seek_api------------------------------------------------------
+## ----print.seek_api------------------------------------------------------------------------
 #' Print method for seek_api object
 #'
 #' @param x Object of class \code{seek_api}.
-#' @param content If FALSE (default), content is not printed.
+#' @param content If FALSE (default), content is no printed.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
 #' @seealso \code{\link{skParse ...}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -161,7 +161,7 @@ invisible(x)
 }
 
 
-## ----skGet---------------------------------------------------------------
+## ----skGet---------------------------------------------------------------------------------
 #' Get inormation from repository.
 #'
 #' @param type Type of information (e.g. "person").
@@ -174,7 +174,7 @@ invisible(x)
 #' @seealso \code{\link{get ...}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -213,8 +213,8 @@ skGet <- function(type, id,
 
 
 
-## ----skData--------------------------------------------------------------
-#' Get content from an *sk* object.
+## ----skData--------------------------------------------------------------------------------
+#' Get content from an *fh* object.
 #'
 #' @param r Object retrieved by skGet.
 #' @param type Name of the required element. If missing, a list with
@@ -226,7 +226,7 @@ skGet <- function(type, id,
 #' @seealso \code{\link{get ...}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -264,8 +264,8 @@ skData <- function(r, node, ...){
 skDatas <- skData
 
 
-## ----skFindId------------------------------------------------------------
-#' Get details of component with id from an *sk* object.
+## ----skFindId------------------------------------------------------------------------------
+#' Get details of component with id from an *fh* object.
 #'
 #' @param type Components name (e.g. 'people', 'projets', ...).
 #' @param title Character string with the identifier
@@ -279,7 +279,7 @@ skDatas <- skData
 #' @seealso \code{\link{skFindTitle}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' id <- skFindId("people","Guest")
 #' id
@@ -305,8 +305,8 @@ skFindId <- function(type, title){
 }
 
 
-## ----skFindTitle---------------------------------------------------------
-#' Get details of component with id from an *sk* object.
+## ----skFindTitle---------------------------------------------------------------------------
+#' Get details of component with id from an *fh* object.
 #'
 #' @param type Components name (e.g. 'people', 'projets', ...).
 #' @param id Character string with the identifier
@@ -320,7 +320,7 @@ skFindId <- function(type, title){
 #' @seealso \code{\link{skFindTitle}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' id <- skFindId("people","Guest")
 #' id
@@ -343,10 +343,10 @@ skFindTitle <- function(type, id){
      }
 
 
-## ----skSkeleton----------------------------------------------------------
-#' Create *sk* skeleton.
+## ----skSkeleton----------------------------------------------------------------------------
+#' Create *fh* skeleton.
 #'
-#' Creates *sk* object with required structure.
+#' Creates *fh* object with required structure.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
 #' @param meta Data frame with pISA metadata or
@@ -357,7 +357,7 @@ skFindTitle <- function(type, id){
 #' @seealso \code{\link{skCreate}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' require(jsonlite)
 #' meta= list(Title = "Test layer", Description = "Some description")
 #' type = "projects"
@@ -380,7 +380,6 @@ skFindTitle <- function(type, id){
 #'   , meta= meta
 #'   )
 #' str(sa)
-#' }
 #'
 #' type = "data_files"
 #' file =
@@ -390,7 +389,6 @@ skFindTitle <- function(type, id){
 #' str(sdata)
 #' }
 #'
-#' }
 skSkeleton <- function (type = "assay", meta, file){
 sj <- switch( type
 , projects =
@@ -810,7 +808,7 @@ return(sr)
 }
 
 
-## ----skLog---------------------------------------------------------------
+## ----skLog---------------------------------------------------------------------------------
 #' Writes a note to a log file.
 #'
 #' @param ... Objects to form a line.
@@ -838,7 +836,7 @@ skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
    }
 
 
-## ------------------------------------------------------------------------
+## ------------------------------------------------------------------------------------------
 #' Determine MIME type for file.
 #'
 #' @param File name.
@@ -883,8 +881,8 @@ contentType <- function(x){
 }
 
 
-## ----skCreate------------------------------------------------------------
-#' Create pISA layer or *sk* component.
+## ----skCreate------------------------------------------------------------------------------
+#' Create pISA layer or *fh* component.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
 #' @param meta Data frame with pISA metadata or
@@ -901,7 +899,7 @@ contentType <- function(x){
 #' @seealso \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' if(FALSE)
 #' {
 #' skIni(prid = 26, test=TRUE)
@@ -1124,7 +1122,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
 
 
 
-## ----skUpload------------------------------------------------------------
+## ----skUpload------------------------------------------------------------------------------
 #' Upload file.
 #'
 #' Upload file to a crerated object of type 'documents' or 'data_files'.

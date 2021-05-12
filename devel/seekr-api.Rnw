@@ -34,7 +34,7 @@ Main FAIRDOMHub URL and test site urls:
 #'
 #' @param test If TRUE, test server will be used..
 #' @return A list with URL and user information. For side effect see Notes.
-#' @notes The returned list is added to the
+#' @note The returned list is added to the
 #'      \code{options()} list under name 'fhub'.
 #' @export
 #' @keywords file
@@ -88,7 +88,7 @@ invisible(tmp)
 #' @seealso \code{\link{skGget ...}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -148,7 +148,7 @@ skParse <- function(resp, ...){
 #' @seealso \code{\link{skParse ...}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -193,7 +193,7 @@ invisible(x)
 #' @seealso \code{\link{get ...}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -245,7 +245,7 @@ skGet <- function(type, id,
 #' @seealso \code{\link{get ...}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -298,7 +298,7 @@ skDatas <- skData
 #' @seealso \code{\link{skFindTitle}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' id <- skFindId("people","Guest")
 #' id
@@ -339,7 +339,7 @@ skFindId <- function(type, title){
 #' @seealso \code{\link{skFindTitle}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' id <- skFindId("people","Guest")
 #' id
@@ -377,7 +377,7 @@ skFindTitle <- function(type, id){
 #' @seealso \code{\link{skCreate}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' require(jsonlite)
 #' meta= list(Title = "Test layer", Description = "Some description")
 #' type = "projects"
@@ -400,7 +400,6 @@ skFindTitle <- function(type, id){
 #'   , meta= meta
 #'   )
 #' str(sa)
-#' }
 #'
 #' type = "data_files"
 #' file =
@@ -410,7 +409,6 @@ skFindTitle <- function(type, id){
 #' str(sdata)
 #' }
 #'
-#' }
 skSkeleton <- function (type = "assay", meta, file){
 sj <- switch( type
 , projects =
@@ -924,7 +922,7 @@ contentType <- function(x){
 #' @seealso \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' if(FALSE)
 #' {
 #' skIni(prid = 26, test=TRUE)
