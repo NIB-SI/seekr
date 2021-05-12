@@ -23,7 +23,7 @@ Get inormation from repository.
 Parameter ... is ignored at this time.
 }
 \examples{
-\donotrun{
+\dontrun{
 skIni()
 options()$fhub$myid
 r <- skGet("people",options()$fhub$myid)
@@ -36,7 +36,7 @@ skGet("people",0)
 }
 }
 \seealso{
-\code{\link{get ...}}
+\code{\link{get}}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

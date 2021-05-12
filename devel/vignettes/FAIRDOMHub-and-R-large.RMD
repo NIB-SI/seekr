@@ -7,7 +7,7 @@ author:
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{my-vignette}
+  %\VignetteIndexEntry{FAIRDOMHub-and-R-large}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -24,6 +24,8 @@ I will try to connect to the FAIRDOM SEEK with the collection of their APIs.
 The API description with examples is available [here](https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.1#/people/updatePerson).
 
 It is also available in my Postman.
+
+ANother useful resource is [JSON API to FAIRDOM SEEK](https://docs.seek4science.org/tech/api/)
 
 My final goal is to enable upload/download from pISA-tree to FAIRDOMHub. This feature will be a part of the R package `pISAR` that will enable use of pISA structure and metafile information for reproducible statistical analyses.
 
@@ -45,9 +47,8 @@ my_test_id <- 368
 I will use the testing site for the development and experiments:
 
 ```{r}
-siteid <- 1
-(baseurl <- c(mainurl, testurl)[siteid])
-(myid <- c(my_main_id, my_test_id)[siteid])
+baseurl <- testurl
+myid <- my_test_id
 url(baseurl)
 ```
 
@@ -80,7 +81,7 @@ library(RCurl)
 
 
 ```{r}
-(FAIRDOMExists <-  url.exists(baseurl))
+(FAIRDOMExists = url.exists(baseurl))
 ```
 # Package `httr`
 
@@ -106,8 +107,7 @@ r$content
 The response is structured and can be investigated with the helper functions. The response has three important parts: status, headers, and body.
 
 ```{r}
-# GET ("https://testing.sysmo-db.org/people/368")
-GET(paste0(baseurl,"/people/",myid))
+GET ("https://testing.sysmo-db.org/people/368")
 ```
 
 
@@ -180,7 +180,7 @@ The rudimetary R read connection with FAIRDOMHub can be established using the pa
 
 ```{r}
 # this function is equivaalent to a call:
-# curl -X GET "https://www.fairdomhub.org/what/id" -H  "accept: application/json"ž
+# curl -X GET "https://www.fairdomhub.org/what/id" -H  "accept: application/json"
 #
 myGET <- function(what, id,
                    uri=baseurl, ... ){
@@ -503,7 +503,7 @@ ij <- toJSON(ir)
 ij
 ```
 
-```{r, eval=FALSE}
+```{r}
 I <- list(
   data=list(
     type="investigations"
@@ -701,7 +701,7 @@ for(nm in names(a)){
 
 ```
 
-## CReate and post documents
+## Create and post documents
 
 ```{r}
 document_skeleton <- '{
@@ -768,13 +768,134 @@ II <- fromJSON(document_skeleton, simplifyVector = TRUE)
 II
 ```
 
+```{r}
+data_skeleton <- '
+{
+  "data": {
+    "type": "data_files",
+    "attributes": {
+      "title": "A Maximal Data File",
+      "description": "This is the description",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "license": "CC-BY-4.0",
+      "other_creators": "John Smith, Jane Smith",
+      "content_blobs": [
+        {
+          "original_filename": "a_pdf_file.pdf",
+          "content_type": "application/pdf"
+        }
+      ],
+      "policy": {
+        "access": "download",
+        "permissions": [
+          {
+            "resource": {
+              "id": "359",
+              "type": "projects"
+            },
+            "access": "edit"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "creators": {
+        "data": [
+          {
+            "id": "234",
+            "type": "people"
+          }
+        ]
+      },
+      "projects": {
+        "data": [
+          {
+            "id": "359",
+            "type": "projects"
+          }
+        ]
+      },
+      "assays": {
+        "data": [
+          {
+            "id": "38",
+            "type": "assays"
+          }
+        ]
+      }
+    }
+  }
+}'
+data_skeleton
+II <- fromJSON(data_skeleton, simplifyVector = TRUE)
+II
+```
+
+
+Content types
+```{r}
+contentType <- function(x){
+  switch(tolower(fileType(x))
+         , txt  = "text/plain"
+         , rnw  = "text/plain"
+         , rmd  = "text/markdown"
+         , md   = "text/markdown"
+         , csv  = "text/plain"
+         , tsv  = "text/plain"
+         , bat  = "text/plain"
+         , htm 	= "text/html"
+         , html = "text/html"
+         , pdf  = "application/pdf"
+         , doc  = "application/msword"
+         , docx = "application/msword"
+         , xls  = "application/excel"
+         , xlsx = "application/excel"
+         , tex  = "application/x-tex"
+         , gz   = "application/x-gz"
+         , tar  = "application/x-tar"
+         , jpg  = "image/jpeg"
+         , jpeg = "image/jpeg"
+         , png  = "image/png"
+         , tif  = "image/tiff"
+         , tiff = "image/tiff"
+         , "application/octet-stream"
+         )
+}
+contentType("bla.pdf")
+contentType("bla.tar.gz")
+contentType("bla.bla")
+```
+
+
 
 ```{r}
-content_type <- "text/plain"
 apath <- "D:/DEJAVNOSTI/OMIKE/pISA-projects/_p_biopharm.si/_I_Task1/_S_doktoratiUM/_A_080-LDA-Ref-R"
 original_filename <- "_ASSAY_METADATA.TXT"
-document_title <- paste("Assay metadata:",Sys.time())
+original_filename <- "_A_080-LDA-Ref-R.tar"
+original_filename <- "_Assay_METADATA - Copy.jpg"
+document_title <- paste(fileName(original_filename),Sys.time())
 document_description <- "Details about assay"
+content_type <- contentType(original_filename)
+tags <- content_type
+tags
+#
+if(FALSE){
+apath <- "O:/DEJAVNOSTI/OMIKE/pISA-Projects/_p_stRT/_I_STRT/_S_03_stCuSTr/_A_01_evigene"
+original_filename <- "intermediate_tr2aacds_Rywal.tar.gz" #   1GB 212s
+original_filename <- "intermediate_tr2aacds_Desiree.tar.gz" # 2GB 422s
+# I was not able to upload files with size over 2GB
+#original_filename <- "intermediate_tr2aacds_PW363.tar.gz" # > 3GB
+document_title <- fileName(original_filename)
+document_description <- "Intermediate steps"
+content_type <- contentType(original_filename)
+tags <- content_type
+tags
+}
+#
+fpath <- file.path(apath, original_filename)
 #
 II$data$attributes$title <- document_title
 II$data$attributes$description <- document_description
@@ -782,14 +903,15 @@ II$data$relationships$creators$data$id <- myid
 II$data$relationships$creators$data
 II$data$relationships$projects$data$id <- pid
 II$data$relationships$projects$data
+II$data$relationships$assays$data$id <- aid
+II$data$relationships$assays$data
 II$data$attributes$policy$permissions$resource$id <- pid
 II$data$attributes$policy$permissions
 II$data$attributes$content_blobs$content_type <- content_type
 II$data$attributes$content_blobs$original_filename <- original_filename
 II$data$attributes$content_blobs
 II$data$attributes$other_creators <- ""
-II$data$attributes$tags <- c("pISA", "metadata")
-II$data$relationships$assays$data$id <- aid
+II$data$attributes$tags <- c("pISA", tags)
 II
 I <- toJSON(II,auto_unbox = TRUE)
 I
@@ -799,7 +921,8 @@ I
 
 
 ```{r}
-uri <- modify_url(baseurl,path="documents")
+
+uri <- modify_url(baseurl,path=II$data$type)
 uri
 response <- POST(uri
     , authenticate("ablejec","testni.1234",type = "basic")
@@ -808,6 +931,7 @@ response <- POST(uri
     , accept("application/json")
     , content_type_json()
     )
+rm(res)
 res <- fromJSON(content(response, as = "text"))
 str(res)
 res$data$id
@@ -818,7 +942,8 @@ blob_link
 
 Open in the web browser
 ```{r}
-if(interactive()) shell.exec(file.path(res$data$meta$base_url,res$data$links$self))
+item_link <- file.path(res$data$meta$base_url,res$data$links$self)
+if(interactive()) shell.exec(item_link)
 ```
 
 
@@ -827,26 +952,29 @@ if(interactive()) shell.exec(file.path(res$data$meta$base_url,res$data$links$sel
 ```{r}
 
 fpath <- file.path(apath, original_filename)
-file_content <- paste(readLines(fpath),collapse="\n")
-cat(file_content)
+if(content_type=="text/plain") {
+  file_content <- paste(readLines(fpath,n = 10),collapse="\n")
+  cat(file_content)
+}
 ```
 
 ```{r}
 uri <- blob_link
 uri
-response <- PUT(uri
+system.time(
+  response <- PUT(uri
     , authenticate("ablejec","testni.1234",type = "basic")
     , body = upload_file(fpath)
     , encode="json"
     , accept("*.*")
     )
+)
 res <- fromJSON(content(response, as = "text"))
 str(res)
 ```
-
-Open in the web browser
+Open in the  web browser
 ```{r}
-if(interactive()) shell.exec(blob_link)
+if(interactive()) shell.exec(item_link)
 ```
 
 
@@ -854,4 +982,8 @@ if(interactive()) shell.exec(blob_link)
 # Links
 
 [Best practices for API packages](https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html)
+
+```{r}
+GET()
+```
 

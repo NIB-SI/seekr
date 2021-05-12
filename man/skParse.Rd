@@ -16,7 +16,7 @@ An object (list) of class \code{seek_api}.
 Parse the response from SEEK API
 }
 \examples{
-\donotrun{
+\dontrun{
 skIni()
 options()$fhub$myid
 r <- skGet("people",options()$fhub$myid)
@@ -34,7 +34,7 @@ r
 }
 }
 \seealso{
-\code{\link{skGget ...}}
+\code{\link{skGet}}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

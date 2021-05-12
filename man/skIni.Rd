@@ -15,6 +15,10 @@ A list with URL and user information. For side effect see Notes.
 \description{
 Define FAIRDOMhub URL and user data
 }
+\note{
+The returned list is added to the
+     \code{options()} list under name 'fhub'.
+}
 \examples{
 \dontrun{
 skIni()

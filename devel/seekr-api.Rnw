@@ -34,7 +34,7 @@ Main FAIRDOMHub URL and test site urls:
 #'
 #' @param test If TRUE, test server will be used..
 #' @return A list with URL and user information. For side effect see Notes.
-#' @notes The returned list is added to the
+#' @note The returned list is added to the
 #'      \code{options()} list under name 'fhub'.
 #' @export
 #' @keywords file
@@ -85,10 +85,10 @@ invisible(tmp)
 #' @param resp Response from SEEK API.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
-#' @seealso \code{\link{skGget ...}}
+#' @seealso \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -145,10 +145,10 @@ skParse <- function(resp, ...){
 #' @param content If FALSE (default), content is no printed.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
-#' @seealso \code{\link{skParse ...}}
+#' @seealso \code{\link{skParse}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -190,10 +190,10 @@ invisible(x)
 #' @export
 #' @note Parameter ... is ignored at this time.
 #' @keywords file
-#' @seealso \code{\link{get ...}}
+#' @seealso \code{\link{get}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -242,10 +242,10 @@ skGet <- function(type, id,
 #' @export
 #' @note Parameter ... is ignored at this time.
 #' @keywords file
-#' @seealso \code{\link{get ...}}
+#' @seealso \code{\link{get}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' options()$fhub$myid
 #' r <- skGet("people",options()$fhub$myid)
@@ -298,7 +298,7 @@ skDatas <- skData
 #' @seealso \code{\link{skFindTitle}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' id <- skFindId("people","Guest")
 #' id
@@ -339,7 +339,7 @@ skFindId <- function(type, title){
 #' @seealso \code{\link{skFindTitle}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' skIni()
 #' id <- skFindId("people","Guest")
 #' id
@@ -377,7 +377,7 @@ skFindTitle <- function(type, id){
 #' @seealso \code{\link{skCreate}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' require(jsonlite)
 #' meta= list(Title = "Test layer", Description = "Some description")
 #' type = "projects"
@@ -400,7 +400,6 @@ skFindTitle <- function(type, id){
 #'   , meta= meta
 #'   )
 #' str(sa)
-#' }
 #'
 #' type = "data_files"
 #' file =
@@ -410,7 +409,6 @@ skFindTitle <- function(type, id){
 #' str(sdata)
 #' }
 #'
-#' }
 skSkeleton <- function (type = "assay", meta, file){
 sj <- switch( type
 , projects =
@@ -924,7 +922,7 @@ contentType <- function(x){
 #' @seealso \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' \donotrun{
+#' \dontrun{
 #' if(FALSE)
 #' {
 #' skIni(prid = 26, test=TRUE)

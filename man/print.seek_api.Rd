@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{Object of class \code{seek_api}.}
 
-\item{content}{If FALSE (default), content is not printed.}
+\item{content}{If FALSE (default), content is no printed.}
 }
 \value{
 An object (list) of class \code{seek_api}.
@@ -18,7 +18,7 @@ An object (list) of class \code{seek_api}.
 Print method for seek_api object
 }
 \examples{
-\donotrun{
+\dontrun{
 skIni()
 options()$fhub$myid
 r <- skGet("people",options()$fhub$myid)
@@ -32,7 +32,7 @@ status_code(r$response)
 
 }
 \seealso{
-\code{\link{skParse ...}}
+\code{\link{skParse}}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}
