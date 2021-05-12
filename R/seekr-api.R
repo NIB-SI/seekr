@@ -126,7 +126,7 @@ skParse <- function(resp, ...){
 #' Print method for seek_api object
 #'
 #' @param x Object of class \code{seek_api}.
-#' @param content If FALSE (default), content is no printed.
+#' @param content If FALSE (default), content is not printed.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
 #' @seealso \code{\link{skParse ...}}
