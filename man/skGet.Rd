@@ -31,7 +31,7 @@ names(r)
 r$response$status_code
 status_code(r$response)
 r
-Non existent user
+# Non existent user
 skGet("people",0)
 }
 }

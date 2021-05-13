@@ -82,7 +82,7 @@ options("fhub")
 
 # Type: data_file
 astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
-oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+oldwd <- setwd(system.file("extdata",astring,package="seekr"))
 oldwd
 .aname <- getLayer("A")
 .aroot <- getRoot("A")

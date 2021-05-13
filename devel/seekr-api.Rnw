@@ -120,7 +120,7 @@ skParse <- function(resp, ...){
     )
   }
   if(length(parsed$meta$base_url)!=1) url <- "" else
-  url <- modify_url(parsed$meta$base_url,path=parsed$links)
+  url <- httr::modify_url(parsed$meta$base_url,path=parsed$links)
   ret <-    structure(
        list(
           id = parsed$id
@@ -201,7 +201,7 @@ invisible(x)
 #' r$response$status_code
 #' status_code(r$response)
 #' r
-#' Non existent user
+#' # Non existent user
 #' skGet("people",0)
 #' }
 skGet <- function(type, id,
@@ -209,10 +209,10 @@ skGet <- function(type, id,
 #                  uri="https://www.fairdomhub.org", ... ){
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
-  ua <- user_agent("https://github.com/ablejec/pisar")
+  ua <- httr::user_agent("https://github.com/nib-si/seekr")
   skLog("skGet", uri)
   fht <- system.time(
-  resp <- GET(uri,
+  resp <- httr::GET(uri,
          add_headers(Accept="application/json")
          , ua
          )
@@ -268,25 +268,25 @@ skGet <- function(type, id,
 #' id <- d[[pmatch(myname,titles)]]$id
 #' id
 #' }
-skData <- function(r, node, ...){
-  if(class(r)=="seek_api") r <- r$response
-  jsn <- "application/json"
-  if(missing(node)) invisible(content(r,"parsed",type=jsn)$data) else
-  invisible(content(r,"parsed",type=jsn)$data[[node]])
-}
+## skData <- function(r, node, ...){
+##   if(class(r)=="seek_api") r <- r$response
+##   jsn <- "application/json"
+##   if(missing(node)) invisible(content(r,"parsed",type=jsn)$data) else
+##   invisible(content(r,"parsed",type=jsn)$data[[node]])
+## }
 skData <- function(r, node, ...){
   if(class(r)=="seek_api") r <- r$content
   jsn <- "application/json"
   if(missing(node)) invisible(r) else
   invisible(r[[node]])
 }
-skDatas <- skData
+# skDatas <- skData
 @
 
 <<skFindId>>=
 #' Get details of component with id from an *fh* object.
 #'
-#' @param type Components name (e.g. 'people', 'projets', ...).
+#' @param type Components name (e.g. 'people', 'projects', ...).
 #' @param title Character string with the identifier
 #'     of the component (title part).
 #' @return FAIRDOMhub component identifier: id, type and title.
@@ -327,7 +327,7 @@ skFindId <- function(type, title){
 <<skFindTitle>>=
 #' Get details of component with id from an *fh* object.
 #'
-#' @param type Components name (e.g. 'people', 'projets', ...).
+#' @param type Components name (e.g. 'people', 'projects', ...).
 #' @param id Character string with the identifier
 #'     of the component (id part).
 #' @return FAIRDOMhub component identifier: id, type and title.
@@ -823,7 +823,7 @@ sj <- switch( type
 sx <- unlist(strsplit(sj,"\n"))
 sx <- sx[!grepl("^#",sx)]
 sj <- paste(sx,collapse="\n")
-sr <- fromJSON(sj, simplifyVector = TRUE)
+sr <- jsonlite::fromJSON(sj, simplifyVector = TRUE)
 return(sr)
 }
 @
@@ -976,7 +976,7 @@ contentType <- function(x){
 #'
 #' # Type: data_file
 #' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
-#' oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+#' oldwd <- setwd(system.file("extdata",astring,package="seekr"))
 #' oldwd
 #' .aname <- getLayer("A")
 #' .aroot <- getRoot("A")
@@ -1086,15 +1086,15 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
       }
      )
      baseurl <- options()$fhub$baseurl
-     uri <- modify_url(baseurl,path=s$data$type)
-     I <- toJSON(s, auto_unbox=TRUE, pretty=TRUE)
+     uri <- httr::modify_url(baseurl,path=s$data$type)
+     I <- jsonlite::toJSON(s, auto_unbox=TRUE, pretty=TRUE)
      #
      # For testing: list JSON object
      #     cat(I, "\n")
      #
-     ua <- user_agent("https://github.com/ablejec/pisar")
+     ua <- httr::user_agent("https://github.com/nib-si/seekr")
      skLog("skCreate", uri)
-     fht <- system.time(resp <- POST(uri
+     fht <- system.time(resp <- httr::POST(uri
          , authenticate(
              options()$fhub$usr
            , options()$fhub$pwd
@@ -1120,7 +1120,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      if(file.exists(fpath)) {
      skLog("skUpload",uri)
      fht <- system.time(
-     resp_blob <- PUT(uri
+     resp_blob <- httr::PUT(uri
          , authenticate(
              options()$fhub$usr
            , options()$fhub$pwd
@@ -1130,7 +1130,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
     , encode="json"
     , accept("*.*")
     ))
-    resp_blob <- fromJSON(content(resp_blob, as = "text"))
+    resp_blob <- jsonlite::fromJSON(content(resp_blob, as = "text"))
     resp_blob <- paste(fpath, " | File size:", resp_blob)
     } else {
     resp_blob <- paste("Error: File not found:" ,fpath)
@@ -1180,7 +1180,7 @@ skUpload <- function( object, file){
      skLog("skUpload",uri)
      fht=-1
      fht <- system.time(
-     resp <- PUT(uri
+     resp <- httr::PUT(uri
         , authenticate(
              options()$fhub$usr
            , options()$fhub$pwd
@@ -1191,7 +1191,7 @@ skUpload <- function( object, file){
     , accept("*.*")
     ))
     print(resp)
-    fs <- round(as.numeric(rawToChar(sd$content))/1024^2,3)
+    fs <- round(as.numeric(rawToChar(resp$content))/1024^2,3)
     file_size <- paste0(fpath, " | ", fs,"MB")
     } else {
     resp_blob <- paste("Error: File not found:" ,fpath)

@@ -100,16 +100,18 @@ Package source file(s): \url{\Sexpr{pkgFile}}
 childtxt <- ""
 @
 <<eval=FALSE>>=
+if(FALSE){
 for (i in 1:length(fctFile)){
     childtxt <- paste(childtxt
    , knit_child(file.path("../devel",fctFile[i]), quiet=TRUE))
+}
 }
 @
 \Sexpr{childtxt}
 \clearpage
 \section{Export as source for package}
 
-perform steps for building a package. Extract code, make documentation files (\file{*.Rd}), build a package.
+Perform steps for building a package. Extract code, make documentation files (\file{*.Rd}), build a package.
 
 \subsection{Extract code}
 
@@ -146,7 +148,6 @@ usethis::use_package('httr')
 usethis::use_package('jsonlite')
 usethis::use_package('pisar')
 usethis::use_build_ignore(c("devel"))
-usethis::use_package('pisar')
 @
 \clearpage
 \subsection{Check}

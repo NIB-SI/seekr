@@ -1,6 +1,6 @@
 ---
 title: "Test API connection to FAIRDOMHub"
-author: 
+author:
  - name: A. Blejec
    email: ablejec@nib.si
    affiliation: National Institute of Biology, Ljubljana, Slovenia
@@ -19,7 +19,7 @@ A former version of this document is available at Available at [RPubs](http://rp
 
 # Introduction
 
-I will try to connect to the FAIRDOM SEEK with the collection of their APIs. 
+I will try to connect to the FAIRDOM SEEK with the collection of their APIs.
 
 The API description with examples is available [here](https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.1#/people/updatePerson).
 
@@ -45,7 +45,8 @@ my_test_id <- 368
 I will use the testing site for the development and experiments:
 
 ```{r}
-siteid <- 1
+siteid <- 1 # real
+siteid <- 2 # test
 (baseurl <- c(mainurl, testurl)[siteid])
 (myid <- c(my_main_id, my_test_id)[siteid])
 url(baseurl)
@@ -67,7 +68,6 @@ url(purl)
 url(iurl)
 url(surl)
 url(aurl)
-
 ```
 
  Check the existence
@@ -180,7 +180,7 @@ The rudimetary R read connection with FAIRDOMHub can be established using the pa
 
 ```{r}
 # this function is equivaalent to a call:
-# curl -X GET "https://www.fairdomhub.org/what/id" -H  "accept: application/json"ž
+# curl -X GET "https://www.fairdomhub.org/what/id" -H  "accept: application/json"
 #
 myGET <- function(what, id,
                    uri=baseurl, ... ){
@@ -306,7 +306,7 @@ iid
 ```{r}
 extract <- function(x, what="relationships") lapply(x[[what]]
                     , FUN=function(x) if(length(x$data)>0) {
-                      myDatas(myGET(x$data[[1]]$type, x$data[[1]]$id),"attributes") 
+                      myDatas(myGET(x$data[[1]]$type, x$data[[1]]$id),"attributes")
                       } else NA )
 #extract <- function(x, what="relationships") lapply(x[[what]]
 #                    , FUN=function(x) length(x$data))
@@ -523,7 +523,7 @@ I <- toJSON(I)
 #I <- gsub("\\]","",I)
 I <- gsub('("type":)\\[(".*")\\],"at','\\1\\2,"at', I)
 I <- gsub('("title":)\\[(".*")\\],"de','\\1\\2,"de', I)
-I <- gsub('("description":)\\[(".*")\\]},','\\1\\2},', I)         
+I <- gsub('("description":)\\[(".*")\\]},','\\1\\2},', I)
 I
 ```
 Or nicer:
@@ -669,7 +669,7 @@ Tudi moj primer
         }
     }
     }
-    
+
 }
 ```
 

@@ -7,7 +7,7 @@
 skFindId(type, title)
 }
 \arguments{
-\item{type}{Components name (e.g. 'people', 'projets', ...).}
+\item{type}{Components name (e.g. 'people', 'projects', ...).}
 
 \item{title}{Character string with the identifier
 of the component (title part).}
