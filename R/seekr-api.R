@@ -19,19 +19,19 @@ library(httr)
 #' @param test If TRUE, test server will be used..
 #' @return A list with URL and user information. For side effect see Notes.
 #' @note The returned list is added to the
-#'      \code{options()} list under name 'fhub'.
+#'      \code{options()} list under name 'shub'.
 #' @export
 #' @keywords file
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options("fhub")
+#' options("shub")
 #' #
 #' skIni(test=FALSE)
-#' options("fhub")
+#' options("shub")
 #' }
-skIni <- function(
+skIni <- function(url="https://www.fairdomhub.org/",myid=NULL,
       prid = NULL
     , pid = NULL
     , iid = NULL
@@ -44,6 +44,7 @@ testurl <- "https://testing.sysmo-db.org"
 my_main_id <- 808
 my_test_id <- 368
 # I will use the testing site for the development and experiments:
+
 baseurl <- ifelse(test, testurl, mainurl)
 myid <- ifelse(test, my_test_id, my_main_id)
 usr <- ifelse(test, "ablejec", "ablejec")
@@ -58,7 +59,7 @@ tmp <- list(baseurl = baseurl
    , sid = as.character(sid)
    , aid = as.character(aid)
    )
-   options(fhub = tmp)
+   options(shub = tmp)
 invisible(tmp)
 }
 
@@ -74,8 +75,8 @@ invisible(tmp)
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$fhub$myid
-#' r <- skGet("people",options()$fhub$myid)
+#' options()$shub$myid
+#' r <- skGet("people",options()$shub$myid)
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
@@ -134,8 +135,8 @@ skParse <- function(resp, ...){
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$fhub$myid
-#' r <- skGet("people",options()$fhub$myid)
+#' options()$shub$myid
+#' r <- skGet("people",options()$shub$myid)
 #' # Print contents
 #' print( r, TRUE)
 #' # Short version, default
@@ -176,8 +177,8 @@ invisible(x)
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$fhub$myid
-#' r <- skGet("people",options()$fhub$myid)
+#' options()$shub$myid
+#' r <- skGet("people",options()$shub$myid)
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
@@ -186,7 +187,7 @@ invisible(x)
 #' skGet("people",0)
 #' }
 skGet <- function(type, id,
-                   uri=options()$fhub$baseurl, ... ){
+                   uri=options()$shub$baseurl, ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
@@ -214,7 +215,7 @@ skGet <- function(type, id,
 
 
 ## ----skData---------------------------------------------------------
-#' Get content from an *fh* object.
+#' Get content from an *sk* object.
 #'
 #' @param r Object retrieved by skGet.
 #' @param type Name of the required element. If missing, a list with
@@ -228,8 +229,8 @@ skGet <- function(type, id,
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$fhub$myid
-#' r <- skGet("people",options()$fhub$myid)
+#' options()$shub$myid
+#' r <- skGet("people",options()$shub$myid)
 #' d <- skData(r,"attributes")
 #' names(d)
 #' d$last_name
@@ -265,7 +266,7 @@ skData <- function(r, node, ...){
 
 
 ## ----skFindId-------------------------------------------------------
-#' Get details of component with id from an *fh* object.
+#' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
 #' @param title Character string with the identifier
@@ -306,7 +307,7 @@ skFindId <- function(type, title){
 
 
 ## ----skFindTitle----------------------------------------------------
-#' Get details of component with id from an *fh* object.
+#' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
 #' @param id Character string with the identifier
@@ -344,9 +345,9 @@ skFindTitle <- function(type, id){
 
 
 ## ----skSkeleton-----------------------------------------------------
-#' Create *fh* skeleton.
+#' Create *sk* skeleton.
 #'
-#' Creates *fh* object with required structure.
+#' Creates *sk* object with required structure.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
 #' @param meta Data frame with pISA metadata or
@@ -882,7 +883,7 @@ contentType <- function(x){
 
 
 ## ----skCreate-------------------------------------------------------
-#' Create pISA layer or *fh* component.
+#' Create pISA layer or *sk* component.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
 #' @param meta Data frame with pISA metadata or
@@ -903,7 +904,7 @@ contentType <- function(x){
 #' if(FALSE)
 #' {
 #' skIni(prid = 26, test=TRUE)
-#' options("fhub")
+#' options("shub")
 #'  sp <- skCreate( type = "projects"
 #'   , meta= list(
 #'       Title=paste("Test project", Sys.time())
@@ -914,7 +915,7 @@ contentType <- function(x){
 #' # Add member manually
 #
 #'  skIni(prid = 26, pid=104, test=TRUE)
-#'  options("fhub")
+#'  options("shub")
 #'  si <- skCreate( type = "investigations"
 #'   , meta= list(
 #'       Title=paste("Test investigation", Sys.time())
@@ -926,7 +927,7 @@ contentType <- function(x){
 #'  iid=skData(si)$id
 #'  iid <- 115
 #'  skIni(prid = 26, pid=104, iid=iid, test=TRUE)
-#'  options("fhub")
+#'  options("shub")
 #'  ss <- skCreate( type = "studies"
 #'   , meta= list(
 #'       Title=paste("Test study", Sys.time())
@@ -940,7 +941,7 @@ contentType <- function(x){
 #'        , iid=skData(si)$id
 #'        , sid=skData(ss)$id
 #'        , test=TRUE)
-#'  options("fhub")
+#'  options("shub")
 #'  sa <- skCreate( type = "assays"
 #'   , meta= list(
 #'       Title=paste("Test assay", Sys.time())
@@ -978,12 +979,12 @@ contentType <- function(x){
 #' if(interactive()) shell.exec(item_link)
 #' }
 skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
-     myid <- options()$fhub$myid
-     prid <- options()$fhub$prid
-     pid <-  options()$fhub$pid
-     iid <-  options()$fhub$iid
-     sid <-  options()$fhub$sid
-     aid <-  options()$fhub$aid
+     myid <- options()$shub$myid
+     prid <- options()$shub$prid
+     pid <-  options()$shub$pid
+     iid <-  options()$shub$iid
+     sid <-  options()$shub$sid
+     aid <-  options()$shub$aid
      s <- skSkeleton(type, meta)
 # Common fileds
      s$data$attributes$title  <-  getMeta(meta,"Title")
@@ -1062,7 +1063,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
         s$data$attributes$tags <- c("pISA", tags)
       }
      )
-     baseurl <- options()$fhub$baseurl
+     baseurl <- options()$shub$baseurl
      uri <- httr::modify_url(baseurl,path=s$data$type)
      I <- jsonlite::toJSON(s, auto_unbox=TRUE, pretty=TRUE)
      #
@@ -1073,8 +1074,8 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      skLog("skCreate", uri)
      fht <- system.time(resp <- httr::POST(uri
          , authenticate(
-             options()$fhub$usr
-           , options()$fhub$pwd
+             options()$shub$usr
+           , options()$shub$pwd
            , type = "basic")
          , body = I
          , encode="json"
@@ -1099,8 +1100,8 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      fht <- system.time(
      resp_blob <- httr::PUT(uri
          , authenticate(
-             options()$fhub$usr
-           , options()$fhub$pwd
+             options()$shub$usr
+           , options()$shub$pwd
            , type = "basic"
            )
     , body = upload_file(fpath)
@@ -1159,8 +1160,8 @@ skUpload <- function( object, file){
      fht <- system.time(
      resp <- httr::PUT(uri
         , authenticate(
-             options()$fhub$usr
-           , options()$fhub$pwd
+             options()$shub$usr
+           , options()$shub$pwd
            , type = "basic"
         )
     , body = upload_file(fpath)
