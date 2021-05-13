@@ -20,8 +20,8 @@ Print method for seek_api object
 \examples{
 \dontrun{
 skIni()
-options()$fhub$myid
-r <- skGet("people",options()$fhub$myid)
+options()$seekr$myid
+r <- skGet("people",options()$seekr$myid)
 # Print contents
 print( r, TRUE)
 # Short version, default

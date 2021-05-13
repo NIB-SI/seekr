@@ -4,7 +4,16 @@
 \alias{skIni}
 \title{Initialize FAIRDOMhub information}
 \usage{
-skIni(prid = NULL, pid = NULL, iid = NULL, sid = NULL, aid = NULL, test = TRUE)
+skIni(
+  url = "https://www.fairdomhub.org/",
+  myid = NULL,
+  prid = NULL,
+  pid = NULL,
+  iid = NULL,
+  sid = NULL,
+  aid = NULL,
+  test = TRUE
+)
 }
 \arguments{
 \item{test}{If TRUE, test server will be used..}
@@ -17,15 +26,15 @@ Define FAIRDOMhub URL and user data
 }
 \note{
 The returned list is added to the
-     \code{options()} list under name 'fhub'.
+     \code{options()} list under name 'seekr'.
 }
 \examples{
 \dontrun{
 skIni()
-options("fhub")
+options("seekr")
 #
 skIni(test=FALSE)
-options("fhub")
+options("seekr")
 }
 }
 \author{

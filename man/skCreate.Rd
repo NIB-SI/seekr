@@ -2,7 +2,7 @@
 % Please edit documentation in R/seekr-api.R
 \name{skCreate}
 \alias{skCreate}
-\title{Create pISA layer or *fh* component.}
+\title{Create pISA layer or *sk* component.}
 \usage{
 skCreate(type = "assays", meta = list(), class = "EXP", file = "NA.TXT")
 }
@@ -22,7 +22,7 @@ Possible values are 'EXP' and 'MODEL'.}
 FAIRDOMhub created component.
 }
 \description{
-Create pISA layer or *fh* component.
+Create pISA layer or *sk* component.
 }
 \note{
 Upon success (status code 200) details
@@ -33,7 +33,7 @@ of newly created component can be used. Check status code.
 if(FALSE)
 {
 skIni(prid = 26, test=TRUE)
-options("fhub")
+options("seekr")
  sp <- skCreate( type = "projects"
   , meta= list(
       Title=paste("Test project", Sys.time())
@@ -43,7 +43,7 @@ options("fhub")
  str(skData(sp))
 # Add member manually
  skIni(prid = 26, pid=104, test=TRUE)
- options("fhub")
+ options("seekr")
  si <- skCreate( type = "investigations"
   , meta= list(
       Title=paste("Test investigation", Sys.time())
@@ -55,7 +55,7 @@ options("fhub")
  iid=skData(si)$id
  iid <- 115
  skIni(prid = 26, pid=104, iid=iid, test=TRUE)
- options("fhub")
+ options("seekr")
  ss <- skCreate( type = "studies"
   , meta= list(
       Title=paste("Test study", Sys.time())
@@ -69,7 +69,7 @@ options("fhub")
        , iid=skData(si)$id
        , sid=skData(ss)$id
        , test=TRUE)
- options("fhub")
+ options("seekr")
  sa <- skCreate( type = "assays"
   , meta= list(
       Title=paste("Test assay", Sys.time())

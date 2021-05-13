@@ -18,8 +18,8 @@ Parse the response from SEEK API
 \examples{
 \dontrun{
 skIni()
-options()$fhub$myid
-r <- skGet("people",options()$fhub$myid)
+options()$seekr$myid
+r <- skGet("people",options()$seekr$myid)
 names(r)
 r$response$status_code
 status_code(r$response)

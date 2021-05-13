@@ -35,17 +35,17 @@ Main FAIRDOMHub URL and test site urls:
 #' @param test If TRUE, test server will be used..
 #' @return A list with URL and user information. For side effect see Notes.
 #' @note The returned list is added to the
-#'      \code{options()} list under name 'shub'.
+#'      \code{options()} list under name 'seekr'.
 #' @export
 #' @keywords file
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options("shub")
+#' options("seekr")
 #' #
 #' skIni(test=FALSE)
-#' options("shub")
+#' options("seekr")
 #' }
 skIni <- function(url="https://www.fairdomhub.org/",myid=NULL,
       prid = NULL
@@ -75,7 +75,7 @@ tmp <- list(baseurl = baseurl
    , sid = as.character(sid)
    , aid = as.character(aid)
    )
-   options(shub = tmp)
+   options(seekr = tmp)
 invisible(tmp)
 }
 @
@@ -91,8 +91,8 @@ invisible(tmp)
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$shub$myid
-#' r <- skGet("people",options()$shub$myid)
+#' options()$seekr$myid
+#' r <- skGet("people",options()$seekr$myid)
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
@@ -151,8 +151,8 @@ skParse <- function(resp, ...){
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$shub$myid
-#' r <- skGet("people",options()$shub$myid)
+#' options()$seekr$myid
+#' r <- skGet("people",options()$seekr$myid)
 #' # Print contents
 #' print( r, TRUE)
 #' # Short version, default
@@ -196,8 +196,8 @@ invisible(x)
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$shub$myid
-#' r <- skGet("people",options()$shub$myid)
+#' options()$seekr$myid
+#' r <- skGet("people",options()$seekr$myid)
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
@@ -206,7 +206,7 @@ invisible(x)
 #' skGet("people",0)
 #' }
 skGet <- function(type, id,
-                   uri=options()$shub$baseurl, ... ){
+                   uri=options()$seekr$baseurl, ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
@@ -248,8 +248,8 @@ skGet <- function(type, id,
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$shub$myid
-#' r <- skGet("people",options()$shub$myid)
+#' options()$seekr$myid
+#' r <- skGet("people",options()$seekr$myid)
 #' d <- skData(r,"attributes")
 #' names(d)
 #' d$last_name
@@ -927,7 +927,7 @@ contentType <- function(x){
 #' if(FALSE)
 #' {
 #' skIni(prid = 26, test=TRUE)
-#' options("shub")
+#' options("seekr")
 #'  sp <- skCreate( type = "projects"
 #'   , meta= list(
 #'       Title=paste("Test project", Sys.time())
@@ -938,7 +938,7 @@ contentType <- function(x){
 #' # Add member manually
 #
 #'  skIni(prid = 26, pid=104, test=TRUE)
-#'  options("shub")
+#'  options("seekr")
 #'  si <- skCreate( type = "investigations"
 #'   , meta= list(
 #'       Title=paste("Test investigation", Sys.time())
@@ -950,7 +950,7 @@ contentType <- function(x){
 #'  iid=skData(si)$id
 #'  iid <- 115
 #'  skIni(prid = 26, pid=104, iid=iid, test=TRUE)
-#'  options("shub")
+#'  options("seekr")
 #'  ss <- skCreate( type = "studies"
 #'   , meta= list(
 #'       Title=paste("Test study", Sys.time())
@@ -964,7 +964,7 @@ contentType <- function(x){
 #'        , iid=skData(si)$id
 #'        , sid=skData(ss)$id
 #'        , test=TRUE)
-#'  options("shub")
+#'  options("seekr")
 #'  sa <- skCreate( type = "assays"
 #'   , meta= list(
 #'       Title=paste("Test assay", Sys.time())
@@ -1002,12 +1002,12 @@ contentType <- function(x){
 #' if(interactive()) shell.exec(item_link)
 #' }
 skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
-     myid <- options()$shub$myid
-     prid <- options()$shub$prid
-     pid <-  options()$shub$pid
-     iid <-  options()$shub$iid
-     sid <-  options()$shub$sid
-     aid <-  options()$shub$aid
+     myid <- options()$seekr$myid
+     prid <- options()$seekr$prid
+     pid <-  options()$seekr$pid
+     iid <-  options()$seekr$iid
+     sid <-  options()$seekr$sid
+     aid <-  options()$seekr$aid
      s <- skSkeleton(type, meta)
 # Common fileds
      s$data$attributes$title  <-  getMeta(meta,"Title")
@@ -1086,7 +1086,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
         s$data$attributes$tags <- c("pISA", tags)
       }
      )
-     baseurl <- options()$shub$baseurl
+     baseurl <- options()$seekr$baseurl
      uri <- httr::modify_url(baseurl,path=s$data$type)
      I <- jsonlite::toJSON(s, auto_unbox=TRUE, pretty=TRUE)
      #
@@ -1097,8 +1097,8 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      skLog("skCreate", uri)
      fht <- system.time(resp <- httr::POST(uri
          , authenticate(
-             options()$shub$usr
-           , options()$shub$pwd
+             options()$seekr$usr
+           , options()$seekr$pwd
            , type = "basic")
          , body = I
          , encode="json"
@@ -1123,8 +1123,8 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      fht <- system.time(
      resp_blob <- httr::PUT(uri
          , authenticate(
-             options()$shub$usr
-           , options()$shub$pwd
+             options()$seekr$usr
+           , options()$seekr$pwd
            , type = "basic"
            )
     , body = upload_file(fpath)
@@ -1183,8 +1183,8 @@ skUpload <- function( object, file){
      fht <- system.time(
      resp <- httr::PUT(uri
         , authenticate(
-             options()$shub$usr
-           , options()$shub$pwd
+             options()$seekr$usr
+           , options()$seekr$pwd
            , type = "basic"
         )
     , body = upload_file(fpath)
