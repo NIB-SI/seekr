@@ -10,6 +10,7 @@ packrat/lib*/
 .RData
 .Ruserdata
 inst/doc
+devel/
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
