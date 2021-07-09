@@ -11,6 +11,16 @@ packrat/lib*/
 .Ruserdata
 inst/doc
 devel/
+# Tex related
+*.gz
+*.synctex
+*.toc
+*.log
+*concordance.tex
+devel/Tex-Aux/*
+gitHeadInfo.gin
+*.aux
+#
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
@@ -48,5 +58,3 @@ Temporary Items
 .apdisk
 Meta
 doc
-*.log
-FAIRDOM.log
