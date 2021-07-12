@@ -1,0 +1,9 @@
+DoNotUpload/
+other/
+*.bat
+_template.txt
+common.ini
+*.zip
+*.tmp
+*.log
+*.R
