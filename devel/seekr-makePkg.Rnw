@@ -21,6 +21,7 @@
 \input{mysweave}
 
 <<include=FALSE>>=
+library(knitr)
 render_sweave()
 opts_chunk$set(fig.path='./figs/seekr-',concordance=TRUE,tidy=TRUE)
 @
@@ -62,7 +63,6 @@ opts_chunk$set(fig.path='./figs/seekr-',concordance=TRUE,tidy=TRUE)
 @
 <<initialize,echo=FALSE,results='hide',message=FALSE>>=
 options(width=70)
-library(knitr)
 library(devtools)
 
 @
