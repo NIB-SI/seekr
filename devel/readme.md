@@ -7,3 +7,6 @@ Another one is in
 This one is maybe more testing?
 <D:\DEJAVNOSTI\OMIKE\pISA-projects\_p_stRT\_I_STRT\_S_-01-DoNotUpload\_A_DoNotUpload-R\other\upload>
 
+Script:
+
+FAIRDOMHub-Upload-with-seekr.Rmd 

@@ -55,3 +55,12 @@
 2021-02-04 14:07:55  0.26 https://testing.sysmo-db.org/people/320 
 2021-02-04 14:07:55 skGet https://testing.sysmo-db.org/people/0 
 2021-02-04 14:07:55  0.04 
+2021-07-12 18:25:47 skCreate https://testing.sysmo-db.org/projects 
+2021-07-12 18:25:58 skCreate https://testing.sysmo-db.org/projects 
+2021-07-12 18:26:13  15.03 https://testing.sysmo-db.org/projects/128 
+2021-07-12 18:28:46 skCreate https://testing.sysmo-db.org/investigations 
+2021-07-12 18:28:48  1.97 https://testing.sysmo-db.org/investigations/145 
+2021-07-12 18:28:48 skCreate https://testing.sysmo-db.org/studies 
+2021-07-12 18:28:50  2.11 https://testing.sysmo-db.org/studies/160 
+2021-07-12 18:29:24 skCreate https://testing.sysmo-db.org/assays 
+2021-07-12 18:29:26  1.84 https://testing.sysmo-db.org/assays/489 
