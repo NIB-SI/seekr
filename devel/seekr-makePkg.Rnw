@@ -21,6 +21,7 @@
 \input{mysweave}
 
 <<include=FALSE>>=
+library(knitr)
 render_sweave()
 opts_chunk$set(fig.path='./figs/seekr-',concordance=TRUE,tidy=TRUE)
 @
@@ -62,7 +63,6 @@ opts_chunk$set(fig.path='./figs/seekr-',concordance=TRUE,tidy=TRUE)
 @
 <<initialize,echo=FALSE,results='hide',message=FALSE>>=
 options(width=70)
-library(knitr)
 library(devtools)
 
 @
@@ -100,16 +100,18 @@ Package source file(s): \url{\Sexpr{pkgFile}}
 childtxt <- ""
 @
 <<eval=FALSE>>=
+if(FALSE){
 for (i in 1:length(fctFile)){
     childtxt <- paste(childtxt
    , knit_child(file.path("../devel",fctFile[i]), quiet=TRUE))
+}
 }
 @
 \Sexpr{childtxt}
 \clearpage
 \section{Export as source for package}
 
-perform steps for building a package. Extract code, make documentation files (\file{*.Rd}), build a package.
+Perform steps for building a package. Extract code, make documentation files (\file{*.Rd}), build a package.
 
 \subsection{Extract code}
 
@@ -128,7 +130,8 @@ childtxt <- paste(childtxt
     , output=file.path(pkgPath,"R",pkgFile[i]))
     )
 }
-dir(file.path(pkgPath,"R"))
+file.path(pkgPath,"R")
+#dir(file.path(pkgPath,"R"))
 
 @
 \Sexpr{childtxt}
@@ -146,14 +149,13 @@ usethis::use_package('httr')
 usethis::use_package('jsonlite')
 usethis::use_package('pisar')
 usethis::use_build_ignore(c("devel"))
-usethis::use_package('pisar')
 @
 \clearpage
 \subsection{Check}
 <<check package,eval=purl>>=
 #system.time(check <- devtools::check(pkgPath))
 system.time(miss <- devtools::missing_s3(pkgPath))
-
+miss
 @
 \clearpage
 \subsection{Check results}
@@ -168,7 +170,7 @@ Build the package
 
 <<build package,eval=purl>>=
 devtools::build(pkgPath,manual=TRUE,quiet=FALSE)
-devtools::load_all()
+
 @
 
 
@@ -176,7 +178,12 @@ devtools::load_all()
 Install
 
 <<install,eval=purl>>=
-devtools::install(pkgPath)
+# detach package
+location <- pmatch(paste0("package:",pkgName),search())
+location
+if(!is.na(location)) detach(pos=location)
+devtools::install(pkgPath, force=TRUE, build_vignettes = TRUE, upgrade="never")
+#remotes::install_local(pkgPath, force=TRUE, build_vignettes = TRUE, upgrade="never")
 ## str(out)(shell(paste(
 ## file.path(R.home("bin"),"Rcmd.exe"),
 ## " INSTALL --no-multiarch --with-keep.source",
@@ -207,14 +214,13 @@ dir(pattern=pkgName)
 @
 
 <<>>=
-help(package=(pkgName), help_type="pdf")
-
+if(interactive()) help(package=(pkgName), help_type="pdf")
 @
 
 Send package to R Windows builder
 
 <<eval=FALSE>>=
-devtools::build_win(pkgPath)
+devtools:::check_win(pkgPath, email="andrej.blejec@nib.si")
 
 @
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/seekr-api.R
 \name{skSkeleton}
 \alias{skSkeleton}
-\title{Create *fh* skeleton.}
+\title{Create *sk* skeleton.}
 \usage{
 skSkeleton(type = "assay", meta, file)
 }
@@ -16,7 +16,7 @@ a list with minimal information (Title, Description, *ToDo: add fields*).}
 A list with the minimal information structure.
 }
 \description{
-Creates *fh* object with required structure.
+Creates *sk* object with required structure.
 }
 \examples{
 \dontrun{

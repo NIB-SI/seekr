@@ -4,7 +4,7 @@
 \alias{skGet}
 \title{Get inormation from repository.}
 \usage{
-skGet(type, id, uri = options()$fhub$baseurl, ...)
+skGet(type, id, uri = options()$seekr$baseurl, ...)
 }
 \arguments{
 \item{type}{Type of information (e.g. "person").}
@@ -25,13 +25,13 @@ Parameter ... is ignored at this time.
 \examples{
 \dontrun{
 skIni()
-options()$fhub$myid
-r <- skGet("people",options()$fhub$myid)
+options()$seekr$myid
+r <- skGet("people",options()$seekr$myid)
 names(r)
 r$response$status_code
 status_code(r$response)
 r
-Non existent user
+# Non existent user
 skGet("people",0)
 }
 }

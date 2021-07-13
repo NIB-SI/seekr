@@ -14,41 +14,57 @@ library(httr)
 ## ----skIni----------------------------------------------------------
 #' Initialize FAIRDOMhub information
 #'
-#' Define FAIRDOMhub URL and user data
+#' Define FAIRDOMhub url and user data
 #'
-#' @param test If TRUE, test server will be used..
+#' @param url SEEK based server address. It can also be a list with
+#'   four components interpreted as url, usr, pwd and myid.
+#' @param usr user name.
+#' @param pwd password.
+#' @param myid numeric user id.
+#' @param prid programme number.
+#' @param pid project number.
+#' @param iid investigation number.
+#' @param sid study number.
+#' @param aid assay number.
 #' @return A list with URL and user information. For side effect see Notes.
 #' @note The returned list is added to the
-#'      \code{options()} list under name 'fhub'.
+#'      \code{options()} list under name 'seekr'. 
+#' @note At the moment two locations are available: main FAIRDOMHub 
+#'       (https://www.fairdomhub.org/) and testing site
+#'       (https://testing.sysmo-db.org).
 #' @export
 #' @keywords file
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' skIni()
-#' options("fhub")
+#' skIni(url="https://www.fairdomhub.org/", usr="username"
+#'    , pwd="secret", myid=888)
+#' options("seekr")
 #' #
-#' skIni(test=FALSE)
-#' options("fhub")
+#' fh <- list(url="https://www.fairdomhub.org/", usr="username"
+#'    , pwd="secret", myid=888)
+#' skIni(fh)
+#' options("seekr")
 #' }
-skIni <- function(
-      prid = NULL
+skIni <- function(url="https://www.fairdomhub.org/"
+    , usr = NULL
+    , pwd = NULL
+    , myid = NULL
+    , prid = NULL
     , pid = NULL
     , iid = NULL
     , sid = NULL
     , aid = NULL
-    , test=TRUE){
-mainurl <- "https://www.fairdomhub.org/"
-testurl <- "https://testing.sysmo-db.org"
-# My personal ids
-my_main_id <- 808
-my_test_id <- 368
-# I will use the testing site for the development and experiments:
-baseurl <- ifelse(test, testurl, mainurl)
-myid <- ifelse(test, my_test_id, my_main_id)
-usr <- ifelse(test, "ablejec", "ablejec")
-pwd <- ifelse(test, "testni.1234", "Abink.9912")
-tmp <- list(baseurl = baseurl
+    ){
+    if(is.list(url)) {
+      tmp <- url
+      url <- tmp[1]
+      usr <- tmp[2]
+      pwd <- tmp[3]
+      myid <- tmp[4]
+      }
+#     
+tmp <- list(baseurl = url
    , usr = usr
    , pwd = pwd
    , myid = as.character(myid)
@@ -58,7 +74,7 @@ tmp <- list(baseurl = baseurl
    , sid = as.character(sid)
    , aid = as.character(aid)
    )
-   options(fhub = tmp)
+   options(seekr = tmp)
 invisible(tmp)
 }
 
@@ -74,8 +90,8 @@ invisible(tmp)
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$fhub$myid
-#' r <- skGet("people",options()$fhub$myid)
+#' options()$seekr$myid
+#' r <- skGet("people",options()$seekr$myid)
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
@@ -104,7 +120,7 @@ skParse <- function(resp, ...){
     )
   }
   if(length(parsed$meta$base_url)!=1) url <- "" else
-  url <- modify_url(parsed$meta$base_url,path=parsed$links)
+  url <- httr::modify_url(parsed$meta$base_url,path=parsed$links)
   ret <-    structure(
        list(
           id = parsed$id
@@ -134,8 +150,8 @@ skParse <- function(resp, ...){
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$fhub$myid
-#' r <- skGet("people",options()$fhub$myid)
+#' options()$seekr$myid
+#' r <- skGet("people",options()$seekr$myid)
 #' # Print contents
 #' print( r, TRUE)
 #' # Short version, default
@@ -176,24 +192,24 @@ invisible(x)
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$fhub$myid
-#' r <- skGet("people",options()$fhub$myid)
+#' options()$seekr$myid
+#' r <- skGet("people",options()$seekr$myid)
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
 #' r
-#' Non existent user
+#' # Non existent user
 #' skGet("people",0)
 #' }
 skGet <- function(type, id,
-                   uri=options()$fhub$baseurl, ... ){
+                   uri=options()$seekr$baseurl, ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
-  ua <- user_agent("https://github.com/ablejec/pisar")
+  ua <- httr::user_agent("https://github.com/nib-si/seekr")
   skLog("skGet", uri)
   fht <- system.time(
-  resp <- GET(uri,
+  resp <- httr::GET(uri,
          add_headers(Accept="application/json")
          , ua
          )
@@ -214,7 +230,7 @@ skGet <- function(type, id,
 
 
 ## ----skData---------------------------------------------------------
-#' Get content from an *fh* object.
+#' Get content from an *sk* object.
 #'
 #' @param r Object retrieved by skGet.
 #' @param type Name of the required element. If missing, a list with
@@ -228,8 +244,8 @@ skGet <- function(type, id,
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$fhub$myid
-#' r <- skGet("people",options()$fhub$myid)
+#' options()$seekr$myid
+#' r <- skGet("people",options()$seekr$myid)
 #' d <- skData(r,"attributes")
 #' names(d)
 #' d$last_name
@@ -249,25 +265,25 @@ skGet <- function(type, id,
 #' id <- d[[pmatch(myname,titles)]]$id
 #' id
 #' }
-skData <- function(r, node, ...){
-  if(class(r)=="seek_api") r <- r$response
-  jsn <- "application/json"
-  if(missing(node)) invisible(content(r,"parsed",type=jsn)$data) else
-  invisible(content(r,"parsed",type=jsn)$data[[node]])
-}
+## skData <- function(r, node, ...){
+##   if(class(r)=="seek_api") r <- r$response
+##   jsn <- "application/json"
+##   if(missing(node)) invisible(content(r,"parsed",type=jsn)$data) else
+##   invisible(content(r,"parsed",type=jsn)$data[[node]])
+## }
 skData <- function(r, node, ...){
   if(class(r)=="seek_api") r <- r$content
   jsn <- "application/json"
   if(missing(node)) invisible(r) else
   invisible(r[[node]])
 }
-skDatas <- skData
+# skDatas <- skData
 
 
 ## ----skFindId-------------------------------------------------------
-#' Get details of component with id from an *fh* object.
+#' Get details of component with id from an *sk* object.
 #'
-#' @param type Components name (e.g. 'people', 'projets', ...).
+#' @param type Components name (e.g. 'people', 'projects', ...).
 #' @param title Character string with the identifier
 #'     of the component (title part).
 #' @return FAIRDOMhub component identifier: id, type and title.
@@ -306,9 +322,9 @@ skFindId <- function(type, title){
 
 
 ## ----skFindTitle----------------------------------------------------
-#' Get details of component with id from an *fh* object.
+#' Get details of component with id from an *sk* object.
 #'
-#' @param type Components name (e.g. 'people', 'projets', ...).
+#' @param type Components name (e.g. 'people', 'projects', ...).
 #' @param id Character string with the identifier
 #'     of the component (id part).
 #' @return FAIRDOMhub component identifier: id, type and title.
@@ -344,9 +360,9 @@ skFindTitle <- function(type, id){
 
 
 ## ----skSkeleton-----------------------------------------------------
-#' Create *fh* skeleton.
+#' Create *sk* skeleton.
 #'
-#' Creates *fh* object with required structure.
+#' Creates *sk* object with required structure.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
 #' @param meta Data frame with pISA metadata or
@@ -803,7 +819,7 @@ sj <- switch( type
 sx <- unlist(strsplit(sj,"\n"))
 sx <- sx[!grepl("^#",sx)]
 sj <- paste(sx,collapse="\n")
-sr <- fromJSON(sj, simplifyVector = TRUE)
+sr <- jsonlite::fromJSON(sj, simplifyVector = TRUE)
 return(sr)
 }
 
@@ -882,7 +898,7 @@ contentType <- function(x){
 
 
 ## ----skCreate-------------------------------------------------------
-#' Create pISA layer or *fh* component.
+#' Create pISA layer or *sk* component.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
 #' @param meta Data frame with pISA metadata or
@@ -903,7 +919,7 @@ contentType <- function(x){
 #' if(FALSE)
 #' {
 #' skIni(prid = 26, test=TRUE)
-#' options("fhub")
+#' options("seekr")
 #'  sp <- skCreate( type = "projects"
 #'   , meta= list(
 #'       Title=paste("Test project", Sys.time())
@@ -914,7 +930,7 @@ contentType <- function(x){
 #' # Add member manually
 #
 #'  skIni(prid = 26, pid=104, test=TRUE)
-#'  options("fhub")
+#'  options("seekr")
 #'  si <- skCreate( type = "investigations"
 #'   , meta= list(
 #'       Title=paste("Test investigation", Sys.time())
@@ -926,7 +942,7 @@ contentType <- function(x){
 #'  iid=skData(si)$id
 #'  iid <- 115
 #'  skIni(prid = 26, pid=104, iid=iid, test=TRUE)
-#'  options("fhub")
+#'  options("seekr")
 #'  ss <- skCreate( type = "studies"
 #'   , meta= list(
 #'       Title=paste("Test study", Sys.time())
@@ -940,7 +956,7 @@ contentType <- function(x){
 #'        , iid=skData(si)$id
 #'        , sid=skData(ss)$id
 #'        , test=TRUE)
-#'  options("fhub")
+#'  options("seekr")
 #'  sa <- skCreate( type = "assays"
 #'   , meta= list(
 #'       Title=paste("Test assay", Sys.time())
@@ -953,7 +969,7 @@ contentType <- function(x){
 #'
 #' # Type: data_file
 #' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
-#' oldwd <- setwd(system.file("extdata",astring,package="pisar"))
+#' oldwd <- setwd(system.file("extdata",astring,package="seekr"))
 #' oldwd
 #' .aname <- getLayer("A")
 #' .aroot <- getRoot("A")
@@ -978,12 +994,12 @@ contentType <- function(x){
 #' if(interactive()) shell.exec(item_link)
 #' }
 skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
-     myid <- options()$fhub$myid
-     prid <- options()$fhub$prid
-     pid <-  options()$fhub$pid
-     iid <-  options()$fhub$iid
-     sid <-  options()$fhub$sid
-     aid <-  options()$fhub$aid
+     myid <- options()$seekr$myid
+     prid <- options()$seekr$prid
+     pid <-  options()$seekr$pid
+     iid <-  options()$seekr$iid
+     sid <-  options()$seekr$sid
+     aid <-  options()$seekr$aid
      s <- skSkeleton(type, meta)
 # Common fileds
      s$data$attributes$title  <-  getMeta(meta,"Title")
@@ -1062,19 +1078,19 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
         s$data$attributes$tags <- c("pISA", tags)
       }
      )
-     baseurl <- options()$fhub$baseurl
-     uri <- modify_url(baseurl,path=s$data$type)
-     I <- toJSON(s, auto_unbox=TRUE, pretty=TRUE)
+     baseurl <- options()$seekr$baseurl
+     uri <- httr::modify_url(baseurl,path=s$data$type)
+     I <- jsonlite::toJSON(s, auto_unbox=TRUE, pretty=TRUE)
      #
      # For testing: list JSON object
      #     cat(I, "\n")
      #
-     ua <- user_agent("https://github.com/ablejec/pisar")
+     ua <- httr::user_agent("https://github.com/nib-si/seekr")
      skLog("skCreate", uri)
-     fht <- system.time(resp <- POST(uri
+     fht <- system.time(resp <- httr::POST(uri
          , authenticate(
-             options()$fhub$usr
-           , options()$fhub$pwd
+             options()$seekr$usr
+           , options()$seekr$pwd
            , type = "basic")
          , body = I
          , encode="json"
@@ -1097,17 +1113,17 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      if(file.exists(fpath)) {
      skLog("skUpload",uri)
      fht <- system.time(
-     resp_blob <- PUT(uri
+     resp_blob <- httr::PUT(uri
          , authenticate(
-             options()$fhub$usr
-           , options()$fhub$pwd
+             options()$seekr$usr
+           , options()$seekr$pwd
            , type = "basic"
            )
     , body = upload_file(fpath)
     , encode="json"
     , accept("*.*")
     ))
-    resp_blob <- fromJSON(content(resp_blob, as = "text"))
+    resp_blob <- jsonlite::fromJSON(content(resp_blob, as = "text"))
     resp_blob <- paste(fpath, " | File size:", resp_blob)
     } else {
     resp_blob <- paste("Error: File not found:" ,fpath)
@@ -1157,10 +1173,10 @@ skUpload <- function( object, file){
      skLog("skUpload",uri)
      fht=-1
      fht <- system.time(
-     resp <- PUT(uri
+     resp <- httr::PUT(uri
         , authenticate(
-             options()$fhub$usr
-           , options()$fhub$pwd
+             options()$seekr$usr
+           , options()$seekr$pwd
            , type = "basic"
         )
     , body = upload_file(fpath)
@@ -1168,7 +1184,7 @@ skUpload <- function( object, file){
     , accept("*.*")
     ))
     print(resp)
-    fs <- round(as.numeric(rawToChar(sd$content))/1024^2,3)
+    fs <- round(as.numeric(rawToChar(resp$content))/1024^2,3)
     file_size <- paste0(fpath, " | ", fs,"MB")
     } else {
     resp_blob <- paste("Error: File not found:" ,fpath)

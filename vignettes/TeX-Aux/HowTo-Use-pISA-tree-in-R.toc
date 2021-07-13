@@ -1,7 +1,0 @@
-\contentsline {section}{\numberline {1}Introduction}{1}
-\contentsline {section}{\numberline {2}Get the pISA-tree information}{2}
-\contentsline {section}{\numberline {3}Layer's root directory}{2}
-\contentsline {section}{\numberline {4}Metadata files}{4}
-\contentsline {section}{\numberline {5}Getting specific parts from the metadata object}{6}
-\contentsline {section}{\numberline {6}All together}{7}
-\contentsline {section}{\numberline {7}To end}{9}

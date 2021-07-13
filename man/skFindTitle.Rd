@@ -2,12 +2,12 @@
 % Please edit documentation in R/seekr-api.R
 \name{skFindTitle}
 \alias{skFindTitle}
-\title{Get details of component with id from an *fh* object.}
+\title{Get details of component with id from an *sk* object.}
 \usage{
 skFindTitle(type, id)
 }
 \arguments{
-\item{type}{Components name (e.g. 'people', 'projets', ...).}
+\item{type}{Components name (e.g. 'people', 'projects', ...).}
 
 \item{id}{Character string with the identifier
 of the component (id part).}
@@ -18,7 +18,7 @@ FAIRDOMhub component identifier: id, type and title.
     for all items is returned. See note.
 }
 \description{
-Get details of component with id from an *fh* object.
+Get details of component with id from an *sk* object.
 }
 \note{
 If item is not found, empty string is returned as title.
