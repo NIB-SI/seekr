@@ -30,42 +30,57 @@ Main FAIRDOMHub URL and test site urls:
 <<skIni>>=
 #' Initialize FAIRDOMhub information
 #'
-#' Define FAIRDOMhub URL and user data
+#' Define FAIRDOMhub url and user data
 #'
-#' @param test If TRUE, test server will be used..
+#' @param url SEEK based server address. It can also be a list with
+#'   four components interpreted as url, usr, pwd and myid.
+#' @param usr user name.
+#' @param pwd password.
+#' @param myid numeric user id.
+#' @param prid programme number.
+#' @param pid project number.
+#' @param iid investigation number.
+#' @param sid study number.
+#' @param aid assay number.
 #' @return A list with URL and user information. For side effect see Notes.
 #' @note The returned list is added to the
-#'      \code{options()} list under name 'seekr'.
+#'      \code{options()} list under name 'seekr'. 
+#' @note At the moment two locations are available: main FAIRDOMHub 
+#'       (https://www.fairdomhub.org/) and testing site
+#'       (https://testing.sysmo-db.org).
 #' @export
 #' @keywords file
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' skIni()
+#' skIni(url="https://www.fairdomhub.org/", usr="username"
+#'    , pwd="secret", myid=888)
 #' options("seekr")
 #' #
-#' skIni(test=FALSE)
+#' fh <- list(url="https://www.fairdomhub.org/", usr="username"
+#'    , pwd="secret", myid=888)
+#' skIni(fh)
 #' options("seekr")
 #' }
-skIni <- function(url="https://www.fairdomhub.org/",myid=NULL,
-      prid = NULL
+skIni <- function(url="https://www.fairdomhub.org/"
+    , usr = NULL
+    , pwd = NULL
+    , myid = NULL
+    , prid = NULL
     , pid = NULL
     , iid = NULL
     , sid = NULL
     , aid = NULL
-    , test=TRUE){
-mainurl <- "https://www.fairdomhub.org/"
-testurl <- "https://testing.sysmo-db.org"
-# My personal ids
-my_main_id <- 808
-my_test_id <- 368
-# I will use the testing site for the development and experiments:
-
-baseurl <- ifelse(test, testurl, mainurl)
-myid <- ifelse(test, my_test_id, my_main_id)
-usr <- ifelse(test, "ablejec", "ablejec")
-pwd <- ifelse(test, "testni.1234", "Abink.9912")
-tmp <- list(baseurl = baseurl
+    ){
+    if(is.list(url)) {
+      tmp <- url
+      url <- tmp[1]
+      usr <- tmp[2]
+      pwd <- tmp[3]
+      myid <- tmp[4]
+      }
+#     
+tmp <- list(baseurl = url
    , usr = usr
    , pwd = pwd
    , myid = as.character(myid)
