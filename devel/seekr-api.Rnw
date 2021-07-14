@@ -96,6 +96,42 @@ invisible(tmp)
 @
 
 <<>>=
+#' Show all seekr related options
+#'
+#' Lists selected seekr related options. Selection is based on the start
+#' and end of the name. All seekr options start with prefix '.sk'. 
+#' Argument \code{end} give the required sufix for the option to be listed.
+#' Typical use would be to list identifiers, when \code{end = "id"}. 
+#' @param end character string defining the end of the string. By default 
+#'    all names are valid (empty string).
+#' @param start character string defining the start of the name, 
+#'    default is "sk.", which is typical for seekr options.
+#' @param hide vector of names, that should not be listed. 
+#'    Default is "sk.pwd" which prevents password to be revealed.
+#' @return A list of seekr related options.
+#' @export
+#' @seealso \code{\link{startsWith}, \link{endsWith}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' skIni()
+#' options(.sk$test)
+#' skOptions()
+#' skOptions(end="id")
+#' }
+skOptions <- function(end="", start="sk.", hide="sk.pwd"){
+    sfilter <- startsWith(names(options()),start)
+    efilter <- endsWith(names(options()),end)  
+    hidden <- names(options())%in% hide
+    if (length(hide)>0 & end=="") cat("Hidden:",paste(hide),"\n")
+    options()[sfilter & efilter & !hidden]
+}
+@
+
+
+
+
+<<>>=
 bla <- function(x=NULL){
 deparse(substitute(x))
 }
@@ -229,7 +265,7 @@ invisible(x)
 #' skGet("people",0)
 #' }
 skGet <- function(type, id,
-                   uri=options("sk.url") ... ){
+                   uri=options("sk.url"), ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
