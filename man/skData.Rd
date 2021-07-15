@@ -7,10 +7,12 @@
 skData(r, node, ...)
 }
 \arguments{
-\item{r}{Object retrieved by skGet.}
+\item{r}{object retrieved by skGet.}
 
-\item{type}{Name of the required element. If missing, a list with
+\item{node}{name of the required element. If missing, a list with
 all relevant objects is returned.}
+
+\item{...}{further arguments.}
 }
 \value{
 File name (string).
@@ -24,12 +26,13 @@ Parameter ... is ignored at this time.
 \examples{
 \dontrun{
 skIni()
-options()$seekr$myid
-r <- skGet("people",options()$seekr$myid)
+options(.sk$test)
+options("sk.myid")
+r <- skGet("people",options("sk.myid"))
 d <- skData(r,"attributes")
 names(d)
 d$last_name
-skData(r)$tools
+skData(r)$attributes$tools
 # Get list of people
 r <- skGet("people")
 d <- skData(r)

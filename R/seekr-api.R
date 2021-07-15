@@ -1,4 +1,4 @@
-## ----c,echo=FALSE---------------------------------------------------
+## ----c,echo=FALSE---------------------------------------------------------------------------------------------
 ###############################################
 ##                                           ##
 ## (c) Andrej Blejec (andrej.blejec@nib.si)  ##
@@ -6,12 +6,12 @@
 ###############################################
 #
 
-## ----d,echo=FALSE,results='hide'------------------------------------
+## ----d,echo=FALSE,results='hide'------------------------------------------------------------------------------
 options(width=70)
 library(httr)
 
 
-## ----skIni----------------------------------------------------------
+## ----skIni----------------------------------------------------------------------------------------------------
 #' Initialize FAIRDOMhub information
 #'
 #' Define FAIRDOMhub url and user data
@@ -28,8 +28,8 @@ library(httr)
 #' @param aid assay number.
 #' @return A list with URL and user information. For side effect see Notes.
 #' @note The returned list is added to the
-#'      \code{options()} list under name 'seekr'. 
-#' @note At the moment two locations are available: main FAIRDOMHub 
+#'      \code{options()} list under name 'seekr'.
+#' @note At the moment two locations are available: main FAIRDOMHub
 #'       (https://www.fairdomhub.org/) and testing site
 #'       (https://testing.sysmo-db.org).
 #' @export
@@ -37,14 +37,14 @@ library(httr)
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' skIni(url="https://www.fairdomhub.org/", usr="username"
-#'    , pwd="secret", myid=888)
-#' options("seekr")
+#' options(sk.url="https://www.fairdomhub.org/", sk.usr="username"
+#'    , sk.pwd="secret", sk.myid=888)
+#' skOptions()
 #' #
-#' fh <- list(url="https://www.fairdomhub.org/", usr="username"
-#'    , pwd="secret", myid=888)
-#' skIni(fh)
-#' options("seekr")
+#' fh <- list(sk.url="https://a.new.one", sk.usr="username"
+#'    , sk.pwd="secret", sk.myid=999)
+#' options(fh)
+#' skOptions(hide=NULL)
 #' }
 skIni <- function(url="https://www.fairdomhub.org/"
     , usr = NULL
@@ -63,7 +63,7 @@ skIni <- function(url="https://www.fairdomhub.org/"
       pwd <- tmp[3]
       myid <- tmp[4]
       }
-#     
+#
 tmp <- list(baseurl = url
    , usr = usr
    , pwd = pwd
@@ -79,19 +79,55 @@ invisible(tmp)
 }
 
 
-## ----skParse--------------------------------------------------------
-#' Parse the response from SEEK API
+## ----skOptions------------------------------------------------------------------------------------------------
+#' Show all seekr related options
 #'
-#' @param resp Response from SEEK API.
+#' Lists selected seekr related options. Selection is based on the start
+#' and end of the name. All seekr options start with prefix '.sk'. 
+#' Argument \code{end} give the required sufix for the option to be listed.
+#' Typical use would be to list identifiers, when \code{end = "id"}. 
+#' @param end character string defining the end of the string. By default 
+#'    all names are valid (empty string).
+#' @param start character string defining the start of the name, 
+#'    default is "sk.", which is typical for seekr options.
+#' @param hide vector of names, that should not be listed. 
+#'    Default is "sk.pwd" which prevents password to be revealed.
+#' @return A list of seekr related options.
+#' @export
+#' @seealso \code{\link{startsWith}, \link{endsWith}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' #skIni()
+#' options(.sk$test)
+#' skOptions()
+#' skOptions("id")
+#' skOptions(hide=NULL)
+#' }
+skOptions <- function(end="", start="sk.", hide="sk.pwd"){
+    sfilter <- startsWith(names(options()),start)
+    efilter <- endsWith(names(options()),end)  
+    hidden <- names(options())%in% hide
+    if (length(hide)>0 & end=="") cat("Hidden:",paste(hide),"\n")
+    options()[sfilter & efilter & !hidden]
+}
+
+
+## ----skParse--------------------------------------------------------------------------------------------------
+#' Parse the response from SEEK API and convert to a list.
+#'
+#' @param resp response from SEEK API.
+#' @param ... further arguments.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
 #' @seealso \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' skIni()
-#' options()$seekr$myid
-#' r <- skGet("people",options()$seekr$myid)
+#' #skIni()
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skGet("people",options("sk.myid"))
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
@@ -138,20 +174,22 @@ skParse <- function(resp, ...){
 }
 
 
-## ----print.seek_api-------------------------------------------------
+## ----print.seek_api-------------------------------------------------------------------------------------------
 #' Print method for seek_api object
 #'
-#' @param x Object of class \code{seek_api}.
+#' @param x object of class \code{seek_api}.
 #' @param content If FALSE (default), content is no printed.
+#' @param ... further arguments passed to or from other methods.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
 #' @seealso \code{\link{skParse}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' skIni()
-#' options()$seekr$myid
-#' r <- skGet("people",options()$seekr$myid)
+#' #skIni()
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skGet("people",options("sk.myid"))
 #' # Print contents
 #' print( r, TRUE)
 #' # Short version, default
@@ -160,7 +198,7 @@ skParse <- function(resp, ...){
 #' status_code(r$response)
 #' }
 #'
-print.seek_api <- function(x, content=FALSE){
+print.seek_api <- function(x, content=FALSE, ...){
 cat("Status:", x$response$headers$status, "\n")
 #if(x$response$status==200)
 {
@@ -177,12 +215,13 @@ invisible(x)
 }
 
 
-## ----skGet----------------------------------------------------------
+## ----skGet----------------------------------------------------------------------------------------------------
 #' Get inormation from repository.
 #'
 #' @param type Type of information (e.g. "person").
 #' @param id Repository id of an item.
-#' @param uri Repository base address (URI)..
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
 #' @note Parameter ... is ignored at this time.
@@ -191,9 +230,10 @@ invisible(x)
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' skIni()
-#' options()$seekr$myid
-#' r <- skGet("people",options()$seekr$myid)
+#' #skIni()
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skGet("people",options("sk.myid"))
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
@@ -202,7 +242,7 @@ invisible(x)
 #' skGet("people",0)
 #' }
 skGet <- function(type, id,
-                   uri=options()$seekr$baseurl, ... ){
+                   uri=options("sk.url"), ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
@@ -229,12 +269,13 @@ skGet <- function(type, id,
 
 
 
-## ----skData---------------------------------------------------------
+## ----skData---------------------------------------------------------------------------------------------------
 #' Get content from an *sk* object.
 #'
-#' @param r Object retrieved by skGet.
-#' @param type Name of the required element. If missing, a list with
+#' @param r object retrieved by skGet.
+#' @param node name of the required element. If missing, a list with
 #'     all relevant objects is returned.
+#' @param ... further arguments.
 #' @return File name (string).
 #' @export
 #' @note Parameter ... is ignored at this time.
@@ -244,12 +285,13 @@ skGet <- function(type, id,
 #' @examples
 #' \dontrun{
 #' skIni()
-#' options()$seekr$myid
-#' r <- skGet("people",options()$seekr$myid)
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skGet("people",options("sk.myid"))
 #' d <- skData(r,"attributes")
 #' names(d)
 #' d$last_name
-#' skData(r)$tools
+#' skData(r)$attributes$tools
 #' # Get list of people
 #' r <- skGet("people")
 #' d <- skData(r)
@@ -280,7 +322,7 @@ skData <- function(r, node, ...){
 # skDatas <- skData
 
 
-## ----skFindId-------------------------------------------------------
+## ----skFindId-------------------------------------------------------------------------------------------------
 #' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -296,7 +338,8 @@ skData <- function(r, node, ...){
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' skIni()
+#' #skIni()
+#' options(.sk$test)
 #' id <- skFindId("people","Guest")
 #' id
 #' skFindTitle("people",id)
@@ -305,6 +348,7 @@ skData <- function(r, node, ...){
 #' # List of projects
 #' projects <- skFindId("projects")
 #' head(projects)
+#' tail(projects)
 #' }
 skFindId <- function(type, title){
      r <- skGet(type)
@@ -321,7 +365,7 @@ skFindId <- function(type, title){
 }
 
 
-## ----skFindTitle----------------------------------------------------
+## ----skFindTitle----------------------------------------------------------------------------------------------
 #' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -337,12 +381,7 @@ skFindId <- function(type, title){
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' skIni()
-#' id <- skFindId("people","Guest")
-#' id
-#' idNew <- skFindTitle("people", id[1])
-#' idNew
-#' all.equal(id, idNew)
+#' #skIni()
 #' skFindTitle("people",0)
 #' }
 skFindTitle <- function(type, id){
@@ -359,13 +398,13 @@ skFindTitle <- function(type, id){
      }
 
 
-## ----skSkeleton-----------------------------------------------------
+## ----skSkeleton-----------------------------------------------------------------------------------------------
 #' Create *sk* skeleton.
 #'
 #' Creates *sk* object with required structure.
 #'
-#' @param type Component name (e.g. 'people', 'projets', ...).
-#' @param meta Data frame with pISA metadata or
+#' @param type component name (e.g. 'people', 'projects', ...).
+#' @param meta a data frame with pISA metadata or
 #' a list with minimal information (Title, Description, *ToDo: add fields*).
 #' @return A list with the minimal information structure.
 #' @export
@@ -375,8 +414,8 @@ skFindTitle <- function(type, id){
 #' @examples
 #' \dontrun{
 #' require(jsonlite)
-#' meta= list(Title = "Test layer", Description = "Some description")
-#' type = "projects"
+#' meta <- list(Title = "Test layer", Description = "Some description")
+#' type <- "projects"
 #' sp <- skSkeleton( type = type
 #'   , meta= meta
 #'   )
@@ -405,7 +444,7 @@ skFindTitle <- function(type, id){
 #' str(sdata)
 #' }
 #'
-skSkeleton <- function (type = "assay", meta, file){
+skSkeleton <- function (type = "assay", meta){
 sj <- switch( type
 , projects =
 '{
@@ -824,7 +863,7 @@ return(sr)
 }
 
 
-## ----skLog----------------------------------------------------------
+## ----skLog----------------------------------------------------------------------------------------------------
 #' Writes a note to a log file.
 #'
 #' @param ... Objects to form a line.
@@ -852,23 +891,27 @@ skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
    }
 
 
-## -------------------------------------------------------------------
+## ----contentType----------------------------------------------------------------------------------------------
 #' Determine MIME type for file.
 #'
-#' @param File name.
+#' @param file file name.
 #' @return MIME type string.
 #' @export
 #' @keywords pisa
-#' @seealso
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' contentType("bla.txt")
 #' contentType("bla.pdf")
 #' contentType("bla.tar.gz")
 #' contentType("bla.bla")
+#' contentType("bla")
+#' contentType("bla.")
 #'
-contentType <- function(x){
-  switch(tolower(fileType(x))
+contentType <- function(file){
+      type <- gsub("(.*)\\.(.*)", "\\2", basename(file))
+    if (type == file)
+        type <- ""
+  switch(tolower(type)
          , txt  = "text/plain"
          , rnw  = "text/plain"
          , log  = "text/plain"
@@ -897,7 +940,7 @@ contentType <- function(x){
 }
 
 
-## ----skCreate-------------------------------------------------------
+## ----skCreate-------------------------------------------------------------------------------------------------
 #' Create pISA layer or *sk* component.
 #'
 #' @param type Component name (e.g. 'people', 'projets', ...).
@@ -918,10 +961,12 @@ contentType <- function(x){
 #' \dontrun{
 #' if(FALSE)
 #' {
-#' skIni(prid = 26, test=TRUE)
-#' options("seekr")
+#' options(.sk$test)
+#' #skIni(prid = 26, test=TRUE)
+#' options(sk.prid = 26)
+#' skOptions("id")
 #'  sp <- skCreate( type = "projects"
-#'   , meta= list(
+#'     , meta= list(
 #'       Title=paste("Test project", Sys.time())
 #'     , Description="Testing of upload")
 #'     )
@@ -929,8 +974,9 @@ contentType <- function(x){
 #'  str(skData(sp))
 #' # Add member manually
 #
-#'  skIni(prid = 26, pid=104, test=TRUE)
-#'  options("seekr")
+#'  #skIni(prid = 26, pid=104, test=TRUE)
+#'  options(sk.prid=26, sk.pid=104)
+#'  skOptions("id")
 #'  si <- skCreate( type = "investigations"
 #'   , meta= list(
 #'       Title=paste("Test investigation", Sys.time())
@@ -940,9 +986,9 @@ contentType <- function(x){
 #'  skData(si)$id
 #'
 #'  iid=skData(si)$id
-#'  iid <- 115
-#'  skIni(prid = 26, pid=104, iid=iid, test=TRUE)
-#'  options("seekr")
+#'  #skIni(prid = 26, pid=104, iid=iid, test=TRUE)
+#'  options(sk.prid=26, sk.pid=104, sk.iid=iid)
+#'  skOptions("id")
 #'  ss <- skCreate( type = "studies"
 #'   , meta= list(
 #'       Title=paste("Test study", Sys.time())
@@ -951,12 +997,12 @@ contentType <- function(x){
 #'  ss
 #'  skData(ss)$id
 #'
-#'  skIni(prid = 26
-#'        , pid=104
-#'        , iid=skData(si)$id
-#'        , sid=skData(ss)$id
-#'        , test=TRUE)
-#'  options("seekr")
+#'  options(sk.prid = 26
+#'        , sk.pid=104
+#'        , sk.iid=skData(si)$id
+#'        , sk.sid=skData(ss)$id
+#'        )
+#'  skOptions()
 #'  sa <- skCreate( type = "assays"
 #'   , meta= list(
 #'       Title=paste("Test assay", Sys.time())
@@ -975,7 +1021,7 @@ contentType <- function(x){
 #' .aroot <- getRoot("A")
 #' .ameta  <- readMeta()
 #'  file <- "input/README.MD"
-#'  skIni(prid = 26, pid=104, iid=115 , sid=117 , aid=401, test=TRUE)
+#'  options(sk.prid = 26, sk.pid=104, sk.iid=115 , sk.sid=117 , sk.aid=401)
 #'  type <- "data_files"
 #'  type <- "documents"
 #'  sdat <- skCreate( type = type
@@ -994,12 +1040,12 @@ contentType <- function(x){
 #' if(interactive()) shell.exec(item_link)
 #' }
 skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
-     myid <- options()$seekr$myid
-     prid <- options()$seekr$prid
-     pid <-  options()$seekr$pid
-     iid <-  options()$seekr$iid
-     sid <-  options()$seekr$sid
-     aid <-  options()$seekr$aid
+     myid <- as.character(getOption("sk.myid"))
+     prid <- as.character(getOption("sk.prid"))
+     pid <-  as.character(getOption("sk.pid"))
+     iid <-  as.character(getOption("sk.iid"))
+     sid <-  as.character(getOption("sk.sid"))
+     aid <-  as.character(getOption("sk.aid"))
      s <- skSkeleton(type, meta)
 # Common fileds
      s$data$attributes$title  <-  getMeta(meta,"Title")
@@ -1011,8 +1057,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
 #       s$data$attributes$members$institution_id <- 69
        s$data$attributes$default_policy$permissions$resource$id <- myid
        s$data$relationships$programmes$data$id <- prid
-       s$data$relationships$creators$data$id <- prid
-
+       s$data$relationships$creators$data$id <- myid
        s$data$relationships$project_administrators$data$id <- myid
        s$data$relationships$asset_housekeeper$data$id <- myid
             }
@@ -1078,19 +1123,19 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
         s$data$attributes$tags <- c("pISA", tags)
       }
      )
-     baseurl <- options()$seekr$baseurl
+     baseurl <- getOption("sk.url")
      uri <- httr::modify_url(baseurl,path=s$data$type)
-     I <- jsonlite::toJSON(s, auto_unbox=TRUE, pretty=TRUE)
-     #
+     I <- jsonlite::toJSON(s, auto_unbox=TRUE, pretty=TRUE) #
      # For testing: list JSON object
-     #     cat(I, "\n")
+         cat(I, "\n")
      #
      ua <- httr::user_agent("https://github.com/nib-si/seekr")
      skLog("skCreate", uri)
-     fht <- system.time(resp <- httr::POST(uri
+     fht <- system.time(
+         resp <- httr::POST(uri
          , authenticate(
-             options()$seekr$usr
-           , options()$seekr$pwd
+             getOption("sk.usr")
+           , getOption("sk.pwd")
            , type = "basic")
          , body = I
          , encode="json"
@@ -1115,8 +1160,8 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      fht <- system.time(
      resp_blob <- httr::PUT(uri
          , authenticate(
-             options()$seekr$usr
-           , options()$seekr$pwd
+             options("sk.usr")
+           , options("sk.pwd")
            , type = "basic"
            )
     , body = upload_file(fpath)
@@ -1138,10 +1183,10 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
 
 
 
-## ----skUpload-------------------------------------------------------
+## ----skUpload-------------------------------------------------------------------------------------------------
 #' Upload file.
 #'
-#' Upload file to a crerated object of type 'documents' or 'data_files'.
+#' Upload file to a created object of type 'documents' or 'data_files'.
 #'
 #' @param object A previously created SEEK component.
 #'     Must be one of 'documents' or 'data_files'.
@@ -1154,11 +1199,13 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
 #' @seealso \code{\link{skCreate}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
+#' \dontrun{
 #' file <- dir()[1]
 #' file
 #' fhd <- skCreate("documents",meta,file=file)
 #' fhd
 #' sd <- skUpload(fhd, file)
+#' }
 #'
 skUpload <- function( object, file){
      if(object$content$type %in% c("data_files", "documents")){
@@ -1175,8 +1222,8 @@ skUpload <- function( object, file){
      fht <- system.time(
      resp <- httr::PUT(uri
         , authenticate(
-             options()$seekr$usr
-           , options()$seekr$pwd
+             options("sk.usr")
+           , options("sk.pwd")
            , type = "basic"
         )
     , body = upload_file(fpath)

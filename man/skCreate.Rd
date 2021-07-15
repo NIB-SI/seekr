@@ -32,18 +32,21 @@ of newly created component can be used. Check status code.
 \dontrun{
 if(FALSE)
 {
-skIni(prid = 26, test=TRUE)
-options("seekr")
+options(.sk$test)
+#skIni(prid = 26, test=TRUE)
+options(sk.prid = 26)
+skOptions("id")
  sp <- skCreate( type = "projects"
-  , meta= list(
+    , meta= list(
       Title=paste("Test project", Sys.time())
     , Description="Testing of upload")
     )
  str(sp)
  str(skData(sp))
 # Add member manually
- skIni(prid = 26, pid=104, test=TRUE)
- options("seekr")
+ #skIni(prid = 26, pid=104, test=TRUE)
+ options(sk.prid=26, sk.pid=104)
+ skOptions("id")
  si <- skCreate( type = "investigations"
   , meta= list(
       Title=paste("Test investigation", Sys.time())
@@ -53,9 +56,9 @@ options("seekr")
  skData(si)$id
 
  iid=skData(si)$id
- iid <- 115
- skIni(prid = 26, pid=104, iid=iid, test=TRUE)
- options("seekr")
+ #skIni(prid = 26, pid=104, iid=iid, test=TRUE)
+ options(sk.prid=26, sk.pid=104, sk.iid=iid)
+ skOptions("id")
  ss <- skCreate( type = "studies"
   , meta= list(
       Title=paste("Test study", Sys.time())
@@ -64,12 +67,12 @@ options("seekr")
  ss
  skData(ss)$id
 
- skIni(prid = 26
-       , pid=104
-       , iid=skData(si)$id
-       , sid=skData(ss)$id
-       , test=TRUE)
- options("seekr")
+ options(sk.prid = 26
+       , sk.pid=104
+       , sk.iid=skData(si)$id
+       , sk.sid=skData(ss)$id
+       )
+ skOptions()
  sa <- skCreate( type = "assays"
   , meta= list(
       Title=paste("Test assay", Sys.time())
@@ -88,7 +91,7 @@ oldwd
 .aroot <- getRoot("A")
 .ameta  <- readMeta()
  file <- "input/README.MD"
- skIni(prid = 26, pid=104, iid=115 , sid=117 , aid=401, test=TRUE)
+ options(sk.prid = 26, sk.pid=104, sk.iid=115 , sk.sid=117 , sk.aid=401)
  type <- "data_files"
  type <- "documents"
  sdat <- skCreate( type = type

@@ -46,20 +46,20 @@ Define FAIRDOMhub url and user data
 The returned list is added to the
      \code{options()} list under name 'seekr'.
 
-At the moment two locations are available: main FAIRDOMHub 
+At the moment two locations are available: main FAIRDOMHub
       (https://www.fairdomhub.org/) and testing site
       (https://testing.sysmo-db.org).
 }
 \examples{
 \dontrun{
-skIni(url="https://www.fairdomhub.org/", usr="username"
-   , pwd="secret", myid=888)
-options("seekr")
+options(sk.url="https://www.fairdomhub.org/", sk.usr="username"
+   , sk.pwd="secret", sk.myid=888)
+skOptions()
 #
-fh <- list(url="https://www.fairdomhub.org/", usr="username"
-   , pwd="secret", myid=888)
-skIni(fh)
-options("seekr")
+fh <- list(sk.url="https://a.new.one", sk.usr="username"
+   , sk.pwd="secret", sk.myid=999)
+options(fh)
+skOptions(hide=NULL)
 }
 }
 \author{
