@@ -99,14 +99,14 @@ invisible(tmp)
 #' Show all seekr related options
 #'
 #' Lists selected seekr related options. Selection is based on the start
-#' and end of the name. All seekr options start with prefix '.sk'. 
+#' and end of the name. All seekr options start with prefix '.sk'.
 #' Argument \code{end} give the required sufix for the option to be listed.
-#' Typical use would be to list identifiers, when \code{end = "id"}. 
-#' @param end character string defining the end of the string. By default 
+#' Typical use would be to list identifiers, when \code{end = "id"}.
+#' @param end character string defining the end of the string. By default
 #'    all names are valid (empty string).
-#' @param start character string defining the start of the name, 
+#' @param start character string defining the start of the name,
 #'    default is "sk.", which is typical for seekr options.
-#' @param hide vector of names, that should not be listed. 
+#' @param hide vector of names, that should not be listed.
 #'    Default is "sk.pwd" which prevents password to be revealed.
 #' @return A list of seekr related options.
 #' @export
@@ -122,7 +122,7 @@ invisible(tmp)
 #' }
 skOptions <- function(end="", start="sk.", hide="sk.pwd"){
     sfilter <- startsWith(names(options()),start)
-    efilter <- endsWith(names(options()),end)  
+    efilter <- endsWith(names(options()),end)
     hidden <- names(options())%in% hide
     if (length(hide)>0 & end=="") cat("Hidden:",paste(hide),"\n")
     options()[sfilter & efilter & !hidden]
@@ -990,25 +990,32 @@ contentType <- function(file){
 #' #skIni(prid = 26, test=TRUE)
 #' options(sk.prid = 26)
 #' skOptions("id")
-#'  sp <- skCreate( type = "projects"
-#'     , meta= list(
+#' meta= list(
 #'       Title=paste("Test project", Sys.time())
-#'     , Description="Testing of upload")
+#'     , Description="Testing upload")
+#' meta
+#'  sp <- skCreate( type = "projects"
+#'     , meta = meta
 #'     )
-#'  str(sp)
+#'     (r <- skFindId("projects",meta$Title))
 #'  str(skData(sp))
 #' # Add member manually
-#
+#' #
 #'  #skIni(prid = 26, pid=104, test=TRUE)
-#'  options(sk.prid=26, sk.pid=104)
+#'  options(sk.prid=26, sk.pid=sp$id)
 #'  skOptions("id")
-#'  si <- skCreate( type = "investigations"
-#'   , meta= list(
+#'  meta= list(
 #'       Title=paste("Test investigation", Sys.time())
-#'     , Description="Testing of upload")
+#'     , Description="Testing upload")
+#'     meta
+#'     rm(si)
+#'  si <- skCreate( type = "investigations"
+#'   , meta=meta
 #'     )
 #'  si
 #'  skData(si)$id
+#'  skFindId("investigations",meta$Title)
+#'  skOptions("id")
 #'
 #'  iid=skData(si)$id
 #'  #skIni(prid = 26, pid=104, iid=iid, test=TRUE)
@@ -1017,7 +1024,7 @@ contentType <- function(file){
 #'  ss <- skCreate( type = "studies"
 #'   , meta= list(
 #'       Title=paste("Test study", Sys.time())
-#'     , Description="Testing of upload")
+#'     , Description="Testing upload")
 #'     )
 #'  ss
 #'  skData(ss)$id
@@ -1031,7 +1038,7 @@ contentType <- function(file){
 #'  sa <- skCreate( type = "assays"
 #'   , meta= list(
 #'       Title=paste("Test assay", Sys.time())
-#'     , Description="Testing of upload")
+#'     , Description="Testing upload")
 #'     , class="EXP"
 #'     )
 #'  #str(sa)
@@ -1152,7 +1159,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      uri <- httr::modify_url(baseurl,path=s$data$type)
      I <- jsonlite::toJSON(s, auto_unbox=TRUE, pretty=TRUE) #
      # For testing: list JSON object
-         cat(I, "\n")
+     #    cat(I, "\n")
      #
      ua <- httr::user_agent("https://github.com/nib-si/seekr")
      skLog("skCreate", uri)
@@ -1169,10 +1176,12 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
          , ua
          )
          )
+     
      parsed <- skParse(resp)
+     print(resp)
      skLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
 # Upload file blob
-     if(FALSE&&s$data$type %in% c("data_files", "documents")){
+     if(FALSE && s$data$type %in% c("data_files", "documents")){
      skLog("Upload file:", file)
      res <- parsed$content
      original_filename <- res$attributes$content_blobs[[1]]$original_filename
@@ -1185,8 +1194,8 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      fht <- system.time(
      resp_blob <- httr::PUT(uri
          , authenticate(
-             options("sk.usr")
-           , options("sk.pwd")
+             getOption("sk.usr")
+           , getOption("sk.pwd")
            , type = "basic"
            )
     , body = upload_file(fpath)
@@ -1247,8 +1256,8 @@ skUpload <- function( object, file){
      fht <- system.time(
      resp <- httr::PUT(uri
         , authenticate(
-             options("sk.usr")
-           , options("sk.pwd")
+             getOption("sk.usr")
+           , getOption("sk.pwd")
            , type = "basic"
         )
     , body = upload_file(fpath)
