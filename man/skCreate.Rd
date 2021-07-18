@@ -27,57 +27,73 @@ Create pISA layer or *sk* component.
 \note{
 Upon success (status code 200) details
 of newly created component can be used. Check status code.
+
+Call through API does not set the 'member
 }
 \examples{
 \dontrun{
 if(FALSE)
 {
-skIni(prid = 26, test=TRUE)
-options("seekr")
- sp <- skCreate( type = "projects"
-  , meta= list(
+options(.sk$test)
+options(sk.prid = 26)
+skOptions("id")
+meta= list(
       Title=paste("Test project", Sys.time())
-    , Description="Testing of upload")
+    , Description="Testing upload")
+meta
+rm(sp)
+ sp <- skCreate( type = "projects"
+    , meta = meta
     )
- str(sp)
+    (r <- skFindId("projects",meta$Title))
+ sp
  str(skData(sp))
-# Add member manually
- skIni(prid = 26, pid=104, test=TRUE)
- options("seekr")
- si <- skCreate( type = "investigations"
-  , meta= list(
+# Call to API does not set the 'member' field
+# Add member manually in the project page on the web site: 
+# /Actions/Administer project members
+#
+ options(sk.prid=26, sk.pid=sp$id)
+ skOptions("id")
+ meta= list(
       Title=paste("Test investigation", Sys.time())
-    , Description="Testing of upload")
+    , Description="Testing upload")
+    meta
+    rm(si)
+ si <- skCreate( type = "investigations"
+  , meta=meta
     )
  si
  skData(si)$id
-
+ skFindId("investigations",meta$Title)
+ options(sk.iid=si$id)
+ skOptions("id")
+#'
  iid=skData(si)$id
- iid <- 115
- skIni(prid = 26, pid=104, iid=iid, test=TRUE)
- options("seekr")
+ options(sk.prid=26, sk.pid=sp$id, sk.iid=si$id)
+ skOptions("id")
  ss <- skCreate( type = "studies"
   , meta= list(
       Title=paste("Test study", Sys.time())
-    , Description="Testing of upload")
+    , Description="Testing upload")
     )
  ss
  skData(ss)$id
-
- skIni(prid = 26
-       , pid=104
-       , iid=skData(si)$id
-       , sid=skData(ss)$id
-       , test=TRUE)
- options("seekr")
+#'
+ options(sk.prid = 26
+       , sk.pid=skData(sp)$id
+       , sk.iid=skData(si)$id
+       , sk.sid=skData(ss)$id
+       )
+ skOptions()
  sa <- skCreate( type = "assays"
   , meta= list(
       Title=paste("Test assay", Sys.time())
-    , Description="Testing of upload")
+    , Description="Testing upload")
     , class="EXP"
     )
- #str(sa)
- sa
+ str(sa)
+ skData(sa)$relationships$submitter
+ skData(sa)$links
 }
 
 # Type: data_file
@@ -88,7 +104,8 @@ oldwd
 .aroot <- getRoot("A")
 .ameta  <- readMeta()
  file <- "input/README.MD"
- skIni(prid = 26, pid=104, iid=115 , sid=117 , aid=401, test=TRUE)
+ options(sk.prid = 26, sk.pid=sp$id, sk.iid=si$id , sk.sid=ss$id , sk.aid=sa$id)
+ skOptions()
  type <- "data_files"
  type <- "documents"
  sdat <- skCreate( type = type

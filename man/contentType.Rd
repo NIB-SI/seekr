@@ -4,10 +4,10 @@
 \alias{contentType}
 \title{Determine MIME type for file.}
 \usage{
-contentType(x)
+contentType(file)
 }
 \arguments{
-\item{File}{name.}
+\item{file}{file name.}
 }
 \value{
 MIME type string.
@@ -20,9 +20,8 @@ contentType("bla.txt")
 contentType("bla.pdf")
 contentType("bla.tar.gz")
 contentType("bla.bla")
-
-}
-\seealso{
+contentType("bla")
+contentType("bla.")
 
 }
 \author{

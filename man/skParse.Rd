@@ -2,24 +2,26 @@
 % Please edit documentation in R/seekr-api.R
 \name{skParse}
 \alias{skParse}
-\title{Parse the response from SEEK API}
+\title{Parse the response from SEEK API and convert to a list.}
 \usage{
 skParse(resp, ...)
 }
 \arguments{
-\item{resp}{Response from SEEK API.}
+\item{resp}{response from SEEK API.}
+
+\item{...}{further arguments.}
 }
 \value{
 An object (list) of class \code{seek_api}.
 }
 \description{
-Parse the response from SEEK API
+Parse the response from SEEK API and convert to a list.
 }
 \examples{
 \dontrun{
-skIni()
-options()$seekr$myid
-r <- skGet("people",options()$seekr$myid)
+options(.sk$test)
+options("sk.myid")
+r <- skGet("people",options("sk.myid"))
 names(r)
 r$response$status_code
 status_code(r$response)

@@ -16,18 +16,20 @@ Must be one of 'documents' or 'data_files'.}
 FAIRDOMhub created component.
 }
 \description{
-Upload file to a crerated object of type 'documents' or 'data_files'.
+Upload file to a created object of type 'documents' or 'data_files'.
 }
 \note{
 Upon success (status code 200) details
 of newly created component can be used. Check status code.
 }
 \examples{
+\dontrun{
 file <- dir()[1]
 file
 fhd <- skCreate("documents",meta,file=file)
 fhd
 sd <- skUpload(fhd, file)
+}
 
 }
 \seealso{
