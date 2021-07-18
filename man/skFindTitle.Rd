@@ -25,7 +25,6 @@ If item is not found, empty string is returned as title.
 }
 \examples{
 \dontrun{
-#skIni()
 skFindTitle("people",0)
 }
 }

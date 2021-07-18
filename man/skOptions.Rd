@@ -7,28 +7,47 @@
 skOptions(end = "", start = "sk.", hide = "sk.pwd")
 }
 \arguments{
-\item{end}{character string defining the end of the string. By default 
+\item{end}{character string defining the end of the string. By default
 all names are valid (empty string).}
 
-\item{start}{character string defining the start of the name, 
+\item{start}{character string defining the start of the name,
 default is "sk.", which is typical for seekr options.}
 
-\item{hide}{vector of names, that should not be listed. 
+\item{hide}{vector of names, that should not be listed.
 Default is "sk.pwd" which prevents password to be revealed.}
 }
 \value{
 A list of seekr related options.
 }
 \description{
-Lists selected seekr related options. Selection is based on the start
-and end of the name. All seekr options start with prefix '.sk'. 
+Lists selected seekr related options that are set in via 
+the options function. Selection is based on the start
+and end of the name. All seekr options start with prefix 'sk.'.
 Argument \code{end} give the required sufix for the option to be listed.
 Typical use would be to list identifiers, when \code{end = "id"}.
 }
+\note{
+At the moment two locations are available: main FAIRDOMHub
+      (https://www.fairdomhub.org/) and testing site
+      (https://testing.sysmo-db.org).
+
+Function options() is used to store server location, 
+       user credentials and pISA layer identifications. 
+       Options that can be declared: 
+         sk.url (server location), 
+         sk.usr (username),
+         sk.pwd (password),
+         sk.myid (user id on server),
+         sk.instid (user's institution id),
+         sk.prid (program id),
+         sk.pid (project id),
+         sk.iid (investigation id),
+         sk.sid (study id),
+         sk.aid (assay id).
+}
 \examples{
 \dontrun{
-#skIni()
-options(.sk$test)
+options(sk.myid=368)
 skOptions()
 skOptions("id")
 skOptions(hide=NULL)

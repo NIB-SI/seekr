@@ -19,7 +19,6 @@ Parse the response from SEEK API and convert to a list.
 }
 \examples{
 \dontrun{
-#skIni()
 options(.sk$test)
 options("sk.myid")
 r <- skGet("people",options("sk.myid"))

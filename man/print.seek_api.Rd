@@ -21,7 +21,6 @@ Print method for seek_api object
 }
 \examples{
 \dontrun{
-#skIni()
 options(.sk$test)
 options("sk.myid")
 r <- skGet("people",options("sk.myid"))
@@ -31,6 +30,7 @@ print( r, TRUE)
 r
 r$response$status_code
 status_code(r$response)
+r$status
 }
 
 }

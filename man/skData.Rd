@@ -25,7 +25,6 @@ Parameter ... is ignored at this time.
 }
 \examples{
 \dontrun{
-skIni()
 options(.sk$test)
 options("sk.myid")
 r <- skGet("people",options("sk.myid"))
