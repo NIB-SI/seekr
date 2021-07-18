@@ -25,7 +25,7 @@ If item is not found, value 0 is returned as id.
 }
 \examples{
 \dontrun{
-skIni()
+options(.sk$test)
 id <- skFindId("people","Guest")
 id
 skFindTitle("people",id)
@@ -34,6 +34,7 @@ skFindId("people","No User")
 # List of projects
 projects <- skFindId("projects")
 head(projects)
+tail(projects)
 }
 }
 \seealso{

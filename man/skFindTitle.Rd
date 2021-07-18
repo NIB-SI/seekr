@@ -25,12 +25,6 @@ If item is not found, empty string is returned as title.
 }
 \examples{
 \dontrun{
-skIni()
-id <- skFindId("people","Guest")
-id
-idNew <- skFindTitle("people", id[1])
-idNew
-all.equal(id, idNew)
 skFindTitle("people",0)
 }
 }

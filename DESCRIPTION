@@ -21,5 +21,4 @@ Imports:
     pisar
 VignetteBuilder: knitr
 Suggests: 
-    knitr,
     rmarkdown

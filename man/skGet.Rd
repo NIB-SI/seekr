@@ -4,14 +4,16 @@
 \alias{skGet}
 \title{Get inormation from repository.}
 \usage{
-skGet(type, id, uri = options()$seekr$baseurl, ...)
+skGet(type, id, uri = options("sk.url"), ...)
 }
 \arguments{
 \item{type}{Type of information (e.g. "person").}
 
 \item{id}{Repository id of an item.}
 
-\item{uri}{Repository base address (URI)..}
+\item{uri}{Repository base address (URI).}
+
+\item{...}{further arguments.}
 }
 \value{
 An object (list) of class \code{seek_api}.
@@ -24,9 +26,9 @@ Parameter ... is ignored at this time.
 }
 \examples{
 \dontrun{
-skIni()
-options()$seekr$myid
-r <- skGet("people",options()$seekr$myid)
+options(.sk$test)
+options("sk.myid")
+r <- skGet("people",options("sk.myid"))
 names(r)
 r$response$status_code
 status_code(r$response)

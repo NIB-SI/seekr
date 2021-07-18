@@ -4,12 +4,12 @@
 \alias{skSkeleton}
 \title{Create *sk* skeleton.}
 \usage{
-skSkeleton(type = "assay", meta, file)
+skSkeleton(type = "assay", meta)
 }
 \arguments{
-\item{type}{Component name (e.g. 'people', 'projets', ...).}
+\item{type}{component name (e.g. 'people', 'projects', ...).}
 
-\item{meta}{Data frame with pISA metadata or
+\item{meta}{a data frame with pISA metadata or
 a list with minimal information (Title, Description, *ToDo: add fields*).}
 }
 \value{
@@ -21,8 +21,8 @@ Creates *sk* object with required structure.
 \examples{
 \dontrun{
 require(jsonlite)
-meta= list(Title = "Test layer", Description = "Some description")
-type = "projects"
+meta <- list(Title = "Test layer", Description = "Some description")
+type <- "projects"
 sp <- skSkeleton( type = type
   , meta= meta
   )

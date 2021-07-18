@@ -4,12 +4,14 @@
 \alias{print.seek_api}
 \title{Print method for seek_api object}
 \usage{
-\method{print}{seek_api}(x, content = FALSE)
+\method{print}{seek_api}(x, content = FALSE, ...)
 }
 \arguments{
-\item{x}{Object of class \code{seek_api}.}
+\item{x}{object of class \code{seek_api}.}
 
 \item{content}{If FALSE (default), content is no printed.}
+
+\item{...}{further arguments passed to or from other methods.}
 }
 \value{
 An object (list) of class \code{seek_api}.
@@ -19,15 +21,16 @@ Print method for seek_api object
 }
 \examples{
 \dontrun{
-skIni()
-options()$seekr$myid
-r <- skGet("people",options()$seekr$myid)
+options(.sk$test)
+options("sk.myid")
+r <- skGet("people",options("sk.myid"))
 # Print contents
 print( r, TRUE)
 # Short version, default
 r
 r$response$status_code
 status_code(r$response)
+r$status
 }
 
 }
