@@ -23,6 +23,8 @@ Get inormation from repository.
 }
 \note{
 Parameter ... is ignored at this time.
+
+Touched component id is set in options.
 }
 \examples{
 \dontrun{

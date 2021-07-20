@@ -28,7 +28,7 @@ Create pISA layer or *sk* component.
 Upon success (status code 200) details
 of newly created component can be used. Check status code.
 
-Call through API does not set the 'member
+Created component id is set in options.
 }
 \examples{
 \dontrun{
@@ -49,7 +49,7 @@ rm(sp)
  sp
  str(skData(sp))
 # Call to API does not set the 'member' field
-# Add member manually in the project page on the web site: 
+# Add member manually in the project page on the web site:
 # /Actions/Administer project members
 #
  options(sk.prid=26, sk.pid=sp$id)

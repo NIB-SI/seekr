@@ -14,7 +14,7 @@ library(httr)
 ## ----skOptions------------------------------------------------------
 #' Show all seekr related options
 #'
-#' Lists selected seekr related options that are set in via 
+#' Lists selected seekr related options that are set in via
 #' the options function. Selection is based on the start
 #' and end of the name. All seekr options start with prefix 'sk.'.
 #' Argument \code{end} give the required sufix for the option to be listed.
@@ -29,10 +29,10 @@ library(httr)
 #' @note At the moment two locations are available: main FAIRDOMHub
 #'       (https://www.fairdomhub.org/) and testing site
 #'       (https://testing.sysmo-db.org).
-#' @note Function options() is used to store server location, 
-#'        user credentials and pISA layer identifications. 
-#'        Options that can be declared: 
-#'          sk.url (server location), 
+#' @note Function options() is used to store server location,
+#'        user credentials and pISA layer identifications.
+#'        Options that can be declared:
+#'          sk.url (server location),
 #'          sk.usr (username),
 #'          sk.pwd (password),
 #'          sk.myid (user id on server),
@@ -42,7 +42,7 @@ library(httr)
 #'          sk.iid (investigation id),
 #'          sk.sid (study id),
 #'          sk.aid (assay id).
-#'          
+#'
 #' @export
 #' @seealso \code{\link{startsWith}, \link{endsWith}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
@@ -173,6 +173,7 @@ invisible(x)
 #' @return An object (list) of class \code{seek_api}.
 #' @export
 #' @note Parameter ... is ignored at this time.
+#' @note Touched component id is set in options.
 #' @keywords file
 #' @seealso \code{\link{get}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
@@ -191,6 +192,8 @@ invisible(x)
 skGet <- function(type, id,
                    uri=options("sk.url"), ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
+  
+  if(missing(type)) stop('Argument "type" is missing, with no default')
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
   ua <- httr::user_agent("https://github.com/nib-si/seekr")
@@ -205,6 +208,7 @@ skGet <- function(type, id,
 
   if( resp$status_code < 300) {
   parsed <- skParse(resp)
+  if(!missing(id)) skSetOption( type, parsed$id )
   skLog( resp$status_code, round(fht["elapsed"],2), parsed$url)
   } else {
   parsed <- resp$status_code
@@ -278,6 +282,7 @@ skData <- function(r, node, ...){
 #'     If argument title is missing, a data frame with identifiers
 #'     for all items is returned.
 #' @note If item is not found, value 0 is returned as id.
+#' @note Touched component id is set in options.
 #' @export
 #' @keywords pisa
 #' @seealso \code{\link{skFindTitle}}
@@ -303,11 +308,53 @@ skFindId <- function(type, title){
      if(!missing(title)){
        id <- d[[pmatch(title,titles[,"title"])]]$id
        if(is.null(id)) id <- 0
+       skSetOption(type,id)
        return(c(id=id,type=type, title=title))
      } else {
      return(titles)
      }
 }
+
+
+## ----skSetOptions---------------------------------------------------
+#' Sets seekr option according to the type.
+#'
+#' @param type Components name (e.g. 'people', 'projects', ...).
+#' @param id Character string with the identifier
+#'     of the component (id part).
+#' @return A list with the set option or NA if the type is not registered.
+#' @export
+#' @seealso \code{\link{skFindTitle}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' skSetOption("people",111)
+#' skSetOption("myid", 368)
+#' skOptions()
+#' skSetOption("bla",1)
+#' }
+skSetOption <- function( type, id){
+       types = c(
+            url = "sk.url",
+            usr = "sk.usr",
+            pwd = "sk.pwd",
+            myid = "sk.myid",
+            programmes = "sk.prid",
+            projects = "sk.pid",
+            investigations = "sk.iid",
+            studies = "sk.sid",
+            assays = "sk.aid",
+            people = "sk.ppid",
+            institutions = "sk.instid"
+            )
+            if(!is.na(types[type])) { names(id) = types[type]
+            options(as.list(id))
+            options( types[type] ) } else {
+            warning("No such type: ", type)}
+            
+}
+skSetOption("people",111)
+skSetOption("bla",1)
 
 
 ## ----skFindTitle----------------------------------------------------
@@ -320,6 +367,7 @@ skFindId <- function(type, title){
 #'     If argument title is missing, a data frame with identifiers
 #'     for all items is returned. See note.
 #' @note If item is not found, empty string is returned as title.
+#' @note Touched component id is set in options.
 #' @export
 #' @keywords pisa
 #' @seealso \code{\link{skFindTitle}}
@@ -897,7 +945,7 @@ contentType <- function(file){
 #' @return FAIRDOMhub created component.
 #' @note Upon success (status code 200) details
 #' of newly created component can be used. Check status code.
-#' @note Call through API does not set the 'member
+#' @note Created component id is set in options.
 #' @export
 #' @keywords pisa
 #' @seealso \code{\link{skGet}}
@@ -921,7 +969,7 @@ contentType <- function(file){
 #'  sp
 #'  str(skData(sp))
 #' # Call to API does not set the 'member' field
-#' # Add member manually in the project page on the web site: 
+#' # Add member manually in the project page on the web site:
 #' # /Actions/Administer project members
 #' #
 #'  options(sk.prid=26, sk.pid=sp$id)
@@ -1002,10 +1050,11 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      iid <-  as.character(getOption("sk.iid"))
      sid <-  as.character(getOption("sk.sid"))
      aid <-  as.character(getOption("sk.aid"))
-     if(is.null(getOption("sk.instid"))){
+     instid <- as.character(getOption("sk.instid"))
+     if(is.null(instid)){
      instid <- (skData(skGet("people",myid))$relationships$institutions$data[[1]]$id)
      options(sk.instid=instid)
-     }
+     } 
      s <- skSkeleton(type, meta)
 # Common fileds
      s$data$attributes$title  <-  getMeta(meta,"Title")
@@ -1138,7 +1187,8 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
          , parsed$url)
      }
      }
-     parsed
+     skSetOption(type, parsed$id)
+     return(parsed)
 }
 #skCreate("documents",meta,file=file)
 
