@@ -315,6 +315,63 @@ skGet <- function(type, id,
 
 @
 
+<<skDelete>>=
+#' Delete component.
+#'
+#' @param type Component type (e.g. "assay").
+#' @param id Repository id of component.
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
+#' @return Deleted object (list) of class \code{seek_api}.
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @note Component id in options is set to NULL.
+#' @keywords 
+#' @seealso \code{\link{skCreate}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skDelete("assay",options("sk.aid"))
+#' names(r)
+#' r$response$status_code
+#' status_code(r$response)
+#' r
+#' }
+skDelete <- function(type, id,
+                   uri=options("sk.url"), ... ){
+  bkp <- skGet(type, id)
+  print(bkp)
+  if(missing(type)) stop('Argument "type" is missing, with no default')
+  if(!missing(type)) uri <- paste0(uri,"/",type)
+  if(!missing(id)) uri <- paste0(uri,"/",id)
+  print(uri)
+  ua <- httr::user_agent("https://github.com/nib-si/seekr")
+  skLog("skDelete", uri)
+  fht <- system.time(
+  resp <- httr::DELETE(uri,
+         add_headers(Accept="application/json")
+         , ua
+         )
+  )
+  cat("Status code: delete",resp$status_code,"\n")
+
+  if( resp$status_code < 300) {
+  parsed <- skParse(resp)
+  if(!missing(id)) skSetOption( type, parsed$id )
+  skLog( resp$status_code, round(fht["elapsed"],2), parsed$url)
+  } else {
+  parsed <- resp$status_code
+  skLog( resp$status_code, round(fht["elapsed"],2))
+  }
+  print(skGet(type,id))
+  return(bkp)
+}
+#
+
+@
+
 <<skData>>=
 #' Get content from an *sk* object.
 #'
