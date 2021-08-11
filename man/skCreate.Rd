@@ -47,7 +47,7 @@ rm(sp)
     )
     (r <- skFindId("projects",meta$Title))
  sp
- str(skData(sp))
+ str(skContent(sp))
 # Call to API does not set the 'member' field
 # Add member manually in the project page on the web site:
 # /Actions/Administer project members
@@ -63,12 +63,12 @@ rm(sp)
   , meta=meta
     )
  si
- skData(si)$id
+ skContent(si)$id
  skFindId("investigations",meta$Title)
  options(sk.iid=si$id)
  skOptions("id")
 #'
- iid=skData(si)$id
+ iid=skContent(si)$id
  options(sk.prid=26, sk.pid=sp$id, sk.iid=si$id)
  skOptions("id")
  ss <- skCreate( type = "studies"
@@ -77,12 +77,12 @@ rm(sp)
     , Description="Testing upload")
     )
  ss
- skData(ss)$id
+ skContent(ss)$id
 #'
  options(sk.prid = 26
-       , sk.pid=skData(sp)$id
-       , sk.iid=skData(si)$id
-       , sk.sid=skData(ss)$id
+       , sk.pid=skContent(sp)$id
+       , sk.iid=skContent(si)$id
+       , sk.sid=skContent(ss)$id
        )
  skOptions()
  sa <- skCreate( type = "assays"
@@ -92,8 +92,8 @@ rm(sp)
     , class="EXP"
     )
  str(sa)
- skData(sa)$relationships$submitter
- skData(sa)$links
+ skContent(sa)$relationships$submitter
+ skContent(sa)$links
 }
 
 # Type: data_file
@@ -116,7 +116,7 @@ oldwd
     )
  #str(sdat)
  sdat
- skData(sdat)$id
+ skContent(sdat)$id
 if(interactive()) setwd(oldwd)
 getwd()
 res <- sdat$content

@@ -192,7 +192,7 @@ invisible(x)
 skGet <- function(type, id,
                    uri=options("sk.url"), ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
-  
+
   if(missing(type)) stop('Argument "type" is missing, with no default')
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
@@ -220,7 +220,64 @@ skGet <- function(type, id,
 
 
 
-## ----skData---------------------------------------------------------
+## ----skDelete-------------------------------------------------------
+#' Delete component.
+#'
+#' @param type Component type (e.g. "assay").
+#' @param id Repository id of component.
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
+#' @return Deleted object (list) of class \code{seek_api}.
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @note Component id in options is set to NULL.
+#' @keywords
+#' @seealso \code{\link{skCreate}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skDelete("assay",options("sk.aid"))
+#' names(r)
+#' r$response$status_code
+#' status_code(r$response)
+#' r
+#' }
+skDelete <- function(type, id,
+                   uri=options("sk.url"), ... ){
+  bkp <- skGet(type, id)
+  print(bkp)
+  if(missing(type)) stop('Argument "type" is missing, with no default')
+  if(!missing(type)) uri <- paste0(uri,"/",type)
+  if(!missing(id)) uri <- paste0(uri,"/",id)
+  print(uri)
+  ua <- httr::user_agent("https://github.com/nib-si/seekr")
+  skLog("skDelete", uri)
+  fht <- system.time(
+  resp <- httr::DELETE(uri,
+         add_headers(Accept="application/json")
+         , ua
+         )
+  )
+  cat("Status code: delete",resp$status_code,"\n")
+
+  if( resp$status_code < 300) {
+  parsed <- skParse(resp)
+  if(!missing(id)) skSetOption( type, parsed$id )
+  skLog( resp$status_code, round(fht["elapsed"],2), parsed$url)
+  } else {
+  parsed <- resp$status_code
+  skLog( resp$status_code, round(fht["elapsed"],2))
+  }
+  print(skGet(type,id))
+  return(bkp)
+}
+#
+
+
+
+## ----skContent------------------------------------------------------
 #' Get content from an *sk* object.
 #'
 #' @param r object retrieved by skGet.
@@ -238,13 +295,13 @@ skGet <- function(type, id,
 #' options(.sk$test)
 #' options("sk.myid")
 #' r <- skGet("people",options("sk.myid"))
-#' d <- skData(r,"attributes")
+#' d <- skContent(r,"attributes")
 #' names(d)
 #' d$last_name
-#' skData(r)$attributes$tools
+#' skContent(r)$attributes$tools
 #' # Get list of people
 #' r <- skGet("people")
-#' d <- skData(r)
+#' d <- skContent(r)
 #' length(d)
 #' names(d)
 #' names(d[[1]])
@@ -257,19 +314,19 @@ skGet <- function(type, id,
 #' id <- d[[pmatch(myname,titles)]]$id
 #' id
 #' }
-## skData <- function(r, node, ...){
+## skContent <- function(r, node, ...){
 ##   if(class(r)=="seek_api") r <- r$response
 ##   jsn <- "application/json"
 ##   if(missing(node)) invisible(content(r,"parsed",type=jsn)$data) else
 ##   invisible(content(r,"parsed",type=jsn)$data[[node]])
 ## }
-skData <- function(r, node, ...){
+skContent <- function(r, node, ...){
   if(class(r)=="seek_api") r <- r$content
   jsn <- "application/json"
   if(missing(node)) invisible(r) else
   invisible(r[[node]])
 }
-# skDatas <- skData
+# skContents <- skContent
 
 
 ## ----skFindId-------------------------------------------------------
@@ -302,7 +359,7 @@ skData <- function(r, node, ...){
 #' }
 skFindId <- function(type, title){
      r <- skGet(type)
-     d <- skData(r)
+     d <- skContent(r)
      titles <- t(sapply(d,function(x) c(id=x$id, type=x$type, title=x$attributes$title)))
      # Get FAIRDOMhub user id
      if(!missing(title)){
@@ -351,7 +408,7 @@ skSetOption <- function( type, id){
             options(as.list(id))
             options( types[type] ) } else {
             warning("No such type: ", type)}
-            
+
 }
 skSetOption("people",111)
 skSetOption("bla",1)
@@ -382,7 +439,7 @@ skFindTitle <- function(type, id){
      if( class(r)=="integer" && r > 300) {
      title <- ""
      } else {
-     d <- skData(r, "attributes")
+     d <- skContent(r, "attributes")
      title <- d$title
      # Set FAIRDOMhub user title
      }
@@ -967,7 +1024,7 @@ contentType <- function(file){
 #'     )
 #'     (r <- skFindId("projects",meta$Title))
 #'  sp
-#'  str(skData(sp))
+#'  str(skContent(sp))
 #' # Call to API does not set the 'member' field
 #' # Add member manually in the project page on the web site:
 #' # /Actions/Administer project members
@@ -983,12 +1040,12 @@ contentType <- function(file){
 #'   , meta=meta
 #'     )
 #'  si
-#'  skData(si)$id
+#'  skContent(si)$id
 #'  skFindId("investigations",meta$Title)
 #'  options(sk.iid=si$id)
 #'  skOptions("id")
 #' #'
-#'  iid=skData(si)$id
+#'  iid=skContent(si)$id
 #'  options(sk.prid=26, sk.pid=sp$id, sk.iid=si$id)
 #'  skOptions("id")
 #'  ss <- skCreate( type = "studies"
@@ -997,12 +1054,12 @@ contentType <- function(file){
 #'     , Description="Testing upload")
 #'     )
 #'  ss
-#'  skData(ss)$id
+#'  skContent(ss)$id
 #' #'
 #'  options(sk.prid = 26
-#'        , sk.pid=skData(sp)$id
-#'        , sk.iid=skData(si)$id
-#'        , sk.sid=skData(ss)$id
+#'        , sk.pid=skContent(sp)$id
+#'        , sk.iid=skContent(si)$id
+#'        , sk.sid=skContent(ss)$id
 #'        )
 #'  skOptions()
 #'  sa <- skCreate( type = "assays"
@@ -1012,8 +1069,8 @@ contentType <- function(file){
 #'     , class="EXP"
 #'     )
 #'  str(sa)
-#'  skData(sa)$relationships$submitter
-#'  skData(sa)$links
+#'  skContent(sa)$relationships$submitter
+#'  skContent(sa)$links
 #' }
 #'
 #' # Type: data_file
@@ -1036,7 +1093,7 @@ contentType <- function(file){
 #'     )
 #'  #str(sdat)
 #'  sdat
-#'  skData(sdat)$id
+#'  skContent(sdat)$id
 #' if(interactive()) setwd(oldwd)
 #' getwd()
 #' res <- sdat$content
@@ -1052,9 +1109,9 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      aid <-  as.character(getOption("sk.aid"))
      instid <- as.character(getOption("sk.instid"))
      if(is.null(instid)){
-     instid <- (skData(skGet("people",myid))$relationships$institutions$data[[1]]$id)
+     instid <- (skContent(skGet("people",myid))$relationships$institutions$data[[1]]$id)
      options(sk.instid=instid)
-     } 
+     }
      s <- skSkeleton(type, meta)
 # Common fileds
      s$data$attributes$title  <-  getMeta(meta,"Title")
