@@ -1091,7 +1091,7 @@ contentType <- function(file){
 <<skCreate>>=
 #' Create pISA layer or *sk* component.
 #'
-#' @param type Component name (e.g. 'people', 'projets', ...).
+#' @param type Component name (e.g. 'people', 'projects', ...).
 #' @param meta Data frame with pISA metadata or
 #'     a list with minimal information (Title,
 #'     Description, *ToDo: add fields*).
