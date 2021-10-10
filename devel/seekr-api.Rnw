@@ -190,7 +190,7 @@ skParse <- function(resp, ...){
         "SEEK API request failed [%s]\n%s\n<%s>",
         status_code(resp),
         resp$header$status,
-        "https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.1"
+        "https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.3.1"
       ),
       call. = FALSE
     )
@@ -268,7 +268,8 @@ invisible(x)
 #' @return An object (list) of class \code{seek_api}.
 #' @export
 #' @note Parameter ... is ignored at this time.
-#' @note Touched component id is set in options.
+#' @note Touched component id is set in the options (see:
+#'      \code\link{skOptions}).
 #' @keywords file
 #' @seealso \code{\link{get}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
@@ -1093,8 +1094,8 @@ contentType <- function(file){
 #'
 #' @param type Component name (e.g. 'people', 'projects', ...).
 #' @param meta Data frame with pISA metadata or
-#'     a list with minimal information (Title,
-#'     Description, *ToDo: add fields*).
+#'     a list with minimal information (short layer name, Title,
+#'     Description, *ToDo: add fields*). See Examples.
 #' @param class Assay class key string.
 #'     Possible values are 'EXP' and 'MODEL'.
 #' @param file File name with path, relative to layer.
@@ -1114,16 +1115,18 @@ contentType <- function(file){
 #' options(sk.prid = 26)
 #' skOptions("id")
 #' meta= list(
-#'       Title=paste("Test project", Sys.time())
+#'       project=paste("Test project", Sys.time())
+#'     , Title="Test project"
 #'     , Description="Testing upload")
 #' meta
 #' rm(sp)
 #'  sp <- skCreate( type = "projects"
 #'     , meta = meta
 #'     )
-#'     (r <- skFindId("projects",meta$Title))
+#'  skFindId("projects",meta$project)
 #'  sp
-#'  str(skContent(sp))
+#'  cat(skContent(sp)$attributes$description)
+#'  sp$url
 #' # Call to API does not set the 'member' field
 #' # Add member manually in the project page on the web site:
 #' # /Actions/Administer project members
@@ -1131,7 +1134,8 @@ contentType <- function(file){
 #'  options(sk.prid=26, sk.pid=sp$id)
 #'  skOptions("id")
 #'  meta= list(
-#'       Title=paste("Test investigation", Sys.time())
+#'       Investigation=paste("Test investigation", Sys.time())
+#'     , Title = "Test investigation"
 #'     , Description="Testing upload")
 #'     meta
 #'     rm(si)
@@ -1140,45 +1144,47 @@ contentType <- function(file){
 #'     )
 #'  si
 #'  skContent(si)$id
-#'  skFindId("investigations",meta$Title)
-#'  options(sk.iid=si$id)
+#'  skFindId("investigations",meta$Investigation)
 #'  skOptions("id")
-#' #'
-#'  iid=skContent(si)$id
+#' # Create Study
+#'  iid <- si$id
 #'  options(sk.prid=26, sk.pid=sp$id, sk.iid=si$id)
 #'  skOptions("id")
-#'  ss <- skCreate( type = "studies"
-#'   , meta= list(
-#'       Title=paste("Test study", Sys.time())
+#'  meta= list(
+#'       Study=paste("Test study", Sys.time())
+#'     , Title="Test Study"
 #'     , Description="Testing upload")
-#'     )
+#'  ss <- skCreate( type = "studies", meta)
 #'  ss
-#'  skContent(ss)$id
-#' #'
+#' ss$id
+#'  skFindId("studies",meta$Study)
+#' # Assay
 #'  options(sk.prid = 26
 #'        , sk.pid=skContent(sp)$id
 #'        , sk.iid=skContent(si)$id
 #'        , sk.sid=skContent(ss)$id
 #'        )
 #'  skOptions()
-#'  sa <- skCreate( type = "assays"
-#'   , meta= list(
-#'       Title=paste("Test assay", Sys.time())
-#'     , Description="Testing upload")
+#'  meta= list(
+#'       Assay=paste("Test Assay", Sys.time())
+#'     , Title="Test Assay"
+#'     , Description="Testing upload"
 #'     , class="EXP"
 #'     )
-#'  str(sa)
+#'  sa <- skCreate( type = "assays"  , meta)
+#'  sa
+#'  sa$id
 #'  skContent(sa)$relationships$submitter
 #'  skContent(sa)$links
 #' }
 #'
-#' # Type: data_file
-#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
-#' oldwd <- setwd(system.file("extdata",astring,package="seekr"))
-#' oldwd
-#' .aname <- getLayer("A")
-#' .aroot <- getRoot("A")
-#' .ameta  <- readMeta()
+ # Type: data_file
+ astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
+ oldwd <- setwd(system.file("extdata",astring,package="seekr"))
+ oldwd
+ .aname <- getLayer("A")
+ .aroot <- getRoot("A")
+ .ameta  <- readMeta()
 #'  file <- "input/README.MD"
 #'  options(sk.prid = 26, sk.pid=sp$id, sk.iid=si$id , sk.sid=ss$id , sk.aid=sa$id)
 #'  skOptions()
@@ -1186,7 +1192,7 @@ contentType <- function(file){
 #'  type <- "documents"
 #'  sdat <- skCreate( type = type
 #'   , meta= list(
-#'       Title=paste("Test assay", Sys.time())
+#'       Title=paste("Test document", Sys.time())
 #'     , Description="Testing of upload")
 #'   , file=file
 #'     )
@@ -1196,7 +1202,7 @@ contentType <- function(file){
 #' if(interactive()) setwd(oldwd)
 #' getwd()
 #' res <- sdat$content
-#' item_link <- file.path(res$meta$base_url,res$links$self)
+#' item_link <- paste0(res$meta$base_url,res$links$self)
 #' if(interactive()) shell.exec(item_link)
 #' }
 skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
@@ -1208,16 +1214,17 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      aid <-  as.character(getOption("sk.aid"))
      instid <- as.character(getOption("sk.instid"))
      if(is.null(instid)){
-     instid <- (skContent(skGet("people",myid))$relationships$institutions$data[[1]]$id)
+     instid <- skContent(skGet("people",myid))$relationships$institutions$data[[1]]$id
      options(sk.instid=instid)
      }
      s <- skSkeleton(type, meta)
 # Common fileds
-     s$data$attributes$title  <-  getMeta(meta,"Title")
-     s$data$attributes$description  <-  getMeta(meta, "Description")
+
 # Type specific fields
      switch(s$data$type,
      projects = {
+       s$data$attributes$title  <-  getMeta(meta,"project")
+       s$data$attributes$description  <-  pasteMeta(meta)
        s$data$attributes$members <- list(list(person_id = myid,
        institution_id = instid))
        s$data$attributes$default_policy$permissions$resource$id <- myid
@@ -1227,12 +1234,16 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
        s$data$relationships$asset_housekeeper$data$id <- myid
             }
      , investigations = {
+        s$data$attributes$title  <-  getMeta(meta,"Investigation")
+        s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$projects$data$id <- pid
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$creators$data$type <- "people"
             }
      , studies = {
+        s$data$attributes$title  <-  getMeta(meta,"Study")
+        s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$investigation$data$id <-iid
         s$data$attributes$person_responsible_id <- myid
         s$data$attributes$policy$permissions$resource$id <- pid
@@ -1240,6 +1251,8 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
         s$data$relationships$creators$data$type <- "people"
             }
      , assays = {
+        s$data$attributes$title  <-  getMeta(meta,"Assay")
+        s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$study$data$id <-sid
         s$data$attributes$person_responsible_id <- myid
         s$data$attributes$policy$permissions$resource$id <- pid
