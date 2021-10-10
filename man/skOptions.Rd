@@ -20,7 +20,7 @@ Default is "sk.pwd" which prevents password to be revealed.}
 A list of seekr related options.
 }
 \description{
-Lists selected seekr related options that are set in via 
+Lists selected seekr related options that are set in via
 the options function. Selection is based on the start
 and end of the name. All seekr options start with prefix 'sk.'.
 Argument \code{end} give the required sufix for the option to be listed.
@@ -31,10 +31,10 @@ At the moment two locations are available: main FAIRDOMHub
       (https://www.fairdomhub.org/) and testing site
       (https://testing.sysmo-db.org).
 
-Function options() is used to store server location, 
-       user credentials and pISA layer identifications. 
-       Options that can be declared: 
-         sk.url (server location), 
+Function options() is used to store server location,
+       user credentials and pISA layer identifications.
+       Options that can be declared:
+         sk.url (server location),
          sk.usr (username),
          sk.pwd (password),
          sk.myid (user id on server),

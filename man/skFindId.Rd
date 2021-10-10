@@ -22,6 +22,8 @@ Get details of component with id from an *sk* object.
 }
 \note{
 If item is not found, value 0 is returned as id.
+
+Touched component id is set in options.
 }
 \examples{
 \dontrun{

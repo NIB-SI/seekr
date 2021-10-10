@@ -1,3 +1,5 @@
+# File patterns to be ignored by SEEK API upload
+#
 DoNotUpload/
 other/
 *.bat
@@ -6,4 +8,4 @@ common.ini
 *.zip
 *.tmp
 *.log
-*.R
+_outputFile.R
