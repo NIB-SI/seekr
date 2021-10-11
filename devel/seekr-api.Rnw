@@ -316,6 +316,41 @@ skGet <- function(type, id,
 
 @
 
+<<skRead>>=
+#' Read information from repository.
+#'
+#' @param type Type of information (e.g. "person").
+#' @param id Repository id of an item.
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
+#' @return An object (list) of class \code{seek_api}.
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @note Touched component id is set in the options (see:
+#'      \code\link{skOptions}).
+#' @keywords file
+#' @seealso \code{\link{get}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skRead("people",options("sk.myid"))
+#' names(r)
+#' r$response$status_code
+#' status_code(r$response)
+#' r
+#' # Non existent user
+#' skRead("people",0)
+#' }
+skRead <- function(type, id,
+                   uri=options("sk.url"), ... ){
+  if(missing(type)) stop('Argument "type" is missing, with no default') else
+  if(missing(id)) stop('Argument "id" is missing, with no default') else
+  skGet( type=type, id=id, uri = uri, ...)
+  }
+@
+
 <<skDelete>>=
 #' Delete component.
 #'
