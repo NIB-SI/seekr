@@ -274,7 +274,7 @@ invisible(x)
 #' @note Touched component id is set in the options (see:
 #'      \code\link{skOptions}).
 #' @keywords file
-#' @seealso \code{\link{get}}
+#' @seealso \code{\link{get}}, \code{\link{skRead}}, \code{\link{skList}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -385,6 +385,68 @@ skList <- function(type,
   if(missing(type)) stop('Argument "type" is missing, with no default') else
   skGet( type=type, uri = uri, ...)
   }
+@
+
+<<skSearch>>=
+#' Search operation returns a list of references to resources.
+#'
+#' @param type Type of information (e.g. "person", default is "data_files").
+#' @param q Text to search for, spaces acceptable.
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
+#' @return An object (list) of class \code{seek_api}.
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @note Touched component id is set in the options (see:
+#'      \code\link{skOptions}).
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skSearch("people","Guest")
+#' names(r)
+#' r$response$status_code
+#' status_code(r$response)
+#' str(skContent(r))
+#' # Non existent user
+#' x <- skSearch("people","XY")
+#' x$content
+#' str(skContent(x))
+#' (skContent(skSearch("institutions","systems biology")))
+#' }
+skSearch <- function(type="data_files", q,
+                   uri=options("sk.url"), ... ){
+#                  uri="https://www.fairdomhub.org", ... ){
+
+  if(missing(q)) stop('Argument "q" is missing, with no default') else
+     {  q <- gsub(" ","%20",q)
+        uri <- paste0(uri,"/search/?q=",q)
+      }    
+     if(!missing(type)) uri <- paste0(uri,"&search_type=",type)
+  print(uri)
+  ua <- httr::user_agent("https://github.com/nib-si/seekr")
+  skLog("skSearch", uri)
+  fht <- system.time(
+  resp <- httr::GET(uri,
+         add_headers(Accept="application/json")
+         , ua
+         )
+  )
+  cat("Status code:",resp$status_code,"\n")
+
+  if( resp$status_code < 300) {
+  parsed <- skParse(resp)
+#  if(!missing(q)) skSetOption( type, parsed$id )
+  skLog( resp$status_code, round(fht["elapsed"],2), parsed$url)
+  } else {
+  parsed <- resp$status_code
+  skLog( resp$status_code, round(fht["elapsed"],2))
+  }
+  return(parsed)
+}
+#
+
 @
 
 <<skDelete>>=
