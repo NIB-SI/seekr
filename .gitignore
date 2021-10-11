@@ -10,7 +10,7 @@ packrat/lib*/
 .RData
 .Ruserdata
 inst/doc
-devel/
+#devel/
 # Tex related
 *.gz
 *.synctex

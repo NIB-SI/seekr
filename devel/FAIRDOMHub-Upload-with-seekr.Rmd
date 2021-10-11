@@ -1,0 +1,361 @@
+---
+title: "Upload to FAIRDOMHub with seekr"
+author: "A. Blejec"
+date: "13. 05. 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+.testing <- TRUE
+```
+
+## Introduction
+
+I will organize a batch upload to FAIRDOMHub. For the operation I have prepared the R package `seekr`, available at [GitHub](https://github.com/NIB-SI/seekr).
+
+```{r}
+library(pisar)
+library(rio)
+library(jsonlite)
+library(httr)
+library(seekr)
+```
+
+
+## Prepare pISA environment
+
+Package `seekr` contains demo pISA-tree project. For this demonstration we can use the demo project. It is assumed, that our working directory is a layer of the pISA project, in our case we will start in an assay.
+
+```{r}
+astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
+oldwd <- setwd(system.file("extdata", astring, package="seekr"))
+oldwd
+dir()
+```
+
+
+Initialize the pISA-tree. Function `pisa` will complain, if the working directory is not a pISA layer.
+
+```{r}
+pini <- pisa()
+```
+
+Let us check some of the infos gathered:
+
+Assay name:
+```{r}
+.aname
+# or
+pini$A$name
+```
+
+Study information
+
+```{r}
+pini$S
+```
+
+Study and project descriptions
+```{r}
+getMeta(.smeta,"Description")
+getMeta(.pmeta,"Description")
+```
+
+
+## Prepare study files
+
+SEEK supports only files in assays. Study files need to be copied to an assay.
+
+
+```{r}
+snames <- dir(.iroot, pattern="^_S_"
+              , full.names = FALSE
+              , recursive=FALSE
+              , include.dirs=TRUE)
+snames
+#snames <- snames[grepl("^_S_",snames)]
+for(sname in snames) {
+  asname <- paste0("_A_",sname,"-files")
+  aspath <- file.path(.iroot,sname,asname)
+  if(!dir.exists(aspath)) dir.create(aspath)
+  #file.copy(file.path(.iroot,sname,"*.*"), aspath)
+}
+```
+
+Get the directory listing of all studies in the parent investigation
+and exclude files listed in file `seekignore.txt`. In our case, seekignore file is in the investigation layer.
+
+```{r}
+# Get SEEK ignore file
+ignore_file <- file.path(.iroot,"seekignore.txt")
+if(file.exists(ignore_file))
+seekignore <- read.table(ignore_file)[,1] else seekignore <- ""
+seekignore
+
+# Create directory listing
+
+dirs <-  dir(.iroot
+             , full.names = FALSE
+             , recursive=TRUE
+             , include.dirs=FALSE)
+head(dirs,10)
+length(dirs)
+
+# Ignore files with patterns in seekignore file
+dirlength <- length(dirs)
+for(pat in toupper(seekignore)){
+  ldir <- length(dirs)
+  at <- gsub("\\.","\\\\.",pat)
+  dirs <- dirs[!grepl(pat,toupper(dirs))]
+  cat("Ignoring" , ldir-length(dirs), "files [",pat," ]\n")
+}
+cat("Files to upload:", length(dirs), "/",dirlength)
+
+# Keep only files in Assays
+
+head(dirs)
+
+dirs <- dirs[grepl("/_A_", dirs)]
+
+head(dirs)
+tail(dirs)
+cat("Files to upload:", length(dirs), "/",dirlength,"\n")
+```
+
+```{r eval=FALSE, include=FALSE, echo=FALSE}
+dirs=c("xx/other/","bla/other-file.txt")
+pat="other/"
+dirs[!grepl(toupper(pat),toupper(dirs),fixed=TRUE)]
+grep(toupper(pat),toupper(dirs),fixed=TRUE, value=TRUE, invert=TRUE)
+glob2rx(pat,trim.head=TRUE,trim.tail=TRUE)
+```
+
+## Prepare connection with FAIRDOMHub
+
+Restart the log file.
+
+```{r}
+skLog("Starting upload for demo project", append=FALSE)
+```
+
+Initialize connection with SEEK cloud service. Cloud service url and project creator name and SEEK service id are expected in the project metadata file. They should be stored in options().
+
+```{r}
+options(.sk$test)
+# options(.sk$main)
+skOptions()
+```
+
+
+Here I am showing a part of the settings (to not reveal my password).
+
+Find creator's FAIRDOMHub id. Project creator name should be spelled exactly as in the FAIRDOMHub account.
+
+```{r}
+meta <- pini$p$meta
+crid <- skFindId("people",meta[grepl("creator",meta$Key),]$Value)["id"]
+crid
+crid <- skFindId("people","Andrej Blejec")["id"]
+crid
+if(crid == 0 ) crid <- 368
+myid <- crid
+myid
+```
+
+
+```{r}
+options(sk.myid = crid)
+
+```
+
+One might be interested in the institution the person belongs. SEEK API returns a JSON structure, which is converted into an R list. One can traverse the list in usual way to get to the relevant data.
+
+```{r}
+resp <- skContent( skRead("people",  getOption( "sk.myid" ) ) )$relationships$institutions$data[[1]]
+resp
+str(resp)
+inst <- skRead(resp$type,resp$id)
+inst
+skContent(inst)$attributes$title
+```
+
+
+### Get project and Investigation ids:
+
+Usually, the project on FAIRDOMHub will be created interactively by the programme admin. First, we will check the existence of our demo project `r pini$p$name`on the FAIRDOMHub.
+
+```{r}
+pini$p$name
+pinfo <- skFindId("projects", pini$p$name)
+pinfo
+# project identification number
+pid <- pinfo["id"]
+# project name
+pname <-  pinfo["title"]
+pname
+pini$p$name == pname
+#
+```
+The local project name and the name on the cloud match. On the FAIRDOMHub, project components have identification numbers. Our project has the identification number `r pid`:
+
+```{r}
+(pid <- pinfo["id"])
+```
+Project id is part of the path to the project on the cloud:
+
+```{r}
+skRead("projects",pid)$url
+```
+
+
+
+
+
+```{r}
+iinfo <- skFindId("investigations", pini$I$name)
+#iinfo <- c(id=325,type="investigation",title=pini$I$name)
+iinfo
+iid <- iinfo["id"]
+iname <- iinfo["title"]
+# project id (todo: make a function)
+prdata <- skRead("projects", pid)
+prid <- prdata$content$relationships$programmes$data[[1]][["id"]]
+prid
+```
+
+If the layer (investigation) does not exist, the function skFindId returns zero in the place of 'id'.
+
+If it is so, one can create the appropriate layer.
+
+```{r eval=(iid == 0)}
+skCreate("investigations", meta=.imeta)
+skFindId("investigations", pini$I$name)
+```
+
+Update seekr options.
+
+```{r}
+options(prid)
+options(pid)
+options(iid)
+skOptions()
+```
+
+Parse file path into study, assay, filename
+
+## Pick the files to upload
+
+```{r}
+uplimit <- 3*10^9
+#ind <- 205  # random line numbers
+#(ind <- which(grepl("_S_03_stCuSTr/_A_01_evigene",dirs,ignore.case=TRUE)))
+ind <- 1:length(dirs)
+nind <- length(ind)
+# For testing
+.testing <- FALSE
+if(.testing){
+ind <- sample(ind,10)
+nind <- length(ind)
+dirs <- dirs[ind]
+ind <- 1:length(dirs)
+}
+```
+
+Loop through list of files and upload
+
+```{r}
+for(i in ind){
+  i <- 1
+  x <- dirs[i]
+ cat("\n\n|", rep("-",50*i/nind-1),">", rep(" ",50*(nind-i)/nind),"| ", i, "/", nind, "\n", x ,"\n\n", rep("-",50),"\n", sep="")
+sname <- gsub("^.*(_S_[^/]*)/_A.*","\\1",x)
+aname <- gsub("^.*/(_A_[^/]*)/.*","\\1",x)
+fname <- gsub("^.*/(_[AS]_[^/]*)/(.*)","\\2",x)
+.sname <- sname
+.aname <- aname
+.aname
+#
+# Check if the study exists, create if not
+#
+# Find Study id
+sid <- skFindId("studies",sname)["id"]
+sid
+sresp <- skRead("studies",sid)
+
+if(sresp$content$relationships$investigation$data$id!=iid) sid <- 0
+skIni(pid=pid,iid=iid)
+smeta <- readMeta(file.path(.iroot,sname))
+meta <- list(Title = sname , Description = pasteMeta(smeta) )
+#cat(meta$Description)
+if(sid==0) { sresp <- skCreate("studies",meta)
+  print(sresp)
+  sid <- sresp$id
+  }
+sid
+#skRead("studies",sid)
+skIni(pid=pid,iid=iid,sid=sid)
+#
+# Check if the assay exists, create if not
+#
+aid <- skFindId("assays",aname)["id"]
+aresp <- skRead("assays",aid)
+aid
+#if(aresp$content$relationships$study$data$id!=sid) aid <- 0
+#if(aresp==404) aid <- 0
+aid
+ameta <- readMeta(file.path(.iroot,sname,aname))
+if(getMeta(ameta,"Assay Class")if(FALSE) {
+meta <- list(Title = aname
+             , Description = paste(
+               getMeta(meta, "Title")
+               ,getMeta(meta,"Description")
+               , sep=" \n "
+               )
+)}
+meta <- list(Title = aname , Description = pasteMeta(ameta) )
+meta
+if(aid==0) { aresp <- skCreate("assays",meta, class=skClass)
+print(aresp)
+aid <- aresp$id
+}
+aid
+skIni(pid=pid,iid=iid,sid=sid,aid=aid)
+#
+# Upload file
+#
+options("seekr")
+if(.testing) {
+  (skRead("studies", options()$seekr$sid))
+  (skRead("assays" , options()$seekr$aid))
+}
+# create and upload file
+x
+fname
+meta <- list(
+       Title=paste0("/",fname)
+     , Description=paste(pini$p$name,pini$I$name,sname,aname,sep="/")
+     )
+if(toupper(fileType(fname))    regexpr("METADATA",fname)>0) {
+  type <- "documents" } else {type <- "data_files"}
+s <- skCreate(type, meta, file= fname)
+if(.testing) print(s)
+#
+f_size <- file.size(file.path(.iroot,x))
+if(!is.na(f_size)){
+if(f_size< uplimit) {
+cat("Uploading ", fname)
+f <- skUpload(s, file.path(.iroot,x))
+} else { f <- paste( "Not uploaded, File too large", f_size ,">",  uplimit/10^9,"GB") } } else  { f <-  x
+        cat("Length NA, not uploaded: ")
+}
+print(f)
+}
+```
+
+
+
+
+
+
+
