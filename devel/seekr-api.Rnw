@@ -22,7 +22,7 @@ library(jsonlite)
 A collection of functions to work with SEEK API.
 Communication with FAIRDOMHub is established via package \pkg{httr}.
 
-SEEK API documentation: url{https://fairdomhub.org/api}.
+SEEK API documentation: \url{https://fairdomhub.org/api}.
 
 \subsection{Server location and authentication}
 
