@@ -14,12 +14,15 @@
 <<d,echo=FALSE,results='hide'>>=
 options(width=70)
 library(httr)
+library(jsonlite)
 @
 
 \section{Functions for upload to FAIRDOMHub}
 
 A collection of functions to work with SEEK API.
 Communication with FAIRDOMHub is established via package \pkg{httr}.
+
+SEEK API documentation: url{https://fairdomhub.org/api}.
 
 \subsection{Server location and authentication}
 
@@ -259,7 +262,7 @@ invisible(x)
 
 
 <<skGet>>=
-#' Get inormation from repository.
+#' Get information from repository.
 #'
 #' @param type Type of information (e.g. "person").
 #' @param id Repository id of an item.
@@ -317,7 +320,7 @@ skGet <- function(type, id,
 @
 
 <<skRead>>=
-#' Read information from repository.
+#' Read operation will return information about the instance identified.
 #'
 #' @param type Type of information (e.g. "person").
 #' @param id Repository id of an item.
@@ -328,8 +331,7 @@ skGet <- function(type, id,
 #' @note Parameter ... is ignored at this time.
 #' @note Touched component id is set in the options (see:
 #'      \code\link{skOptions}).
-#' @keywords file
-#' @seealso \code{\link{get}}
+#' @seealso \code{\link{skRead}}, \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -348,6 +350,40 @@ skRead <- function(type, id,
   if(missing(type)) stop('Argument "type" is missing, with no default') else
   if(missing(id)) stop('Argument "id" is missing, with no default') else
   skGet( type=type, id=id, uri = uri, ...)
+  }
+@
+
+<<skList>>=
+#' List operations return a list of all objects of the specified type,
+#' to which the authenticated user has access.
+#'
+#' @param type Type of information (e.g. "person").
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
+#' @return An object (list) of class \code{seek_api}.
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @note Touched component id is set in the options (see:
+#'      \code\link{skOptions}).
+#' @seealso \code{\link{skRead}}, \code{\link{skGet}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skList("people")
+#' names(r)
+#' r$response$status_code
+#' status_code(r$response)
+#' l <- skContent(r)
+#' length(l)
+#' # Short list of users
+#' head(sort(sapply(l, function(x) x$attributes$title)),10)
+#' }
+skList <- function(type,
+                   uri=options("sk.url"), ... ){
+  if(missing(type)) stop('Argument "type" is missing, with no default') else
+  skGet( type=type, uri = uri, ...)
   }
 @
 
