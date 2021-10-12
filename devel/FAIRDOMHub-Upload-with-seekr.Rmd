@@ -218,6 +218,10 @@ iinfo <- skFindId("investigations", pini$I$name)
 iinfo
 iid <- iinfo["id"]
 iname <- iinfo["title"]
+```
+
+Find project id
+```{r}
 # project id (todo: make a function)
 prdata <- skRead("projects", pid)
 prid <- prdata$content$relationships$programmes$data[[1]][["id"]]
@@ -226,11 +230,43 @@ prid
 
 If the layer (investigation) does not exist, the function skFindId returns zero in the place of 'id'.
 
-If it is so, one can create the appropriate layer.
+If it is so, one can create the appropriate layer. Created object id is stored in options or can be found by a call to function \fct{dkFindId}.
 
 ```{r eval=(iid == 0)}
-skCreate("investigations", meta=.imeta)
+if( iid==0) skCreate("investigations", meta=.imeta)
 skFindId("investigations", pini$I$name)
+options("sk.iid")
+```
+
+
+So far,  in SEEK files can be associated only to assays. As a workaround, metadata are recorded in the description field of attributes.. This is how the metadata can be retrieved:
+
+```{r}
+r <- skRead("investigations", options("sk.iid"))
+r <- skContent(r)
+names(r$attributes)
+(desc <- r$attributes$description)
+```
+
+Metadata are a string with tabs and new-lines, so it can be typed to the console.
+
+```{r}
+cat(desc)
+```
+
+One way to convert metadata string to a data frame:
+
+```{r}
+cat(desc, file="clipboard")
+im <- read.table("clipboard", sep="\t", col.names=c("Key","Value"))
+im
+```
+
+Package pisar has a method to nicely print metadata.
+
+```{r}
+ class(im)=c("pISAmeta","Dlist","data.frame")
+ im
 ```
 
 Update seekr options.

@@ -593,7 +593,7 @@ skFindId <- function(type, title){
      titles <- t(sapply(d,function(x) c(id=x$id, type=x$type, title=x$attributes$title)))
      # Get FAIRDOMhub user id
      if(!missing(title)){
-       id <- d[[pmatch(title,titles[,"title"])]]$id
+       id <- d[[pmatch(title,titles[,"title"],duplicates.ok=TRUE)]]$id
        if(is.null(id)) id <- 0
        skSetOption(type,id)
        return(c(id=id,type=type, title=title))
@@ -601,6 +601,56 @@ skFindId <- function(type, title){
      return(titles)
      }
 }
+@
+
+<<expand>>=
+#' Expand shortened type name into full name.
+#'
+#' @param type Component name (possibly shortened e.g. 'pe' for 'people', 
+#'     'proj' for 'projects', ...).
+#' @param title Character string with the identifier
+#'     of the component (title part).
+#' @return logical value indicating whether the component named by
+#'      argument title exists.
+#' @export
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' expand("p")
+#' expand("pe")
+#' expand("proj")
+#' expand("inv")
+#' expand("st")
+#' expand("a")
+#'
+expand <- function(type){
+           types <- c("assays", "collections", "data_files", "documents", "events", "institutions", "investigations", "models", "organisms", "people", "presentations", "programmes", "projects", "publications", "sample_types", "sops", "studies", "workflows")
+     tip <- types[pmatch(type,types)]
+     if(is.na(tip)) stop("No such type or duplicate entry for '",type,"'")
+     tip
+     }
+@
+
+<<skExists>>=
+#' Check if component exist.
+#'
+#' @param type Component name (possibly shortened e.g. 'pe' for 'people',
+#' 'proj' for 'projects', ...).
+#' @return Expanded type name.
+#' @export
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' skExists("people", "Andrej Blejec")
+#' skExists("projects","Demo")
+#' }
+skExists <- function(type, title) {
+    r <- skFindId(type, title)
+    ok <- (as.numeric(r["id"]) > 0)
+    return(ok)
+}
+
+
 @
 
 <<skSetOptions>>=
