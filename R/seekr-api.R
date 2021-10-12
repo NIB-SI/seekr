@@ -9,6 +9,7 @@
 ## ----d,echo=FALSE,results='hide'------------------------------------
 options(width=70)
 library(httr)
+library(jsonlite)
 
 
 ## ----skOptions------------------------------------------------------
@@ -75,13 +76,13 @@ skOptions <- function(end="", start="sk.", hide="sk.pwd"){
 #' \dontrun{
 #' options(.sk$test)
 #' options("sk.myid")
-#' r <- skGet("people",options("sk.myid"))
+#' r <- skRead("people",options("sk.myid"))
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
 #' names(r$content)
 #' r
-#' r <- skGet("people")
+#' r <- skRead("people")
 #' length(r$content)
 #' names(r$content)
 #' r$content[[1]]
@@ -98,7 +99,7 @@ skParse <- function(resp, ...){
         "SEEK API request failed [%s]\n%s\n<%s>",
         status_code(resp),
         resp$header$status,
-        "https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.1"
+        "https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.3.1"
       ),
       call. = FALSE
     )
@@ -136,7 +137,7 @@ skParse <- function(resp, ...){
 #' \dontrun{
 #' options(.sk$test)
 #' options("sk.myid")
-#' r <- skGet("people",options("sk.myid"))
+#' r <- skRead("people",options("sk.myid"))
 #' # Print contents
 #' print( r, TRUE)
 #' # Short version, default
@@ -164,7 +165,7 @@ invisible(x)
 
 
 ## ----skGet----------------------------------------------------------
-#' Get inormation from repository.
+#' Get information from repository.
 #'
 #' @param type Type of information (e.g. "person").
 #' @param id Repository id of an item.
@@ -173,9 +174,10 @@ invisible(x)
 #' @return An object (list) of class \code{seek_api}.
 #' @export
 #' @note Parameter ... is ignored at this time.
-#' @note Touched component id is set in options.
+#' @note Touched component id is set in the options (see:
+#'      \code\link{skOptions}).
 #' @keywords file
-#' @seealso \code{\link{get}}
+#' @seealso \code{\link{get}}, \code{\link{skRead}}, \code{\link{skList}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -220,6 +222,136 @@ skGet <- function(type, id,
 
 
 
+## ----skRead---------------------------------------------------------
+#' Read operation will return information about the instance identified.
+#'
+#' @param type Type of information (e.g. "person").
+#' @param id Repository id of an item.
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
+#' @return An object (list) of class \code{seek_api}.
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @note Touched component id is set in the options (see:
+#'      \code\link{skOptions}).
+#' @seealso \code{\link{skRead}}, \code{\link{skGet}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skRead("people",options("sk.myid"))
+#' names(r)
+#' r$response$status_code
+#' status_code(r$response)
+#' r
+#' # Non existent user
+#' skRead("people",0)
+#' }
+skRead <- function(type, id,
+                   uri=options("sk.url"), ... ){
+  if(missing(type)) stop('Argument "type" is missing, with no default') else
+  if(missing(id)) stop('Argument "id" is missing, with no default') else
+  skGet( type=type, id=id, uri = uri, ...)
+  }
+
+
+## ----skList---------------------------------------------------------
+#' List operations return a list of all objects of the specified type,
+#' to which the authenticated user has access.
+#'
+#' @param type Type of information (e.g. "person").
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
+#' @return An object (list) of class \code{seek_api}.
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @note Touched component id is set in the options (see:
+#'      \code\link{skOptions}).
+#' @seealso \code{\link{skRead}}, \code{\link{skGet}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skList("people")
+#' names(r)
+#' r$response$status_code
+#' status_code(r$response)
+#' l <- skContent(r)
+#' length(l)
+#' # Short list of users
+#' head(sort(sapply(l, function(x) x$attributes$title)),10)
+#' }
+skList <- function(type,
+                   uri=options("sk.url"), ... ){
+  if(missing(type)) stop('Argument "type" is missing, with no default') else
+  skGet( type=type, uri = uri, ...)
+  }
+
+
+## ----skSearch-------------------------------------------------------
+#' Search operation returns a list of references to resources.
+#'
+#' @param type Type of information (e.g. "person", default is "data_files").
+#' @param q Text to search for, spaces acceptable.
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
+#' @return An object (list) of class \code{seek_api}.
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @note Touched component id is set in the options (see:
+#'      \code\link{skOptions}).
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' options("sk.myid")
+#' r <- skSearch("people","Guest")
+#' names(r)
+#' r$response$status_code
+#' status_code(r$response)
+#' str(skContent(r))
+#' # Non existent user
+#' x <- skSearch("people","XY")
+#' x$content
+#' str(skContent(x))
+#' (skContent(skSearch("institutions","systems biology")))
+#' }
+skSearch <- function(type="data_files", q,
+                   uri=options("sk.url"), ... ){
+#                  uri="https://www.fairdomhub.org", ... ){
+
+  if(missing(q)) stop('Argument "q" is missing, with no default') else
+     {  q <- gsub(" ","%20",q)
+        uri <- paste0(uri,"/search/?q=",q)
+      }
+     if(!missing(type)) uri <- paste0(uri,"&search_type=",type)
+  print(uri)
+  ua <- httr::user_agent("https://github.com/nib-si/seekr")
+  skLog("skSearch", uri)
+  fht <- system.time(
+  resp <- httr::GET(uri,
+         add_headers(Accept="application/json")
+         , ua
+         )
+  )
+  cat("Status code:",resp$status_code,"\n")
+
+  if( resp$status_code < 300) {
+  parsed <- skParse(resp)
+#  if(!missing(q)) skSetOption( type, parsed$id )
+  skLog( resp$status_code, round(fht["elapsed"],2), parsed$url)
+  } else {
+  parsed <- resp$status_code
+  skLog( resp$status_code, round(fht["elapsed"],2))
+  }
+  return(parsed)
+}
+#
+
+
+
 ## ----skDelete-------------------------------------------------------
 #' Delete component.
 #'
@@ -246,7 +378,7 @@ skGet <- function(type, id,
 #' }
 skDelete <- function(type, id,
                    uri=options("sk.url"), ... ){
-  bkp <- skGet(type, id)
+  bkp <- skRead(type, id)
   print(bkp)
   if(missing(type)) stop('Argument "type" is missing, with no default')
   if(!missing(type)) uri <- paste0(uri,"/",type)
@@ -270,7 +402,7 @@ skDelete <- function(type, id,
   parsed <- resp$status_code
   skLog( resp$status_code, round(fht["elapsed"],2))
   }
-  print(skGet(type,id))
+  print(skRead(type,id))
   return(bkp)
 }
 #
@@ -294,13 +426,13 @@ skDelete <- function(type, id,
 #' \dontrun{
 #' options(.sk$test)
 #' options("sk.myid")
-#' r <- skGet("people",options("sk.myid"))
+#' r <- skRead("people",options("sk.myid"))
 #' d <- skContent(r,"attributes")
 #' names(d)
 #' d$last_name
 #' skContent(r)$attributes$tools
 #' # Get list of people
-#' r <- skGet("people")
+#' r <- skList("people")
 #' d <- skContent(r)
 #' length(d)
 #' names(d)
@@ -358,7 +490,7 @@ skContent <- function(r, node, ...){
 #' tail(projects)
 #' }
 skFindId <- function(type, title){
-     r <- skGet(type)
+     r <- skList(type)
      d <- skContent(r)
      titles <- t(sapply(d,function(x) c(id=x$id, type=x$type, title=x$attributes$title)))
      # Get FAIRDOMhub user id
@@ -402,7 +534,8 @@ skSetOption <- function( type, id){
             studies = "sk.sid",
             assays = "sk.aid",
             people = "sk.ppid",
-            institutions = "sk.instid"
+            institutions = "sk.instid",
+            data_file = "sk.fileid"
             )
             if(!is.na(types[type])) { names(id) = types[type]
             options(as.list(id))
@@ -435,7 +568,7 @@ skSetOption("bla",1)
 #' }
 skFindTitle <- function(type, id){
      id <- as.vector(id[1])
-     r <- skGet(type, id )
+     r <- skRead(type, id )
      if( class(r)=="integer" && r > 300) {
      title <- ""
      } else {
@@ -992,10 +1125,10 @@ contentType <- function(file){
 ## ----skCreate-------------------------------------------------------
 #' Create pISA layer or *sk* component.
 #'
-#' @param type Component name (e.g. 'people', 'projets', ...).
+#' @param type Component name (e.g. 'people', 'projects', ...).
 #' @param meta Data frame with pISA metadata or
-#'     a list with minimal information (Title,
-#'     Description, *ToDo: add fields*).
+#'     a list with minimal information (short layer name, Title,
+#'     Description, *ToDo: add fields*). See Examples.
 #' @param class Assay class key string.
 #'     Possible values are 'EXP' and 'MODEL'.
 #' @param file File name with path, relative to layer.
@@ -1015,16 +1148,18 @@ contentType <- function(file){
 #' options(sk.prid = 26)
 #' skOptions("id")
 #' meta= list(
-#'       Title=paste("Test project", Sys.time())
+#'       project=paste("Test project", Sys.time())
+#'     , Title="Test project"
 #'     , Description="Testing upload")
 #' meta
 #' rm(sp)
 #'  sp <- skCreate( type = "projects"
 #'     , meta = meta
 #'     )
-#'     (r <- skFindId("projects",meta$Title))
+#'  skFindId("projects",meta$project)
 #'  sp
-#'  str(skContent(sp))
+#'  cat(skContent(sp)$attributes$description)
+#'  sp$url
 #' # Call to API does not set the 'member' field
 #' # Add member manually in the project page on the web site:
 #' # /Actions/Administer project members
@@ -1032,7 +1167,8 @@ contentType <- function(file){
 #'  options(sk.prid=26, sk.pid=sp$id)
 #'  skOptions("id")
 #'  meta= list(
-#'       Title=paste("Test investigation", Sys.time())
+#'       Investigation=paste("Test investigation", Sys.time())
+#'     , Title = "Test investigation"
 #'     , Description="Testing upload")
 #'     meta
 #'     rm(si)
@@ -1041,45 +1177,47 @@ contentType <- function(file){
 #'     )
 #'  si
 #'  skContent(si)$id
-#'  skFindId("investigations",meta$Title)
-#'  options(sk.iid=si$id)
+#'  skFindId("investigations",meta$Investigation)
 #'  skOptions("id")
-#' #'
-#'  iid=skContent(si)$id
+#' # Create Study
+#'  iid <- si$id
 #'  options(sk.prid=26, sk.pid=sp$id, sk.iid=si$id)
 #'  skOptions("id")
-#'  ss <- skCreate( type = "studies"
-#'   , meta= list(
-#'       Title=paste("Test study", Sys.time())
+#'  meta= list(
+#'       Study=paste("Test study", Sys.time())
+#'     , Title="Test Study"
 #'     , Description="Testing upload")
-#'     )
+#'  ss <- skCreate( type = "studies", meta)
 #'  ss
-#'  skContent(ss)$id
-#' #'
+#' ss$id
+#'  skFindId("studies",meta$Study)
+#' # Assay
 #'  options(sk.prid = 26
 #'        , sk.pid=skContent(sp)$id
 #'        , sk.iid=skContent(si)$id
 #'        , sk.sid=skContent(ss)$id
 #'        )
 #'  skOptions()
-#'  sa <- skCreate( type = "assays"
-#'   , meta= list(
-#'       Title=paste("Test assay", Sys.time())
-#'     , Description="Testing upload")
+#'  meta= list(
+#'       Assay=paste("Test Assay", Sys.time())
+#'     , Title="Test Assay"
+#'     , Description="Testing upload"
 #'     , class="EXP"
 #'     )
-#'  str(sa)
+#'  sa <- skCreate( type = "assays"  , meta)
+#'  sa
+#'  sa$id
 #'  skContent(sa)$relationships$submitter
 #'  skContent(sa)$links
 #' }
 #'
-#' # Type: data_file
-#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
-#' oldwd <- setwd(system.file("extdata",astring,package="seekr"))
-#' oldwd
-#' .aname <- getLayer("A")
-#' .aroot <- getRoot("A")
-#' .ameta  <- readMeta()
+ # Type: data_file
+ astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
+ oldwd <- setwd(system.file("extdata",astring,package="seekr"))
+ oldwd
+ .aname <- getLayer("A")
+ .aroot <- getRoot("A")
+ .ameta  <- readMeta()
 #'  file <- "input/README.MD"
 #'  options(sk.prid = 26, sk.pid=sp$id, sk.iid=si$id , sk.sid=ss$id , sk.aid=sa$id)
 #'  skOptions()
@@ -1087,7 +1225,7 @@ contentType <- function(file){
 #'  type <- "documents"
 #'  sdat <- skCreate( type = type
 #'   , meta= list(
-#'       Title=paste("Test assay", Sys.time())
+#'       Title=paste("Test document", Sys.time())
 #'     , Description="Testing of upload")
 #'   , file=file
 #'     )
@@ -1097,7 +1235,7 @@ contentType <- function(file){
 #' if(interactive()) setwd(oldwd)
 #' getwd()
 #' res <- sdat$content
-#' item_link <- file.path(res$meta$base_url,res$links$self)
+#' item_link <- paste0(res$meta$base_url,res$links$self)
 #' if(interactive()) shell.exec(item_link)
 #' }
 skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
@@ -1109,16 +1247,17 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      aid <-  as.character(getOption("sk.aid"))
      instid <- as.character(getOption("sk.instid"))
      if(is.null(instid)){
-     instid <- (skContent(skGet("people",myid))$relationships$institutions$data[[1]]$id)
+     instid <- skContent(skRead("people",myid))$relationships$institutions$data[[1]]$id
      options(sk.instid=instid)
      }
      s <- skSkeleton(type, meta)
 # Common fileds
-     s$data$attributes$title  <-  getMeta(meta,"Title")
-     s$data$attributes$description  <-  getMeta(meta, "Description")
+
 # Type specific fields
      switch(s$data$type,
      projects = {
+       s$data$attributes$title  <-  getMeta(meta,"project")
+       s$data$attributes$description  <-  pasteMeta(meta)
        s$data$attributes$members <- list(list(person_id = myid,
        institution_id = instid))
        s$data$attributes$default_policy$permissions$resource$id <- myid
@@ -1128,12 +1267,16 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
        s$data$relationships$asset_housekeeper$data$id <- myid
             }
      , investigations = {
+        s$data$attributes$title  <-  getMeta(meta,"Investigation")
+        s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$projects$data$id <- pid
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$creators$data$type <- "people"
             }
      , studies = {
+        s$data$attributes$title  <-  getMeta(meta,"Study")
+        s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$investigation$data$id <-iid
         s$data$attributes$person_responsible_id <- myid
         s$data$attributes$policy$permissions$resource$id <- pid
@@ -1141,6 +1284,8 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
         s$data$relationships$creators$data$type <- "people"
             }
      , assays = {
+        s$data$attributes$title  <-  getMeta(meta,"Assay")
+        s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$study$data$id <-sid
         s$data$attributes$person_responsible_id <- myid
         s$data$attributes$policy$permissions$resource$id <- pid

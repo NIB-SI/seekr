@@ -15,6 +15,7 @@
 options(width=70)
 library(httr)
 library(jsonlite)
+library(pisar)
 @
 
 \section{Functions for upload to FAIRDOMHub}
@@ -170,13 +171,13 @@ skOptions <- function(end="", start="sk.", hide="sk.pwd"){
 #' \dontrun{
 #' options(.sk$test)
 #' options("sk.myid")
-#' r <- skGet("people",options("sk.myid"))
+#' r <- skRead("people",options("sk.myid"))
 #' names(r)
 #' r$response$status_code
 #' status_code(r$response)
 #' names(r$content)
 #' r
-#' r <- skGet("people")
+#' r <- skRead("people")
 #' length(r$content)
 #' names(r$content)
 #' r$content[[1]]
@@ -231,7 +232,7 @@ skParse <- function(resp, ...){
 #' \dontrun{
 #' options(.sk$test)
 #' options("sk.myid")
-#' r <- skGet("people",options("sk.myid"))
+#' r <- skRead("people",options("sk.myid"))
 #' # Print contents
 #' print( r, TRUE)
 #' # Short version, default
@@ -331,7 +332,7 @@ skGet <- function(type, id,
 #' @note Parameter ... is ignored at this time.
 #' @note Touched component id is set in the options (see:
 #'      \code\link{skOptions}).
-#' @seealso \code{\link{skRead}}, \code{\link{skGet}}
+#' @seealso \code{\link{skList}}, \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -422,7 +423,7 @@ skSearch <- function(type="data_files", q,
   if(missing(q)) stop('Argument "q" is missing, with no default') else
      {  q <- gsub(" ","%20",q)
         uri <- paste0(uri,"/search/?q=",q)
-      }    
+      }
      if(!missing(type)) uri <- paste0(uri,"&search_type=",type)
   print(uri)
   ua <- httr::user_agent("https://github.com/nib-si/seekr")
@@ -475,7 +476,7 @@ skSearch <- function(type="data_files", q,
 #' }
 skDelete <- function(type, id,
                    uri=options("sk.url"), ... ){
-  bkp <- skGet(type, id)
+  bkp <- skRead(type, id)
   print(bkp)
   if(missing(type)) stop('Argument "type" is missing, with no default')
   if(!missing(type)) uri <- paste0(uri,"/",type)
@@ -499,7 +500,7 @@ skDelete <- function(type, id,
   parsed <- resp$status_code
   skLog( resp$status_code, round(fht["elapsed"],2))
   }
-  print(skGet(type,id))
+  print(skRead(type,id))
   return(bkp)
 }
 #
@@ -523,13 +524,13 @@ skDelete <- function(type, id,
 #' \dontrun{
 #' options(.sk$test)
 #' options("sk.myid")
-#' r <- skGet("people",options("sk.myid"))
+#' r <- skRead("people",options("sk.myid"))
 #' d <- skContent(r,"attributes")
 #' names(d)
 #' d$last_name
 #' skContent(r)$attributes$tools
 #' # Get list of people
-#' r <- skGet("people")
+#' r <- skList("people")
 #' d <- skContent(r)
 #' length(d)
 #' names(d)
@@ -587,7 +588,7 @@ skContent <- function(r, node, ...){
 #' tail(projects)
 #' }
 skFindId <- function(type, title){
-     r <- skGet(type)
+     r <- skList(type)
      d <- skContent(r)
      titles <- t(sapply(d,function(x) c(id=x$id, type=x$type, title=x$attributes$title)))
      # Get FAIRDOMhub user id
@@ -631,7 +632,8 @@ skSetOption <- function( type, id){
             studies = "sk.sid",
             assays = "sk.aid",
             people = "sk.ppid",
-            institutions = "sk.instid"
+            institutions = "sk.instid",
+            data_file = "sk.fileid"
             )
             if(!is.na(types[type])) { names(id) = types[type]
             options(as.list(id))
@@ -664,7 +666,7 @@ skSetOption("bla",1)
 #' }
 skFindTitle <- function(type, id){
      id <- as.vector(id[1])
-     r <- skGet(type, id )
+     r <- skRead(type, id )
      if( class(r)=="integer" && r > 300) {
      title <- ""
      } else {
@@ -1347,7 +1349,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      aid <-  as.character(getOption("sk.aid"))
      instid <- as.character(getOption("sk.instid"))
      if(is.null(instid)){
-     instid <- skContent(skGet("people",myid))$relationships$institutions$data[[1]]$id
+     instid <- skContent(skRead("people",myid))$relationships$institutions$data[[1]]$id
      options(sk.instid=instid)
      }
      s <- skSkeleton(type, meta)

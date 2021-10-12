@@ -23,7 +23,7 @@ Print method for seek_api object
 \dontrun{
 options(.sk$test)
 options("sk.myid")
-r <- skGet("people",options("sk.myid"))
+r <- skRead("people",options("sk.myid"))
 # Print contents
 print( r, TRUE)
 # Short version, default

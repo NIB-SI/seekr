@@ -27,13 +27,13 @@ Parameter ... is ignored at this time.
 \dontrun{
 options(.sk$test)
 options("sk.myid")
-r <- skGet("people",options("sk.myid"))
+r <- skRead("people",options("sk.myid"))
 d <- skContent(r,"attributes")
 names(d)
 d$last_name
 skContent(r)$attributes$tools
 # Get list of people
-r <- skGet("people")
+r <- skList("people")
 d <- skContent(r)
 length(d)
 names(d)
