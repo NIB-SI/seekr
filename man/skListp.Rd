@@ -4,7 +4,13 @@
 \alias{skListp}
 \title{List of all objects of the specified type within the project.}
 \usage{
-skListp(type, pid = options("sk.pid"), uri = options("sk.url"), ...)
+skListp(
+  class = projects,
+  type,
+  pid = options("sk.pid"),
+  uri = options("sk.url"),
+  ...
+)
 }
 \arguments{
 \item{type}{Type of information (e.g. "person").}
@@ -31,10 +37,10 @@ Touched component id is set in the options (see:
 \dontrun{
 options(.sk$test)
 options("sk.pid")
-r <- skListp("people")
+r <- skListp("proj","people")
 r
-skListp("inv")
-skListp("assays")
+skListp("inv","assays")
+skListp("proj", "inv")
 }
 }
 \seealso{

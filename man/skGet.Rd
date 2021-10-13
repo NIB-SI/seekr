@@ -4,7 +4,7 @@
 \alias{skGet}
 \title{Get information from repository.}
 \usage{
-skGet(type, id, uri = options("sk.url"), ...)
+skGet(type, id, uri = options("sk.url"), verbose = FALSE, ...)
 }
 \arguments{
 \item{type}{Type of information (e.g. "person").}
@@ -12,6 +12,8 @@ skGet(type, id, uri = options("sk.url"), ...)
 \item{id}{Repository id of an item.}
 
 \item{uri}{Repository base address (URI).}
+
+\item{verbose}{logical, print details if TRUE.}
 
 \item{...}{further arguments.}
 }

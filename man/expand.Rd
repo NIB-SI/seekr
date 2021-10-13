@@ -22,6 +22,7 @@ expand("proj")
 expand("inv")
 expand("st")
 expand("a")
+expand(c("a","inv"))
 # expand("p")
 # Error in expand("p") : No such type or duplicate entry for 'p'
 

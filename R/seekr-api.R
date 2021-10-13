@@ -179,15 +179,17 @@ invisible(x)
 #' expand("inv")
 #' expand("st")
 #' expand("a")
+#' expand(c("a","inv"))
 #' # expand("p")
 #' # Error in expand("p") : No such type or duplicate entry for 'p'
 #'
 expand <- function(type){
            types <- c("assays", "collections", "data_files", "documents", "events", "institutions", "investigations", "models", "organisms", "people", "presentations", "programmes", "projects", "publications", "sample_types", "sops", "studies", "workflows")
      tip <- types[pmatch(type,types)]
-     if(is.na(tip)) stop("No such type or duplicate entry for '",type,"'")
+     if(any(is.na(tip))) stop("No such type or duplicate entry for: ", paste(type[!is.na(tip)],collaps=", "))
      tip
      }
+
 
 
 ## ----skLog----------------------------------------------------------
@@ -224,6 +226,7 @@ skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
 #' @param type Type of information (e.g. "person").
 #' @param id Repository id of an item.
 #' @param uri Repository base address (URI).
+#' @param verbose logical, print details if TRUE.
 #' @param ... further arguments.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
@@ -246,7 +249,7 @@ skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
 #' skGet("people",0)
 #' }
 skGet <- function(type, id,
-                   uri=options("sk.url"), ... ){
+                   uri=options("sk.url"), verbose=FALSE, ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
 
   if(missing(type)) stop('Argument "type" is missing, with no default')
@@ -260,7 +263,7 @@ skGet <- function(type, id,
          , ua
          )
   )
-  cat("Status code:",resp$status_code,"\n")
+  if(verbose) cat("Status code:",resp$status_code,"\n")
 
   if( resp$status_code < 300) {
   parsed <- skParse(resp)
@@ -365,15 +368,17 @@ skList <- function(type,
 #' \dontrun{
 #' options(.sk$test)
 #' options("sk.pid")
-#' r <- skListp("people")
+#' r <- skListp("proj","people")
 #' r
-#' skListp("inv")
-#' skListp("assays")
+#' skListp("inv","assays")
+#' skListp("proj", "inv")
 #' }
-skListp <- function(type, pid=options("sk.pid"),
+skListp <- function(class=projects, type, pid=options("sk.pid"),
                    uri=options("sk.url"), ... ){
-  if(missing(type)) stop('Argument "type" is missing, with no default') else { type <- expand(type)
-  pr <- skRead( "projects", pid, uri, content=TRUE, ... )
+  if(missing(type)) stop('Argument "type" is missing, with no default') else { 
+  class <- expand(class)
+  type <- expand(type)
+  pr <- skRead( class, pid, uri, content=TRUE, ... )
   data <- pr$relationships[[type]]$data
   ids <- sapply(data, function(x) x$id)
   if(length(ids) >0) lst <- data.frame(t(sapply(ids, function(x) skFindTitle(type,x)))) else
@@ -382,6 +387,57 @@ skListp <- function(type, pid=options("sk.pid"),
   lst[,"id"] <- as.numeric(lst[,"id"])
   return(lst)
   }
+
+
+## ----skRelationships------------------------------------------------
+#' List of relationships within an object.
+#'
+#' @param type Object type (e.g. "project").
+#' @param id Id of the object giving the scope of the list.
+#' @param select Vector of character strings with object types of interest.
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
+#' @return A data.frame with ids, types, roles and titles of related objects.
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @note Id of each last touched component is set in the options (see:
+#'      \code{\link{skOptions}}).
+#' @seealso \code{\link{skListp}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' skRelationships("projects",152)
+#' skRelationships("investigations",151)
+#' skRelationships("investigations",152)
+#' skRelationships("investigations",152, "assays")
+#' skRelationships("inv",152, c("people","studies"))
+#' skRelationships("inv",152, c("pe","a"))
+#' skRelationships("studies",165)
+#' skRelationships("assays",494)
+#' skRelationships("people",368,"projects")
+#'}
+skRelationships <- function( type, id, select=NULL, 
+        uri=options("sk.url"), ... ){
+    #r <- skRead("projects",100,content=TRUE)
+    #r <- skRead("programmes",26,content=TRUE) # LARGE !!!
+    type <- expand(type)
+    r <- skRead(type, id , uri, content=TRUE)
+    u <- unlist(r$relationships)
+    u
+    role <- sapply(strsplit(names(u[seq(1,length(u),2)]),"\\."),function(x) x[1])
+    u <- matrix(unlist(r$relationships),ncol=2, byrow=TRUE)
+    if(!is.null(select)) {
+        select <- expand(select)
+        filter <- u[,2] %in% select
+        u <- u[filter,]
+        role <- role[filter]
+        }
+    role <- c(type,role)
+    u <- rbind(c(id,type),u)
+    dimnames(u) <- list(NULL,c("id","type"))
+    system.time(title <- apply(u,1,function(x) skFindTitle(x[2],x[1])["title"]))
+    cbind(u,role,title)
+}
 
 
 ## ----skSearch-------------------------------------------------------
@@ -696,12 +752,13 @@ skSetOption <- function( type, id){
             assays = "sk.aid",
             people = "sk.ppid",
             institutions = "sk.instid",
-            data_file = "sk.fileid"
+            data_files = "sk.fileid"
             )
             if(!is.na(types[type])) { names(id) = types[type]
             options(as.list(id))
-            options( types[type] ) } else {
-            warning("No such type: ", type)}
+            options( types[type] ) } 
+            #else {
+            #warning("No such type: ", type)}
 
 }
 
