@@ -4,7 +4,7 @@
 \alias{skRead}
 \title{Read operation will return information about the instance identified.}
 \usage{
-skRead(type, id, uri = options("sk.url"), ...)
+skRead(type, id, uri = options("sk.url"), content = FALSE, ...)
 }
 \arguments{
 \item{type}{Type of information (e.g. "person").}
@@ -12,6 +12,8 @@ skRead(type, id, uri = options("sk.url"), ...)
 \item{id}{Repository id of an item.}
 
 \item{uri}{Repository base address (URI).}
+
+\item{content}{Return complete response (FALSE) or content part (TRUE).}
 
 \item{...}{further arguments.}
 }
@@ -25,7 +27,7 @@ Read operation will return information about the instance identified.
 Parameter ... is ignored at this time.
 
 Touched component id is set in the options (see:
-     \code\link{skOptions}).
+     \code{\link{skOptions}}).
 }
 \examples{
 \dontrun{
@@ -41,7 +43,7 @@ skRead("people",0)
 }
 }
 \seealso{
-\code{\link{skRead}}, \code{\link{skGet}}
+\code{\link{skList}}, \code{\link{skGet}}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

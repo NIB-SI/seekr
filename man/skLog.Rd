@@ -23,7 +23,7 @@ Writes a note to a log file.
 tst <- function(){
   skLog("Test", "writing to logfile", file="")
   fht <- system.time(Sys.sleep(1))
-  skLog( "Time:", round(fht["elapsed"],2))
+  skLog( "Time:", round(fht["elapsed"],2), file="")
 }
 tst()
 rm(tst)

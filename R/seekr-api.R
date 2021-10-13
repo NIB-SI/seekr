@@ -1,4 +1,4 @@
-## ----c,echo=FALSE---------------------------------------------------
+## ----c,echo=FALSE---------------------------------------------------------------------------------------------------------------------
 ###############################################
 ##                                           ##
 ## (c) Andrej Blejec (andrej.blejec@nib.si)  ##
@@ -6,13 +6,14 @@
 ###############################################
 #
 
-## ----d,echo=FALSE,results='hide'------------------------------------
+## ----d,echo=FALSE,results='hide'------------------------------------------------------------------------------------------------------
 options(width=70)
-library(httr)
-library(jsonlite)
+#library(httr)
+#library(jsonlite)
+#library(pisar)
 
 
-## ----skOptions------------------------------------------------------
+## ----skOptions------------------------------------------------------------------------------------------------------------------------
 #' Show all seekr related options
 #'
 #' Lists selected seekr related options that are set in via
@@ -63,7 +64,7 @@ skOptions <- function(end="", start="sk.", hide="sk.pwd"){
 }
 
 
-## ----skParse--------------------------------------------------------
+## ----skParse--------------------------------------------------------------------------------------------------------------------------
 #' Parse the response from SEEK API and convert to a list.
 #'
 #' @param resp response from SEEK API.
@@ -123,7 +124,7 @@ skParse <- function(resp, ...){
 }
 
 
-## ----print.seek_api-------------------------------------------------
+## ----print.seek_api-------------------------------------------------------------------------------------------------------------------
 #' Print method for seek_api object
 #'
 #' @param x object of class \code{seek_api}.
@@ -164,7 +165,60 @@ invisible(x)
 }
 
 
-## ----skGet----------------------------------------------------------
+## ----expand---------------------------------------------------------------------------------------------------------------------------
+#' Expand shortened type name into full name.
+#'
+#' @param type Component name (possibly shortened e.g. 'pe' for 'people',
+#'     'proj' for 'projects', ...).
+#' @return Expanded type name.
+#' @export
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' expand("pe")
+#' expand("proj")
+#' expand("inv")
+#' expand("st")
+#' expand("a")
+#' # expand("p")
+#' # Error in expand("p") : No such type or duplicate entry for 'p'
+#'
+expand <- function(type){
+           types <- c("assays", "collections", "data_files", "documents", "events", "institutions", "investigations", "models", "organisms", "people", "presentations", "programmes", "projects", "publications", "sample_types", "sops", "studies", "workflows")
+     tip <- types[pmatch(type,types)]
+     if(is.na(tip)) stop("No such type or duplicate entry for '",type,"'")
+     tip
+     }
+
+
+## ----skLog----------------------------------------------------------------------------------------------------------------------------
+#' Writes a note to a log file.
+#'
+#' @param ... Objects to form a line.
+#' @param file Log file name.
+#' @param append Control append/rewrite mode.
+#' @return System time of invoking..
+#' @export
+#' @keywords pisa
+#' @seealso \code{\link{skGet}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' tst <- function(){
+#'   skLog("Test", "writing to logfile", file="")
+#'   fht <- system.time(Sys.sleep(1))
+#'   skLog( "Time:", round(fht["elapsed"],2), file="")
+
+#' }
+#' tst()
+#' rm(tst)
+#'
+#' @rdname skLog
+#' @export skLog
+skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
+   cat(paste(Sys.time(),..., "\n"), file=file, append=append)
+   }
+
+
+## ----skGet----------------------------------------------------------------------------------------------------------------------------
 #' Get information from repository.
 #'
 #' @param type Type of information (e.g. "person").
@@ -175,7 +229,7 @@ invisible(x)
 #' @export
 #' @note Parameter ... is ignored at this time.
 #' @note Touched component id is set in the options (see:
-#'      \code\link{skOptions}).
+#'      \code{\link{skOptions}}).
 #' @keywords file
 #' @seealso \code{\link{get}}, \code{\link{skRead}}, \code{\link{skList}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
@@ -222,19 +276,20 @@ skGet <- function(type, id,
 
 
 
-## ----skRead---------------------------------------------------------
+## ----skRead---------------------------------------------------------------------------------------------------------------------------
 #' Read operation will return information about the instance identified.
 #'
 #' @param type Type of information (e.g. "person").
 #' @param id Repository id of an item.
 #' @param uri Repository base address (URI).
+#' @param content Return complete response (FALSE) or content part (TRUE).
 #' @param ... further arguments.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
 #' @note Parameter ... is ignored at this time.
 #' @note Touched component id is set in the options (see:
-#'      \code\link{skOptions}).
-#' @seealso \code{\link{skRead}}, \code{\link{skGet}}
+#'      \code{\link{skOptions}}).
+#' @seealso \code{\link{skList}}, \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -249,14 +304,16 @@ skGet <- function(type, id,
 #' skRead("people",0)
 #' }
 skRead <- function(type, id,
-                   uri=options("sk.url"), ... ){
+                   uri=options("sk.url"), content=FALSE, ... ){
   if(missing(type)) stop('Argument "type" is missing, with no default') else
   if(missing(id)) stop('Argument "id" is missing, with no default') else
-  skGet( type=type, id=id, uri = uri, ...)
+  r <- skGet( type=type, id=id, uri = uri, ...)
+  if(content) r <- skContent(r)
+  return(r)
   }
 
 
-## ----skList---------------------------------------------------------
+## ----skList---------------------------------------------------------------------------------------------------------------------------
 #' List operations return a list of all objects of the specified type,
 #' to which the authenticated user has access.
 #'
@@ -267,7 +324,7 @@ skRead <- function(type, id,
 #' @export
 #' @note Parameter ... is ignored at this time.
 #' @note Touched component id is set in the options (see:
-#'      \code\link{skOptions}).
+#'      \code{\link{skOptions}}).
 #' @seealso \code{\link{skRead}}, \code{\link{skGet}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
@@ -290,18 +347,56 @@ skList <- function(type,
   }
 
 
-## ----skSearch-------------------------------------------------------
+## ----skListp--------------------------------------------------------------------------------------------------------------------------
+#' List of all objects of the specified type within the project.
+#'
+#' @param type Type of information (e.g. "person").
+#' @param pid Id of a project giving the scope of the list.
+#' @param uri Repository base address (URI).
+#' @param ... further arguments.
+#' @return A data.frame with ids and titles of related object.
+#' @export
+#' @note Parameter ... is ignored at this time.
+#' @note Touched component id is set in the options (see:
+#'      \code{\link{skOptions}}).
+#' @seealso \code{\link{skList}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' options("sk.pid")
+#' r <- skListp("people")
+#' r
+#' skListp("inv")
+#' skListp("assays")
+#' }
+skListp <- function(type, pid=options("sk.pid"),
+                   uri=options("sk.url"), ... ){
+  if(missing(type)) stop('Argument "type" is missing, with no default') else { type <- expand(type)
+  pr <- skRead( "projects", pid, uri, content=TRUE, ... )
+  data <- pr$relationships[[type]]$data
+  ids <- sapply(data, function(x) x$id)
+  if(length(ids) >0) lst <- data.frame(t(sapply(ids, function(x) skFindTitle(type,x)))) else
+  lst <- data.frame(id=0,type=type,title=NA)
+  }
+  lst[,"id"] <- as.numeric(lst[,"id"])
+  return(lst)
+  }
+
+
+## ----skSearch-------------------------------------------------------------------------------------------------------------------------
 #' Search operation returns a list of references to resources.
 #'
 #' @param type Type of information (e.g. "person", default is "data_files").
 #' @param q Text to search for, spaces acceptable.
 #' @param uri Repository base address (URI).
+#' @param content Return complete response (FALSE) or content part (TRUE).
 #' @param ... further arguments.
 #' @return An object (list) of class \code{seek_api}.
 #' @export
 #' @note Parameter ... is ignored at this time.
 #' @note Touched component id is set in the options (see:
-#'      \code\link{skOptions}).
+#'      \code{\link{skOptions}}).
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -319,7 +414,9 @@ skList <- function(type,
 #' (skContent(skSearch("institutions","systems biology")))
 #' }
 skSearch <- function(type="data_files", q,
-                   uri=options("sk.url"), ... ){
+                   uri=options("sk.url"),
+                   content = FALSE,
+                   ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
 
   if(missing(q)) stop('Argument "q" is missing, with no default') else
@@ -346,13 +443,14 @@ skSearch <- function(type="data_files", q,
   parsed <- resp$status_code
   skLog( resp$status_code, round(fht["elapsed"],2))
   }
+  if(content) parsed <- skContent(parsed)
   return(parsed)
 }
 #
 
 
 
-## ----skDelete-------------------------------------------------------
+## ----skDelete-------------------------------------------------------------------------------------------------------------------------
 #' Delete component.
 #'
 #' @param type Component type (e.g. "assay").
@@ -409,7 +507,7 @@ skDelete <- function(type, id,
 
 
 
-## ----skContent------------------------------------------------------
+## ----skContent------------------------------------------------------------------------------------------------------------------------
 #' Get content from an *sk* object.
 #'
 #' @param r object retrieved by skGet.
@@ -461,7 +559,7 @@ skContent <- function(r, node, ...){
 # skContents <- skContent
 
 
-## ----skFindId-------------------------------------------------------
+## ----skFindId-------------------------------------------------------------------------------------------------------------------------
 #' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -495,7 +593,7 @@ skFindId <- function(type, title){
      titles <- t(sapply(d,function(x) c(id=x$id, type=x$type, title=x$attributes$title)))
      # Get FAIRDOMhub user id
      if(!missing(title)){
-       id <- d[[pmatch(title,titles[,"title"])]]$id
+       id <- d[[pmatch(title,titles[,"title"],duplicates.ok=TRUE)]]$id
        if(is.null(id)) id <- 0
        skSetOption(type,id)
        return(c(id=id,type=type, title=title))
@@ -505,7 +603,37 @@ skFindId <- function(type, title){
 }
 
 
-## ----skSetOptions---------------------------------------------------
+## ----skExists-------------------------------------------------------------------------------------------------------------------------
+#' Check if component exist.
+#'
+#' @param type Component name (possibly shortened e.g. 'pe' for 'people',
+#' 'proj' for 'projects', ...).
+#' @param title Character string with the identifier
+#'     of the component (title part).
+#' @param verbose logical, if TRUE, details are printed.
+#' @return logical value indicating whether the component named by
+#'      argument title exists.
+#' @export
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' skExists("people", "Andrej Blejec")
+#' skExists("projects","Demo", verbose=TRUE)
+#' skExists("pe", "Guest")
+#' }
+skExists <- function(type, title, verbose=FALSE) {
+    type <- expand(type)
+    r <- skFindId(type, title)
+    if(verbose) print(r)
+    ok <- (as.numeric(r["id"]) > 0)
+    return(ok)
+}
+
+
+
+
+## ----skSetOptions---------------------------------------------------------------------------------------------------------------------
 #' Sets seekr option according to the type.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -543,11 +671,9 @@ skSetOption <- function( type, id){
             warning("No such type: ", type)}
 
 }
-skSetOption("people",111)
-skSetOption("bla",1)
 
 
-## ----skFindTitle----------------------------------------------------
+## ----skFindTitle----------------------------------------------------------------------------------------------------------------------
 #' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -580,7 +706,7 @@ skFindTitle <- function(type, id){
      }
 
 
-## ----skSkeleton-----------------------------------------------------
+## ----skSkeleton-----------------------------------------------------------------------------------------------------------------------
 #' Create *sk* skeleton.
 #'
 #' Creates *sk* object with required structure.
@@ -1045,35 +1171,7 @@ return(sr)
 }
 
 
-## ----skLog----------------------------------------------------------
-#' Writes a note to a log file.
-#'
-#' @param ... Objects to form a line.
-#' @param file Log file name.
-#' @param append Control append/rewrite mode.
-#' @return System time of invoking..
-#' @export
-#' @keywords pisa
-#' @seealso \code{\link{skGet}}
-#' @author Andrej Blejec \email{andrej.blejec@nib.si}
-#' @examples
-#' tst <- function(){
-#'   skLog("Test", "writing to logfile", file="")
-#'   fht <- system.time(Sys.sleep(1))
-#'   skLog( "Time:", round(fht["elapsed"],2))
-
-#' }
-#' tst()
-#' rm(tst)
-#'
-#' @rdname skLog
-#' @export skLog
-skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
-   cat(paste(Sys.time(),..., "\n"), file=file, append=append)
-   }
-
-
-## ----contentType----------------------------------------------------
+## ----contentType----------------------------------------------------------------------------------------------------------------------
 #' Determine MIME type for file.
 #'
 #' @param file file name.
@@ -1122,7 +1220,7 @@ contentType <- function(file){
 }
 
 
-## ----skCreate-------------------------------------------------------
+## ----skCreate-------------------------------------------------------------------------------------------------------------------------
 #' Create pISA layer or *sk* component.
 #'
 #' @param type Component name (e.g. 'people', 'projects', ...).
@@ -1211,13 +1309,6 @@ contentType <- function(file){
 #'  skContent(sa)$links
 #' }
 #'
- # Type: data_file
- astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
- oldwd <- setwd(system.file("extdata",astring,package="seekr"))
- oldwd
- .aname <- getLayer("A")
- .aroot <- getRoot("A")
- .ameta  <- readMeta()
 #'  file <- "input/README.MD"
 #'  options(sk.prid = 26, sk.pid=sp$id, sk.iid=si$id , sk.sid=ss$id , sk.aid=sa$id)
 #'  skOptions()
@@ -1396,7 +1487,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
 
 
 
-## ----skUpload-------------------------------------------------------
+## ----skUpload-------------------------------------------------------------------------------------------------------------------------
 #' Upload file.
 #'
 #' Upload file to a created object of type 'documents' or 'data_files'.

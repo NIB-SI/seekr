@@ -4,7 +4,7 @@
 \alias{skSearch}
 \title{Search operation returns a list of references to resources.}
 \usage{
-skSearch(type = "data_files", q, uri = options("sk.url"), ...)
+skSearch(type = "data_files", q, uri = options("sk.url"), content = FALSE, ...)
 }
 \arguments{
 \item{type}{Type of information (e.g. "person", default is "data_files").}
@@ -12,6 +12,8 @@ skSearch(type = "data_files", q, uri = options("sk.url"), ...)
 \item{q}{Text to search for, spaces acceptable.}
 
 \item{uri}{Repository base address (URI).}
+
+\item{content}{Return complete response (FALSE) or content part (TRUE).}
 
 \item{...}{further arguments.}
 }
@@ -25,7 +27,7 @@ Search operation returns a list of references to resources.
 Parameter ... is ignored at this time.
 
 Touched component id is set in the options (see:
-     \code\link{skOptions}).
+     \code{\link{skOptions}}).
 }
 \examples{
 \dontrun{

@@ -2,10 +2,130 @@
 % Please edit documentation in R/seekr-api.R
 \name{skCreate}
 \alias{skCreate}
-\title{}
+\title{Create pISA layer or *sk* component.}
 \usage{
 skCreate(type = "assays", meta = list(), class = "EXP", file = "NA.TXT")
 }
-\description{
+\arguments{
+\item{type}{Component name (e.g. 'people', 'projects', ...).}
 
+\item{meta}{Data frame with pISA metadata or
+a list with minimal information (short layer name, Title,
+Description, *ToDo: add fields*). See Examples.}
+
+\item{class}{Assay class key string.
+Possible values are 'EXP' and 'MODEL'.}
+
+\item{file}{File name with path, relative to layer.}
 }
+\value{
+FAIRDOMhub created component.
+}
+\description{
+Create pISA layer or *sk* component.
+}
+\note{
+Upon success (status code 200) details
+of newly created component can be used. Check status code.
+
+Created component id is set in options.
+}
+\examples{
+\dontrun{
+if(FALSE)
+{
+options(.sk$test)
+options(sk.prid = 26)
+skOptions("id")
+meta= list(
+      project=paste("Test project", Sys.time())
+    , Title="Test project"
+    , Description="Testing upload")
+meta
+rm(sp)
+ sp <- skCreate( type = "projects"
+    , meta = meta
+    )
+ skFindId("projects",meta$project)
+ sp
+ cat(skContent(sp)$attributes$description)
+ sp$url
+# Call to API does not set the 'member' field
+# Add member manually in the project page on the web site:
+# /Actions/Administer project members
+#
+ options(sk.prid=26, sk.pid=sp$id)
+ skOptions("id")
+ meta= list(
+      Investigation=paste("Test investigation", Sys.time())
+    , Title = "Test investigation"
+    , Description="Testing upload")
+    meta
+    rm(si)
+ si <- skCreate( type = "investigations"
+  , meta=meta
+    )
+ si
+ skContent(si)$id
+ skFindId("investigations",meta$Investigation)
+ skOptions("id")
+# Create Study
+ iid <- si$id
+ options(sk.prid=26, sk.pid=sp$id, sk.iid=si$id)
+ skOptions("id")
+ meta= list(
+      Study=paste("Test study", Sys.time())
+    , Title="Test Study"
+    , Description="Testing upload")
+ ss <- skCreate( type = "studies", meta)
+ ss
+ss$id
+ skFindId("studies",meta$Study)
+# Assay
+ options(sk.prid = 26
+       , sk.pid=skContent(sp)$id
+       , sk.iid=skContent(si)$id
+       , sk.sid=skContent(ss)$id
+       )
+ skOptions()
+ meta= list(
+      Assay=paste("Test Assay", Sys.time())
+    , Title="Test Assay"
+    , Description="Testing upload"
+    , class="EXP"
+    )
+ sa <- skCreate( type = "assays"  , meta)
+ sa
+ sa$id
+ skContent(sa)$relationships$submitter
+ skContent(sa)$links
+}
+
+ file <- "input/README.MD"
+ options(sk.prid = 26, sk.pid=sp$id, sk.iid=si$id , sk.sid=ss$id , sk.aid=sa$id)
+ skOptions()
+ type <- "data_files"
+ type <- "documents"
+ sdat <- skCreate( type = type
+  , meta= list(
+      Title=paste("Test document", Sys.time())
+    , Description="Testing of upload")
+  , file=file
+    )
+ #str(sdat)
+ sdat
+ skContent(sdat)$id
+if(interactive()) setwd(oldwd)
+getwd()
+res <- sdat$content
+item_link <- paste0(res$meta$base_url,res$links$self)
+if(interactive()) shell.exec(item_link)
+}
+}
+\seealso{
+\code{\link{skGet}}
+}
+\author{
+Andrej Blejec \email{andrej.blejec@nib.si}
+}
+\keyword{pisa}

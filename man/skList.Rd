@@ -25,7 +25,7 @@ to which the authenticated user has access.
 Parameter ... is ignored at this time.
 
 Touched component id is set in the options (see:
-     \code\link{skOptions}).
+     \code{\link{skOptions}}).
 }
 \examples{
 \dontrun{

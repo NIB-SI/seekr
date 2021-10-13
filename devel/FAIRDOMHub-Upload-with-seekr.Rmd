@@ -124,11 +124,13 @@ cat("Files to upload:", length(dirs), "/",dirlength,"\n")
 ```
 
 ```{r eval=FALSE, include=FALSE, echo=FALSE}
+if(FALSE){
 dirs=c("xx/other/","bla/other-file.txt")
 pat="other/"
 dirs[!grepl(toupper(pat),toupper(dirs),fixed=TRUE)]
 grep(toupper(pat),toupper(dirs),fixed=TRUE, value=TRUE, invert=TRUE)
 glob2rx(pat,trim.head=TRUE,trim.tail=TRUE)
+}
 ```
 
 ## Prepare connection with FAIRDOMHub
@@ -209,9 +211,6 @@ skRead("projects",pid)$url
 ```
 
 
-
-
-
 ```{r}
 iinfo <- skFindId("investigations", pini$I$name)
 #iinfo <- c(id=325,type="investigation",title=pini$I$name)
@@ -228,12 +227,17 @@ prid <- prdata$content$relationships$programmes$data[[1]][["id"]]
 prid
 ```
 
-If the layer (investigation) does not exist, the function skFindId returns zero in the place of 'id'.
+If the layer (investigation) does not exist, the function skFindId returns zero in the place of 'id'. There is a convenience functio \fct{skExists} that checks existence of a layer of object.
 
-If it is so, one can create the appropriate layer. Created object id is stored in options or can be found by a call to function \fct{dkFindId}.
+```{r}
+iid
+pini$I$name
+skExists("inv",pini$I$name, verbose=TRUE)
+```
+If it is so, one can create the appropriate layer. Created object id is stored in options or can be found by a call to function \fct{skFindId}.
 
 ```{r eval=(iid == 0)}
-if( iid==0) skCreate("investigations", meta=.imeta)
+if( !skExists("inv",pini$I$name)) skCreate("investigations", meta=.imeta)
 skFindId("investigations", pini$I$name)
 options("sk.iid")
 ```
