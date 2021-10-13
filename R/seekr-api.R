@@ -1,4 +1,4 @@
-## ----c,echo=FALSE---------------------------------------------------------------------------------------------------------------------
+## ----c,echo=FALSE---------------------------------------------------
 ###############################################
 ##                                           ##
 ## (c) Andrej Blejec (andrej.blejec@nib.si)  ##
@@ -6,14 +6,14 @@
 ###############################################
 #
 
-## ----d,echo=FALSE,results='hide'------------------------------------------------------------------------------------------------------
+## ----d,echo=FALSE,results='hide'------------------------------------
 options(width=70)
 #library(httr)
 #library(jsonlite)
 #library(pisar)
 
 
-## ----skOptions------------------------------------------------------------------------------------------------------------------------
+## ----skOptions------------------------------------------------------
 #' Show all seekr related options
 #'
 #' Lists selected seekr related options that are set in via
@@ -64,7 +64,7 @@ skOptions <- function(end="", start="sk.", hide="sk.pwd"){
 }
 
 
-## ----skParse--------------------------------------------------------------------------------------------------------------------------
+## ----skParse--------------------------------------------------------
 #' Parse the response from SEEK API and convert to a list.
 #'
 #' @param resp response from SEEK API.
@@ -124,7 +124,7 @@ skParse <- function(resp, ...){
 }
 
 
-## ----print.seek_api-------------------------------------------------------------------------------------------------------------------
+## ----print.seek_api-------------------------------------------------
 #' Print method for seek_api object
 #'
 #' @param x object of class \code{seek_api}.
@@ -165,7 +165,7 @@ invisible(x)
 }
 
 
-## ----expand---------------------------------------------------------------------------------------------------------------------------
+## ----expand---------------------------------------------------------
 #' Expand shortened type name into full name.
 #'
 #' @param type Component name (possibly shortened e.g. 'pe' for 'people',
@@ -190,7 +190,7 @@ expand <- function(type){
      }
 
 
-## ----skLog----------------------------------------------------------------------------------------------------------------------------
+## ----skLog----------------------------------------------------------
 #' Writes a note to a log file.
 #'
 #' @param ... Objects to form a line.
@@ -218,7 +218,7 @@ skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
    }
 
 
-## ----skGet----------------------------------------------------------------------------------------------------------------------------
+## ----skGet----------------------------------------------------------
 #' Get information from repository.
 #'
 #' @param type Type of information (e.g. "person").
@@ -276,7 +276,7 @@ skGet <- function(type, id,
 
 
 
-## ----skRead---------------------------------------------------------------------------------------------------------------------------
+## ----skRead---------------------------------------------------------
 #' Read operation will return information about the instance identified.
 #'
 #' @param type Type of information (e.g. "person").
@@ -313,7 +313,7 @@ skRead <- function(type, id,
   }
 
 
-## ----skList---------------------------------------------------------------------------------------------------------------------------
+## ----skList---------------------------------------------------------
 #' List operations return a list of all objects of the specified type,
 #' to which the authenticated user has access.
 #'
@@ -347,7 +347,7 @@ skList <- function(type,
   }
 
 
-## ----skListp--------------------------------------------------------------------------------------------------------------------------
+## ----skListp--------------------------------------------------------
 #' List of all objects of the specified type within the project.
 #'
 #' @param type Type of information (e.g. "person").
@@ -384,7 +384,7 @@ skListp <- function(type, pid=options("sk.pid"),
   }
 
 
-## ----skSearch-------------------------------------------------------------------------------------------------------------------------
+## ----skSearch-------------------------------------------------------
 #' Search operation returns a list of references to resources.
 #'
 #' @param type Type of information (e.g. "person", default is "data_files").
@@ -450,7 +450,7 @@ skSearch <- function(type="data_files", q,
 
 
 
-## ----skDelete-------------------------------------------------------------------------------------------------------------------------
+## ----skDelete-------------------------------------------------------
 #' Delete component.
 #'
 #' @param type Component type (e.g. "assay").
@@ -507,7 +507,7 @@ skDelete <- function(type, id,
 
 
 
-## ----skContent------------------------------------------------------------------------------------------------------------------------
+## ----skContent------------------------------------------------------
 #' Get content from an *sk* object.
 #'
 #' @param r object retrieved by skGet.
@@ -559,7 +559,7 @@ skContent <- function(r, node, ...){
 # skContents <- skContent
 
 
-## ----skFindId-------------------------------------------------------------------------------------------------------------------------
+## ----skFindId-------------------------------------------------------
 #' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -603,7 +603,7 @@ skFindId <- function(type, title){
 }
 
 
-## ----skExists-------------------------------------------------------------------------------------------------------------------------
+## ----skExists-------------------------------------------------------
 #' Check if component exist.
 #'
 #' @param type Component name (possibly shortened e.g. 'pe' for 'people',
@@ -633,7 +633,40 @@ skExists <- function(type, title, verbose=FALSE) {
 
 
 
-## ----skSetOptions---------------------------------------------------------------------------------------------------------------------
+## ----skExistsp------------------------------------------------------
+#' Check if component exist within the project.
+#'
+#' @param type Component name (possibly shortened e.g. 'pe' for 'people',
+#' 'proj' for 'projects', ...).
+#' @param title Character string with the identifier
+#'     of the component (title part).
+#' @param verbose logical, if TRUE, details are printed.
+#' @return logical value indicating whether the component named by
+#'      argument title exists.
+#' @export
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' skFindId("projects","_p_Demo")
+#' skOptions()
+#' skExistsp("people", "Andrej Blejec")
+#' skExistsp("investigations","_I_Test", verbose=TRUE)
+#' skExistsp("pe", "Guest")
+#' }
+skExistsp <- function(type, title, pid=options("sk.pid"), verbose=FALSE) {
+    type <- expand(type)
+    obj <- skListp(type,pid)
+    ind <- pmatch(title, obj$title)
+    if(verbose) print(obj[ind,])
+    ok <- !is.na(ind)
+    return(ok)
+}
+
+
+
+
+## ----skSetOptions---------------------------------------------------
 #' Sets seekr option according to the type.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -673,7 +706,7 @@ skSetOption <- function( type, id){
 }
 
 
-## ----skFindTitle----------------------------------------------------------------------------------------------------------------------
+## ----skFindTitle----------------------------------------------------
 #' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -706,7 +739,7 @@ skFindTitle <- function(type, id){
      }
 
 
-## ----skSkeleton-----------------------------------------------------------------------------------------------------------------------
+## ----skSkeleton-----------------------------------------------------
 #' Create *sk* skeleton.
 #'
 #' Creates *sk* object with required structure.
@@ -1171,7 +1204,7 @@ return(sr)
 }
 
 
-## ----contentType----------------------------------------------------------------------------------------------------------------------
+## ----contentType----------------------------------------------------
 #' Determine MIME type for file.
 #'
 #' @param file file name.
@@ -1220,7 +1253,7 @@ contentType <- function(file){
 }
 
 
-## ----skCreate-------------------------------------------------------------------------------------------------------------------------
+## ----skCreate-------------------------------------------------------
 #' Create pISA layer or *sk* component.
 #'
 #' @param type Component name (e.g. 'people', 'projects', ...).
@@ -1487,7 +1520,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
 
 
 
-## ----skUpload-------------------------------------------------------------------------------------------------------------------------
+## ----skUpload-------------------------------------------------------
 #' Upload file.
 #'
 #' Upload file to a created object of type 'documents' or 'data_files'.

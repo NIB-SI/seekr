@@ -728,6 +728,39 @@ skExists <- function(type, title, verbose=FALSE) {
 
 @
 
+<<skExistsp>>=
+#' Check if component exist within the project.
+#'
+#' @param type Component name (possibly shortened e.g. 'pe' for 'people',
+#' 'proj' for 'projects', ...).
+#' @param title Character string with the identifier
+#'     of the component (title part).
+#' @param verbose logical, if TRUE, details are printed.
+#' @return logical value indicating whether the component named by
+#'      argument title exists.
+#' @export
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' skFindId("projects","_p_Demo")
+#' skOptions()
+#' skExistsp("people", "Andrej Blejec")
+#' skExistsp("investigations","_I_Test", verbose=TRUE)
+#' skExistsp("pe", "Guest")
+#' }
+skExistsp <- function(type, title, pid=options("sk.pid"), verbose=FALSE) {
+    type <- expand(type)
+    obj <- skListp(type,pid)
+    ind <- pmatch(title, obj$title)
+    if(verbose) print(obj[ind,])
+    ok <- !is.na(ind)
+    return(ok)
+}
+
+
+@
+
 <<skSetOptions>>=
 #' Sets seekr option according to the type.
 #'
