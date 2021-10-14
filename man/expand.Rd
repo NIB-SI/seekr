@@ -7,7 +7,7 @@
 expand(type)
 }
 \arguments{
-\item{type}{Component name (possibly shortened e.g. 'pe' for 'people',
+\item{type}{Component type (possibly shortened e.g. 'pe' for 'people',
 'proj' for 'projects', ...).}
 }
 \value{

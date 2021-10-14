@@ -7,7 +7,7 @@
 skCreate(type = "assays", meta = list(), class = "EXP", file = "NA.TXT")
 }
 \arguments{
-\item{type}{Component name (e.g. 'people', 'projects', ...).}
+\item{type}{Component type (e.g. 'people', 'projects', ...).}
 
 \item{meta}{Data frame with pISA metadata or
 a list with minimal information (short layer name, Title,

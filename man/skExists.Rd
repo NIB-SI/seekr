@@ -2,16 +2,19 @@
 % Please edit documentation in R/seekr-api.R
 \name{skExists}
 \alias{skExists}
-\title{Check if component exist.}
+\title{Check if component exists within the layer.}
 \usage{
-skExists(type, title, verbose = FALSE)
+skExists(type, title, ptype, pid, verbose = FALSE)
 }
 \arguments{
-\item{type}{Component name (possibly shortened e.g. 'pe' for 'people',
+\item{type}{Component type (possibly shortened e.g. 'pe' for 'people',
 'proj' for 'projects', ...).}
 
-\item{title}{Character string with the identifier
-of the component (title part).}
+\item{title}{Character string,  component name.}
+
+\item{ptype}{Parent component type (possibly shortened).}
+
+\item{pid}{Parent component id.}
 
 \item{verbose}{logical, if TRUE, details are printed.}
 }
@@ -20,14 +23,21 @@ logical value indicating whether the component named by
      argument title exists.
 }
 \description{
-Check if component exist.
+Check if component exists within the layer.
+}
+\note{
+Check if named layer (.e.g. assay) exists in the parent layer.
+    Parent layer is usually just one above (e.g. study where the assay 
+    is supposed to reside) but can be any above.
 }
 \examples{
 \dontrun{
 options(.sk$test)
-skExists("people", "Andrej Blejec")
-skExists("projects","Demo", verbose=TRUE)
-skExists("pe", "Guest")
+skFindId("projects","_p_Demo")
+skOptions()
+skExists("people", "Andrej Blejec", "proj", options("sk.pid"))
+skExists("investigations","_I_Test", "proj", options("sk.pid"),TRUE)
+skExists("pe", "Guest", "proj", options("sk.pid"))
 }
 }
 \author{

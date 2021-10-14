@@ -6,11 +6,18 @@
 ###############################################
 #
 
-## ----d,echo=FALSE,results='hide'------------------------------------
+## ----d,echo=FALSE,results='hide',eval=FALSE-------------------------
 options(width=70)
 #library(httr)
 #library(jsonlite)
 #library(pisar)
+test <- function(...) if(.testing) {cat(">>>> ", deparse(substitute(...)),"\n")
+print(...)
+cat(">>>>\n")
+}
+.testing <- TRUE
+test(.testing)
+.testing <- TRUE
 
 
 ## ----skOptions------------------------------------------------------
@@ -34,16 +41,18 @@ options(width=70)
 #' @note Function options() is used to store server location,
 #'        user credentials and pISA layer identifications.
 #'        Options that can be declared:
-#'          sk.url (server location),
-#'          sk.usr (username),
-#'          sk.pwd (password),
-#'          sk.myid (user id on server),
-#'          sk.instid (user's institution id),
-#'          sk.prid (program id),
-#'          sk.pid (project id),
-#'          sk.iid (investigation id),
-#'          sk.sid (study id),
-#'          sk.aid (assay id).
+#'   \itemize{
+#'   \item sk.url:  server location,
+#'   \item sk.usr:  username,
+#'   \item sk.pwd:  password,
+#'   \item sk.myid:  user id on server,
+#'   \item sk.instid:  user's institution id,
+#'   \item sk.prid:  program id,
+#'   \item sk.pid:  project id,
+#'   \item sk.iid:  investigation id,
+#'   \item sk.sid:  study id,
+#'   \item sk.aid:  assay id. 
+#'     }
 #'
 #' @export
 #' @seealso \code{\link{startsWith}, \link{endsWith}}
@@ -168,7 +177,7 @@ invisible(x)
 ## ----expand---------------------------------------------------------
 #' Expand shortened type name into full name.
 #'
-#' @param type Component name (possibly shortened e.g. 'pe' for 'people',
+#' @param type Component type (possibly shortened e.g. 'pe' for 'people',
 #'     'proj' for 'projects', ...).
 #' @return Expanded type name.
 #' @export
@@ -251,8 +260,6 @@ skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
 skGet <- function(type, id,
                    uri=options("sk.url"), verbose=FALSE, ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
-
-  if(missing(type)) stop('Argument "type" is missing, with no default')
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
   ua <- httr::user_agent("https://github.com/nib-si/seekr")
@@ -308,8 +315,6 @@ skGet <- function(type, id,
 #' }
 skRead <- function(type, id,
                    uri=options("sk.url"), content=FALSE, ... ){
-  if(missing(type)) stop('Argument "type" is missing, with no default') else
-  if(missing(id)) stop('Argument "id" is missing, with no default') else
   r <- skGet( type=type, id=id, uri = uri, ...)
   if(content) r <- skContent(r)
   return(r)
@@ -375,7 +380,7 @@ skList <- function(type,
 #' }
 skListp <- function(class=projects, type, pid=options("sk.pid"),
                    uri=options("sk.url"), ... ){
-  if(missing(type)) stop('Argument "type" is missing, with no default') else { 
+  if(missing(type)) stop('Argument "type" is missing, with no default') else {
   class <- expand(class)
   type <- expand(type)
   pr <- skRead( class, pid, uri, content=TRUE, ... )
@@ -389,7 +394,7 @@ skListp <- function(class=projects, type, pid=options("sk.pid"),
   }
 
 
-## ----skRelationships------------------------------------------------
+## ----skRelated------------------------------------------------------
 #' List of relationships within an object.
 #'
 #' @param type Object type (e.g. "project").
@@ -406,24 +411,25 @@ skListp <- function(class=projects, type, pid=options("sk.pid"),
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' skRelationships("projects",152)
-#' skRelationships("investigations",151)
-#' skRelationships("investigations",152)
-#' skRelationships("investigations",152, "assays")
-#' skRelationships("inv",152, c("people","studies"))
-#' skRelationships("inv",152, c("pe","a"))
-#' skRelationships("studies",165)
-#' skRelationships("assays",494)
-#' skRelationships("people",368,"projects")
+#' skRelated("projects",152)
+#' skRelated("investigations",151)
+#' skRelated("investigations",152)
+#' skRelated("investigations",152, "assays")
+#' skRelated("proj",options("sk.pid"), "inv")
+#' skRelated("inv",152, c("people","studies"))
+#' skRelated("inv",152, c("pe","a"))
+#' skRelated("studies",165)
+#' skRelated("assays",494)
+#' skRelated("people",368,"projects")
 #'}
-skRelationships <- function( type, id, select=NULL, 
+skRelated <- function( type, id, select=NULL,
         uri=options("sk.url"), ... ){
     #r <- skRead("projects",100,content=TRUE)
     #r <- skRead("programmes",26,content=TRUE) # LARGE !!!
     type <- expand(type)
+    id <- unlist(id)
     r <- skRead(type, id , uri, content=TRUE)
     u <- unlist(r$relationships)
-    u
     role <- sapply(strsplit(names(u[seq(1,length(u),2)]),"\\."),function(x) x[1])
     u <- matrix(unlist(r$relationships),ncol=2, byrow=TRUE)
     if(!is.null(select)) {
@@ -434,10 +440,14 @@ skRelationships <- function( type, id, select=NULL,
         }
     role <- c(type,role)
     u <- rbind(c(id,type),u)
-    dimnames(u) <- list(NULL,c("id","type"))
-    system.time(title <- apply(u,1,function(x) skFindTitle(x[2],x[1])["title"]))
-    cbind(u,role,title)
+    dimnames(u) <- list(1:nrow(u),c("id","type"))
+    system.time(titles <- apply(u,1,function(x) (skFindTitle(x[2],x[1]))["title"])
+    )
+    r <- cbind(u,role,title=titles)
+    return(r)
 }
+
+
 
 
 ## ----skSearch-------------------------------------------------------
@@ -659,10 +669,10 @@ skFindId <- function(type, title){
 }
 
 
-## ----skExists-------------------------------------------------------
-#' Check if component exist.
+## ----skExistsa------------------------------------------------------
+#' Check if component exist anywhere in the repository.
 #'
-#' @param type Component name (possibly shortened e.g. 'pe' for 'people',
+#' @param type Component type (possibly shortened e.g. 'pe' for 'people',
 #' 'proj' for 'projects', ...).
 #' @param title Character string with the identifier
 #'     of the component (title part).
@@ -674,11 +684,11 @@ skFindId <- function(type, title){
 #' @examples
 #' \dontrun{
 #' options(.sk$test)
-#' skExists("people", "Andrej Blejec")
-#' skExists("projects","Demo", verbose=TRUE)
-#' skExists("pe", "Guest")
+#' skExistsa("people", "Andrej Blejec")
+#' skExistsa("projects","Demo", verbose=TRUE)
+#' skExistsa("pe", "Guest")
 #' }
-skExists <- function(type, title, verbose=FALSE) {
+skExistsa <- function(type, title, verbose=FALSE) {
     type <- expand(type)
     r <- skFindId(type, title)
     if(verbose) print(r)
@@ -692,7 +702,7 @@ skExists <- function(type, title, verbose=FALSE) {
 ## ----skExistsp------------------------------------------------------
 #' Check if component exist within the project.
 #'
-#' @param type Component name (possibly shortened e.g. 'pe' for 'people',
+#' @param type Component type (possibly shortened e.g. 'pe' for 'people',
 #' 'proj' for 'projects', ...).
 #' @param title Character string with the identifier
 #'     of the component (title part).
@@ -722,6 +732,42 @@ skExistsp <- function(type, title, pid=options("sk.pid"), verbose=FALSE) {
 
 
 
+## ----skExists-------------------------------------------------------
+#' Check if component exists within the layer.
+#'
+#' @param type Component type (possibly shortened e.g. 'pe' for 'people',
+#' 'proj' for 'projects', ...).
+#' @param title Character string,  component name.
+#' @param ptype Parent component type (possibly shortened).
+#' @param pid Parent component id.
+#' @param verbose logical, if TRUE, details are printed.
+#' @return logical value indicating whether the component named by
+#'      argument title exists.
+#' @export
+#' @note Check if named layer (.e.g. assay) exists in the parent layer.
+#'     Parent layer is usually just one above (e.g. study where the assay 
+#'     is supposed to reside) but can be any above.
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(.sk$test)
+#' skFindId("projects","_p_Demo")
+#' skOptions()
+#' skExists("people", "Andrej Blejec", "proj", options("sk.pid"))
+#' skExists("investigations","_I_Test", "proj", options("sk.pid"),TRUE)
+#' skExists("pe", "Guest", "proj", options("sk.pid"))
+#' }
+skExists <- function(type, title, ptype, pid, verbose=FALSE) {
+    type <- expand(type)
+    ptype <- expand(ptype)
+    obj <- skRelated(ptype, pid, select=type)
+    ind <- pmatch(title, obj[-1,"title"])
+    if(verbose) print(obj[ind+1,])
+    ok <- !is.na(ind)
+    return(ok)
+}
+
+
 ## ----skSetOptions---------------------------------------------------
 #' Sets seekr option according to the type.
 #'
@@ -740,7 +786,7 @@ skExistsp <- function(type, title, pid=options("sk.pid"), verbose=FALSE) {
 #' skSetOption("bla",1)
 #' }
 skSetOption <- function( type, id){
-       types = c(
+       types  <-  c(
             url = "sk.url",
             usr = "sk.usr",
             pwd = "sk.pwd",
@@ -756,7 +802,7 @@ skSetOption <- function( type, id){
             )
             if(!is.na(types[type])) { names(id) = types[type]
             options(as.list(id))
-            options( types[type] ) } 
+            options( types[type] ) }
             #else {
             #warning("No such type: ", type)}
 
@@ -801,7 +847,7 @@ skFindTitle <- function(type, id){
 #'
 #' Creates *sk* object with required structure.
 #'
-#' @param type component name (e.g. 'people', 'projects', ...).
+#' @param type Component type (e.g. 'people', 'projects', ...).
 #' @param meta a data frame with pISA metadata or
 #' a list with minimal information (Title, Description, *ToDo: add fields*).
 #' @return A list with the minimal information structure.
@@ -1313,7 +1359,7 @@ contentType <- function(file){
 ## ----skCreate-------------------------------------------------------
 #' Create pISA layer or *sk* component.
 #'
-#' @param type Component name (e.g. 'people', 'projects', ...).
+#' @param type Component type (e.g. 'people', 'projects', ...).
 #' @param meta Data frame with pISA metadata or
 #'     a list with minimal information (short layer name, Title,
 #'     Description, *ToDo: add fields*). See Examples.

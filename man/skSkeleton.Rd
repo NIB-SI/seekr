@@ -7,7 +7,7 @@
 skSkeleton(type = "assay", meta)
 }
 \arguments{
-\item{type}{component name (e.g. 'people', 'projects', ...).}
+\item{type}{Component type (e.g. 'people', 'projects', ...).}
 
 \item{meta}{a data frame with pISA metadata or
 a list with minimal information (Title, Description, *ToDo: add fields*).}

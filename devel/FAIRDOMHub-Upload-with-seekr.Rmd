@@ -91,6 +91,7 @@ and exclude files listed in file `seekignore.txt`. In our case, seekignore file 
 ignore_file <- file.path(.iroot,"seekignore.txt")
 if(file.exists(ignore_file))
 seekignore <- read.table(ignore_file)[,1] else seekignore <- ""
+#seekignore <- c("_A_Work-R")
 seekignore
 
 # Create directory listing
@@ -120,6 +121,7 @@ dirs <- dirs[grepl("/_A_", dirs)]
 
 head(dirs)
 tail(dirs)
+dirs
 cat("Files to upload:", length(dirs), "/",dirlength,"\n")
 ```
 
@@ -345,7 +347,9 @@ aid
 #if(aresp==404) aid <- 0
 aid
 ameta <- readMeta(file.path(.iroot,sname,aname))
-if(getMeta(ameta,"Assay Class")if(FALSE) {
+# ToDO what are the ifs?????
+#if(getMeta(ameta,"Assay Class")
+if(FALSE) {
 meta <- list(Title = aname
              , Description = paste(
                getMeta(meta, "Title")
@@ -376,6 +380,7 @@ meta <- list(
        Title=paste0("/",fname)
      , Description=paste(pini$p$name,pini$I$name,sname,aname,sep="/")
      )
+## ToDo
 if(toupper(fileType(fname))    regexpr("METADATA",fname)>0) {
   type <- "documents" } else {type <- "data_files"}
 s <- skCreate(type, meta, file= fname)
