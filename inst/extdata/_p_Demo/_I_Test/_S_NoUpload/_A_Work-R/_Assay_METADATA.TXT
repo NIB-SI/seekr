@@ -1,0 +1,12 @@
+Assay:	_A_Work-R
+Short Name:	Work-R
+Assay Class:	DRY
+Assay Type:	R
+Title:	Working in assay
+Description:	Not really working, just testing :)
+pISA Assay creation date:	2019-10-15
+pISA Assay creator:	AB
+Analyst:	AB
+Phenodata:	../../phenodata_20191015.txt
+Featuredata:	
+Data:	
