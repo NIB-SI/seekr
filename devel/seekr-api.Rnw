@@ -145,7 +145,6 @@ Use options() to declare url, your credentials and pISA-tree identifcations (see
 #'   \item sk.sid:  study id,
 #'   \item sk.aid:  assay id.
 #'     }
-#'
 #' @export
 #' @seealso \code{\link{startsWith}, \link{endsWith}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
@@ -162,6 +161,38 @@ skOptions <- function(end="", start="sk.", hide="sk.pwd"){
     hidden <- names(options())%in% hide
     if (length(hide)>0 & end=="") cat("Hidden:",paste(hide),"\n")
     options()[sfilter & efilter & !hidden]
+}
+@
+
+<<skReset>>=
+#' Reset seekr related options
+#'
+#' @param all logical. Reset all options (including user and server related).
+#' @export
+#' @seealso \code{\link{skOptions}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(sk.myid=368, sk.pid=166, sk.usr="Username")
+#' skOptions()
+#' skReset()
+#' skOptions()
+#' }
+skReset <- function(all=FALSE){
+    options(sk.prid = NULL)
+    options(sk.pid = NULL)
+    options(sk.iid = NULL)
+    options(sk.sid = NULL)
+    options(sk.aid = NULL)
+    options(sk.instid = NULL)
+    options(sk.myid = NULL)
+    options(sk.ppid = NULL)
+
+    if(all) {
+    options(sk.usr = NULL)
+    options(sk.pwd = NULL)
+    options(sk.url = NULL)
+    }
 }
 @
 
@@ -1788,27 +1819,164 @@ skUpload <- function( object, file){
 }
 @
 
-<<>>=
-skFilesToUpload <- function(root=.iroot, na.exclude=FALSE, md.exclude=TRUE, verbose=TRUE, quiet=FALSE, skignore=file.path(root,"seekignore.txt")){
+<<skDoNotUpload>>
+#' Decide if the layer should not be uploaded.
+#'
+#' Check pISA-tree branch metadata files for the "Upload to FAIRDOMHub" key
+#'    and prepare ignore entries for the sub-branches
+#'    that should not be uploaded.
+#' @root character string. Directory, pointing to the branch
+#'     of pISA-tree to be checked.
+#'     Default is the investigation of current assay.
+#' @exclude.nokey logical value. If TRUE, the layer will be ignored
+#'     if the "Upload to FAIRDOMHub" is not present.
+#' @verbose logical. Shold print progress details?
+#' @quiet logical. Should print final report?
+#' @recursive logical. Should the listing recurse into directories?
+#' @value A character vector with patterns of directories to
+#'     be completely ignored for upload (including subdirectories).
+#' @note This function is primarily used by the function skFilesToUpload.
+#'
+#' @export
+#' @keywords pisa, seekr
+#' @seealso \code{\link{skFilesToUpload}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#'
+#' proot <- "../../.."
+#' skDoNotUpload(proot)
+#' skDoNotUpload(proot,verbose=FALSE, quiet=TRUE)
+#' }
+skDoNotUpload <- function(root = "../.." ,exclude.nokey=FALSE, verbose=TRUE, quiet=FALSE, recursive=TRUE){
+#
+mdir <- dir(root,pattern="*_METADATA.TXT", recursive=recursive)
+mlength <- length(mdir)
+ignore <- NULL
+for(fn in mdir) {
+#fn <- mdir[2]
+    mdata <- read.table(file.path(root,fn), sep="\t",header=TRUE)
+    select <- mdata[,1]=="Upload to FAIRDOMHub:"
+    value <- substr(mdata[select,2][1],1,1)
+    if(  value %in% c("n", "N")  | (is.na(value)& exclude.nokey)  ) {
+     ignore <- c(ignore, dirname(fn))
+    if(verbose & !quiet) cat("Ignoring pISA layer:", dirname(fn),"\n")
+    }
+  }
+if(!quiet) cat("Ignored pISA layers:", length(ignore),"/",mlength, "\n")
+  return(sort(ignore))
+}
+@
+
+<<skIgnoreBlankReadme>>
+#' Decide which README.MD files should not be uploaded.
+#'
+#' Check pISA-tree branch if README.MD file holds useful information
+#'    and prepare ignore entries for the files that have
+#'    just the header line.
+#' @root character string. Directory, pointing to the branch
+#'     of pISA-tree to be checked.
+#'     Default is the investigation of current assay.
+#' @exclude.nokey logical value. If TRUE, the layer will be ignored
+#'     if the "Upload to FAIRDOMHub" is not present.
+#' @exclude.md logical value. If TRUE, the file will be ignored
+#'     if it contains just the header line.
+#' @verbose logical. Shold print progress details?
+#' @quiet logical. Should print final report?
+#' @recursive logical. Should the listing recurse into directories?
+#' @value A character vector with patterns of files to
+#'     be completely ignored for upload.
+#' @note This function is primarily used by the function skFilesToUpload.
+#' @export
+#' @keywords pisa, seekr
+#' @seealso \code{\link{skFilesToUpload}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' proot <- "../../.."
+#' skIgnoreBlankReadme("../../..")
+#' skIgnoreBlankReadme("../../..",exclude.empty=FALSE)
+#' skIgnoreBlankReadme("../../..", verbose=FALSE,
+#' quiet=TRUE, recursive=FALSE)
+#' }
+skIgnoreBlankReadme <- function(root = "../.." , exclude.md=TRUE,
+      verbose=TRUE, quiet=FALSE, recursive=TRUE){
+#
+mdir <- dir(root,pattern="README.MD", recursive=recursive)
+#print(mdir)
+ignore <- NULL
+if(exclude.md){
+for(fn in mdir) {
+    mdata <- scan(file.path(root,fn),"character",sep="\n",quiet=TRUE)
+    if(  length(mdata)<2  ) {
+     ignore <- c(ignore, fn)
+    } else      if(verbose) cat("Keep .md file:",fn,"\n")
+  }
+  }
+  if(!quiet) cat("Ignored README.MD files:",length(ignore),"/",length(mdir),"\n")
+  return(ignore)
+}
+
+@
+
+<<skFilesToUpload>>=
+#' Prepare the list of files for upload
+#'
+#' @root character string. Directory, pointing to the branch
+#'     of pISA-tree to be checked.
+#'     Default is the investigation of current assay.
+#' @exclude.nokey
+#' @exclude.md logical value. If TRUE, the file will be ignored
+#'     if it contains just the header line.
+#' @verbose logical. Shold print progress details?
+#' @quiet logical. Should print final report?
+#' @recursive logical. Should the listing recurse into directories?
+#' @value A character vector with names of files to be uploaded.
+#' @note Function `skFilesToUpload` will first create a list
+#' of files in root directory. Then, it will read the seekignore.txt
+#' and extend it with patterns of layers that should not be uploaded
+#'  according to metadata key "Upload to FAIRDOMHub".
+#' In addition, seekignre list will be appended with the list of empty
+#' README.MD files that might clutter the FAIRDOMHub list of files.
+#' Then it will filter it according to declarations in the combined
+#' seekignore pattern list. 
+#' @export
+#' @keywords pisa, seekr
+#' @seealso \code{\link{skIgnoreBlankReadme}}, \code{\link{skDoNotUpload}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' dirs <- skFilesToUpload()
+#' dirs
+#' skFilesToUpload(exclude.md=FALSE)
+#' skFilesToUpload( verbose=FALSE, quiet=TRUE)
+#' seekignore <- c("# ignore patterns","*.zip","*.txt")
+#' skFilesToUpload(skignore=seekignore)
+#' skFilesToUpload(file.path(.iroot),skignore=NULL)
+#' }
+skFilesToUpload <- function(root="../..", exclude.nokey=FALSE, exclude.md=TRUE, verbose=TRUE, quiet=FALSE, skignore=file.path(root,"seekignore.txt"), recursive=TRUE){
 if(length(skignore)==1 ){
 if(file.exists(skignore)) seekignore <- readLines(skignore)
-    } 
+    }
      else seekignore <- skignore
 seekignore <- seekignore[!grepl("^#",seekignore)] # get rid of comment lines
-seekignore <- c(seekignore,skDoNotUpload(root,na.exclude, verbose, quiet))
-if(md.exclude) seekignore <- c(seekignore,skIgnoreBlankReadme(root, verbose, quiet))
-
+seekignore <- c(seekignore,skDoNotUpload(root,exclude.nokey, verbose, quiet, recursive))
+if(exclude.md) {
+     mdignore <- skIgnoreBlankReadme(root, verbose, quiet, recursive)
+     #  Protect files in the root directory
+       ind <- substr(mdignore,1,1)!="_"
+     #  rootName <- rev(strsplit(normalizePath(root),"\\\\")[[1]])[1]
+       mdignore[ind] <- paste0("XX/",mdignore[ind])
+     #
+     seekignore <- c(seekignore,mdignore)
+}
 # Create directory listing
-
-dirs <-  dir(root
-             , full.names = FALSE
-             , recursive=TRUE
-             , include.dirs=FALSE)
-dirs <- list.files(root, full.names=TRUE, recursive=TRUE)
+dirs <- list.files(root, full.names=FALSE, recursive=TRUE)
 #  Protect files in the root directory
   ind <- substr(dirs,1,1)!="_"
-  dirs[ind] <- paste0("XX//",dirs[ind])
-#             
+  dirs[ind] <- paste0("XX/",dirs[ind])
+
+
 # Ignore files with patterns in seekignore file
 dirlength <- length(dirs)
 for(pat in seekignore){
@@ -1817,74 +1985,18 @@ for(pat in seekignore){
   dirs <- dirs[!grepl(pat, dirs, ignore.case=TRUE)]
   if(verbose & !quiet) cat("Ignoring" , ldir-length(dirs), "files [",pat," ]\n")
 }
-#cat("Files to upload:", length(dirs), "/",dirlength)
 
-# Keep only files in Assays
-
-#head(dirs)
-
-#dirs <- dirs[grepl("/_A_", dirs)]
 # Unprotect files in the root directory
 
-dirs <- gsub("^XX//","",dirs)
+dirs <- gsub("^XX/","",dirs)
 if(!quiet) cat("Files to upload:", length(dirs), "/",dirlength,"\n")
 return(dirs)
 }
-skFilesToUpload()
-skFilesToUpload(md.exclude=FALSE)
-skFilesToUpload( verbose=FALSE, quiet=TRUE)
-seekignore <- c("# ignore patterns","*.zip","*.txt")
-skFilesToUpload(skignore=seekignore)
-skFilesToUpload(file.path(.iroot),skignore=NULL)
+#
 
 @
 
-<<>>
-skDoNotUpload <- function(root = .iroot ,na.exclude=FALSE, verbose=TRUE, quiet=FALSE){
-#
-mdir <- dir(root,pattern="*_METADATA.TXT", recursive=TRUE)
-mlength <- length(mdir)
-ignore <- NULL
-for(fn in mdir) {
-#fn <- mdir[2]
-    mdata <- read.table(file.path(root,fn), sep="\t",header=TRUE)
-    select <- mdata[,1]=="Upload to FAIRDOMHub:"
-    value <- substr(mdata[select,2][1],1,1) 
-    if(  value %in% c("n", "N")  | (is.na(value)& na.exclude)  ) {
-     ignore <- c(ignore, dirname(fn))
-    if(verbose & !quiet) cat("Ignoring pISA layer:", dirname(fn),"\n")
-    }
-  }
-if(!quiet) cat("Ignored pISA layers:", length(ignore),"/",mlength, "\n")
-  return(sort(ignore))
-}
-skDoNotUpload(.proot)
-skDoNotUpload(.proot, quiet=TRUE)
 
-@
-
-<<>>
-skIgnoreBlankReadme <- function(root = .iroot ,na.exclude=TRUE, quiet=FALSE){
-#
-mdir <- dir(root,pattern="README.MD", recursive=TRUE)
-#print(mdir)
-ignore <- NULL
-for(fn in mdir) {
-    mdata <- scan(file.path(root,fn),"character",sep="\n",quiet=TRUE)
-    if(  length(mdata)<2  ) {
-     ignore <- c(ignore, fn)
-    }
-  }
-#  Protect files in the root directory
-  ind <- substr(ignore,1,1)!="_"
-#  rootName <- rev(strsplit(normalizePath(root),"\\\\")[[1]])[1]
-  ignore[ind] <- paste0("XX/",ignore[ind])
-#
-  if(!quiet) cat("Ignored README.MD files:",length(ignore),"/",length(mdir),"\n")
-  return(ignore)
-}
-skIgnoreBlankReadme(.proot)
-@
 
 
 \url{https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html}

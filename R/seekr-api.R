@@ -51,15 +51,14 @@ test(.testing)
 #'   \item sk.pid:  project id,
 #'   \item sk.iid:  investigation id,
 #'   \item sk.sid:  study id,
-#'   \item sk.aid:  assay id. 
+#'   \item sk.aid:  assay id.
 #'     }
-#'
 #' @export
 #' @seealso \code{\link{startsWith}, \link{endsWith}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' options(sk.myid=368)
+#' options(sk.myid=368, sk.pid=166, sk.usr="Username")
 #' skOptions()
 #' skOptions("id")
 #' skOptions(hide=NULL)
@@ -70,6 +69,38 @@ skOptions <- function(end="", start="sk.", hide="sk.pwd"){
     hidden <- names(options())%in% hide
     if (length(hide)>0 & end=="") cat("Hidden:",paste(hide),"\n")
     options()[sfilter & efilter & !hidden]
+}
+
+
+## ----skReset--------------------------------------------------------
+#' Reset seekr related options
+#'
+#' @param all logical. Reset all options (including user and server related).
+#' @export
+#' @seealso \code{\link{skOptions}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' options(sk.myid=368, sk.pid=166, sk.usr="Username")
+#' skOptions()
+#' skReset()
+#' skOptions()
+#' }
+skReset <- function(all=FALSE){
+    options(sk.prid = NULL)
+    options(sk.pid = NULL)
+    options(sk.iid = NULL)
+    options(sk.sid = NULL)
+    options(sk.aid = NULL)
+    options(sk.instid = NULL)
+    options(sk.myid = NULL)
+    options(sk.ppid = NULL)
+
+    if(all) {
+    options(sk.usr = NULL)
+    options(sk.pwd = NULL)
+    options(sk.url = NULL)
+    }
 }
 
 
@@ -745,7 +776,7 @@ skExistsp <- function(type, title, pid=options("sk.pid"), verbose=FALSE) {
 #'      argument title exists.
 #' @export
 #' @note Check if named layer (.e.g. assay) exists in the parent layer.
-#'     Parent layer is usually just one above (e.g. study where the assay 
+#'     Parent layer is usually just one above (e.g. study where the assay
 #'     is supposed to reside) but can be any above.
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
@@ -1683,4 +1714,81 @@ skUpload <- function( object, file){
 }
   resp
 }
+
+
+## ----skFilesToUpload------------------------------------------------
+#' Prepare the list of files for upload
+#'
+#' @root character string. Directory, pointing to the branch
+#'     of pISA-tree to be checked.
+#'     Default is the investigation of current assay.
+#' @exclude.nokey
+#' @exclude.md logical value. If TRUE, the file will be ignored
+#'     if it contains just the header line.
+#' @verbose logical. Shold print progress details?
+#' @quiet logical. Should print final report?
+#' @recursive logical. Should the listing recurse into directories?
+#' @value A character vector with names of files to be uploaded.
+#' @note Function `skFilesToUpload` will first create a list
+#' of files in root directory. Then, it will read the seekignore.txt
+#' and extend it with patterns of layers that should not be uploaded
+#'  according to metadata key "Upload to FAIRDOMHub".
+#' In addition, seekignre list will be appended with the list of empty
+#' README.MD files that might clutter the FAIRDOMHub list of files.
+#' Then it will filter it according to declarations in the combined
+#' seekignore pattern list. 
+#' @export
+#' @keywords pisa, seekr
+#' @seealso \code{\link{skIgnoreBlankReadme}}, \code{\link{skDoNotUpload}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' dirs <- skFilesToUpload()
+#' dirs
+#' skFilesToUpload(exclude.md=FALSE)
+#' skFilesToUpload( verbose=FALSE, quiet=TRUE)
+#' seekignore <- c("# ignore patterns","*.zip","*.txt")
+#' skFilesToUpload(skignore=seekignore)
+#' skFilesToUpload(file.path(.iroot),skignore=NULL)
+#' }
+skFilesToUpload <- function(root="../..", exclude.nokey=FALSE, exclude.md=TRUE, verbose=TRUE, quiet=FALSE, skignore=file.path(root,"seekignore.txt"), recursive=TRUE){
+if(length(skignore)==1 ){
+if(file.exists(skignore)) seekignore <- readLines(skignore)
+    }
+     else seekignore <- skignore
+seekignore <- seekignore[!grepl("^#",seekignore)] # get rid of comment lines
+seekignore <- c(seekignore,skDoNotUpload(root,exclude.nokey, verbose, quiet, recursive))
+if(exclude.md) {
+     mdignore <- skIgnoreBlankReadme(root, verbose, quiet, recursive)
+     #  Protect files in the root directory
+       ind <- substr(mdignore,1,1)!="_"
+     #  rootName <- rev(strsplit(normalizePath(root),"\\\\")[[1]])[1]
+       mdignore[ind] <- paste0("XX/",mdignore[ind])
+     #
+     seekignore <- c(seekignore,mdignore)
+}
+# Create directory listing
+dirs <- list.files(root, full.names=FALSE, recursive=TRUE)
+#  Protect files in the root directory
+  ind <- substr(dirs,1,1)!="_"
+  dirs[ind] <- paste0("XX/",dirs[ind])
+
+
+# Ignore files with patterns in seekignore file
+dirlength <- length(dirs)
+for(pat in seekignore){
+  ldir <- length(dirs)
+  pat <- gsub("\\.","\\\\.",pat)
+  dirs <- dirs[!grepl(pat, dirs, ignore.case=TRUE)]
+  if(verbose & !quiet) cat("Ignoring" , ldir-length(dirs), "files [",pat," ]\n")
+}
+
+# Unprotect files in the root directory
+
+dirs <- gsub("^XX/","",dirs)
+if(!quiet) cat("Files to upload:", length(dirs), "/",dirlength,"\n")
+return(dirs)
+}
+#
+
 

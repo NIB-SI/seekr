@@ -1,5 +1,5 @@
 ---
-title: "Upload to FAIRDOMHub with seekr"
+title: "Prepare list of files for upload to FAIRDOMHub with seekr"
 author: "A. Blejec"
 date: "Last compiled on `r format(Sys.time(), '%Y-%m-%d')`"
 output: html_document
@@ -27,7 +27,9 @@ library(seekr)
 
 Package `seekr` contains demo pISA-tree project. For this demonstration we can use the demo project. It is assumed, that our working directory is a layer of the pISA project. It is recommended that working directory is an assay, so we will start in an assay that is available in the package `seekr`.
 
-```{r}
+Note: If R is already started in an existing assay, the folowing chunk is not needed, set eval to FALSE.
+
+```{r eval=!TRUE}
 astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
 oldwd <- setwd(system.file("extdata", astring, package="seekr"))
 oldwd
@@ -92,102 +94,4 @@ forUpload
 ```
 
 ## Prepare connection with FAIRDOMHub
-
-Restart the log file.
-
-```{r}
-logfn <- "Test-upload.log"
-skLog("Starting upload for demo project", file=logfn, append=FALSE)
-readLines(logfn)
-```
-
-Initialize connection with SEEK cloud service. Cloud service url and project creator name and SEEK service id are expected in the project metadata file. They should be stored in options().
-
-```{r}
-skReset()
-options(.sk$test)
-# options(.sk$main)
-skOptions()
-```
-
-A part of the settings is shown above (to not reveal my password). Option "sk.myid" will be used as creator or uploader id. You can replace it with your preffered one like this:
-
-```{r eval=FALSE}
-options(sk.myid = <your id>)
-```
-
-Eventually you can perform an automatic check of creator's FAIRDOMHub id from project metadata. Project creator name should be spelled exactly as in the FAIRDOMHub account.
-
-```{r}
-meta <- pini$p$meta
-creatorName <- meta[grepl("creator",meta$Key),]$Value
-creatorName
-crid <- skFindId("people",creatorName)["id"]
-crid
-if(crid == 0 ) crid <- 368 # just in case if not found : )
-myid <- crid
-```
-
-Save creator id into seekr options.
-
-```{r}
-options(sk.myid = crid)
-```
-
-
-### Get and set programme and project info
-
-Usually, the project on FAIRDOMHub will be created interactively by the programme admin. First, we will check the existence of our demo project `r pini$p$name`on the FAIRDOMHub. The project name might be just the name, without prefix a layer prefix `\_p\_`. The function skExists sets the "sk.pid" option to project id. If the project is not found, it sets "sk.pid" to zero.
-
-Functions of seekr package that communicate with the FAIRDOMHub automatically store the resulting layer ids in the seekr part of options.
-
-Let us check. First we have to set/check the programme (pISA-tree) we want to use. Function skExists will check and set the programme id option ("sk.prid")
-```{r}
-options("sk.prid")
-skExists("programme","pISA-tree")
-options("sk.prid")
-```
-
-
-
-```{r}
-found <- skExists("projects", pini$p$name)
-found
-if(!found) found <- skExists("projects", gsub("_p_", "", pini$p$name))
-if(found) {
-pinfo <- skFindTitle("projects", options("sk.pid"))
-cat("Project found:", pinfo$title, "\n")
-} else {
-# create project
-pinfo <- skCreate("projects", meta = pini$p$meta)
-}
-# project identification number
-pid <- pinfo$id
-# project name
-pname <-  pinfo["title"]
-pname
-pini$p$name == pname
-#
-```
-The local project name and the name on the cloud match. On the FAIRDOMHub, project components have identification numbers. Our project has the identification number `r pid`:
-
-```{r}
-(pid <- getOption("sk.pid"))
-```
-Project id is part of the path to the project on the cloud:
-
-```{r}
-skRead("projects",pid)$url
-```
-
-For demonstration purposes we will change investigation name into unique name by appending current date and time to the original name.
-
-```{r}
-if(FALSE){
-pini$I$name
-pini$I$name <- paste(pini$p$name,  Sys.time())
-pini$I$meta[1,]$Value <- pini$I$name
-pini$I$meta[1:3,]
-}
-```
 

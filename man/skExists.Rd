@@ -27,7 +27,7 @@ Check if component exists within the layer.
 }
 \note{
 Check if named layer (.e.g. assay) exists in the parent layer.
-    Parent layer is usually just one above (e.g. study where the assay 
+    Parent layer is usually just one above (e.g. study where the assay
     is supposed to reside) but can be any above.
 }
 \examples{

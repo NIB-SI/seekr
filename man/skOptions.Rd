@@ -44,12 +44,12 @@ Function options() is used to store server location,
   \item sk.pid:  project id,
   \item sk.iid:  investigation id,
   \item sk.sid:  study id,
-  \item sk.aid:  assay id. 
+  \item sk.aid:  assay id.
     }
 }
 \examples{
 \dontrun{
-options(sk.myid=368)
+options(sk.myid=368, sk.pid=166, sk.usr="Username")
 skOptions()
 skOptions("id")
 skOptions(hide=NULL)
