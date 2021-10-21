@@ -169,7 +169,7 @@ skOptions <- function(end="", start="sk.", hide="sk.pwd"){
 #'
 #' @param all logical. Reset all options (including user and server related).
 #' @export
-#' @seealso \code{\link{skOptions}
+#' @seealso \code{\link{skOptions}}
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
@@ -475,7 +475,6 @@ skRead <- function(type, id,
 #' }
 skList <- function(type,
                    uri=options("sk.url"), ... ){
-  if(missing(type)) stop('Argument "type" is missing, with no default') else
   skGet( type=type, uri = uri, ...)
   }
 @
@@ -483,6 +482,7 @@ skList <- function(type,
 <<skListp>>=
 #' List of all objects of the specified type within the project.
 #'
+#' @param class Type of parent layer (e.g. "projects").
 #' @param type Type of information (e.g. "person").
 #' @param pid Id of a project giving the scope of the list.
 #' @param uri Repository base address (URI).
@@ -503,9 +503,8 @@ skList <- function(type,
 #' skListp("inv","assays")
 #' skListp("proj", "inv")
 #' }
-skListp <- function(class=projects, type, pid=options("sk.pid"),
+skListp <- function(class=projects, type, pid=getOption("sk.pid"),
                    uri=options("sk.url"), ... ){
-  if(missing(type)) stop('Argument "type" is missing, with no default') else {
   class <- expand(class)
   type <- expand(type)
   pr <- skRead( class, pid, uri, content=TRUE, ... )
@@ -513,7 +512,6 @@ skListp <- function(class=projects, type, pid=options("sk.pid"),
   ids <- sapply(data, function(x) x$id)
   if(length(ids) >0) lst <- data.frame(t(sapply(ids, function(x) skFindTitle(type,x)))) else
   lst <- data.frame(id=0,type=type,title=NA)
-  }
   lst[,"id"] <- as.numeric(lst[,"id"])
   return(lst)
   }
@@ -834,6 +832,7 @@ skExistsa <- function(type, title, verbose=FALSE) {
 #' 'proj' for 'projects', ...).
 #' @param title Character string with the identifier
 #'     of the component (title part).
+#' @param pid numeric or character. Parent component id. Note: might be not needed.
 #' @param verbose logical, if TRUE, details are printed.
 #' @return logical value indicating whether the component named by
 #'      argument title exists.
@@ -848,7 +847,7 @@ skExistsa <- function(type, title, verbose=FALSE) {
 #' skExistsp("investigations","_I_Test", verbose=TRUE)
 #' skExistsp("pe", "Guest")
 #' }
-skExistsp <- function(type, title, pid=options("sk.pid"), verbose=FALSE) {
+skExistsp <- function(type, title, pid=getOption("sk.pid"), verbose=FALSE) {
     type <- expand(type)
     obj <- skListp(type,pid)
     ind <- pmatch(title, obj$title)
@@ -1819,24 +1818,24 @@ skUpload <- function( object, file){
 }
 @
 
-<<skDoNotUpload>>
+<<skDoNotUpload,purl=FALSE>>=
 #' Decide if the layer should not be uploaded.
 #'
 #' Check pISA-tree branch metadata files for the "Upload to FAIRDOMHub" key
 #'    and prepare ignore entries for the sub-branches
 #'    that should not be uploaded.
-#' @root character string. Directory, pointing to the branch
+#'
+#' @param root character string. Directory, pointing to the branch
 #'     of pISA-tree to be checked.
 #'     Default is the investigation of current assay.
-#' @exclude.nokey logical value. If TRUE, the layer will be ignored
+#' @param exclude.nokey logical value. If TRUE, the layer will be ignored
 #'     if the "Upload to FAIRDOMHub" is not present.
-#' @verbose logical. Shold print progress details?
-#' @quiet logical. Should print final report?
-#' @recursive logical. Should the listing recurse into directories?
+#' @param verbose logical. Shold print progress details?
+#' @param quiet logical. Should print final report?
+#' @param recursive logical. Should the listing recurse into directories?
 #' @value A character vector with patterns of directories to
 #'     be completely ignored for upload (including subdirectories).
 #' @note This function is primarily used by the function skFilesToUpload.
-#'
 #' @export
 #' @keywords pisa, seekr
 #' @seealso \code{\link{skFilesToUpload}}
@@ -1868,25 +1867,25 @@ if(!quiet) cat("Ignored pISA layers:", length(ignore),"/",mlength, "\n")
 }
 @
 
-<<skIgnoreBlankReadme>>
+<<skIgnoreBlankReadme,purl=FALSE>>=
 #' Decide which README.MD files should not be uploaded.
 #'
-#' Check pISA-tree branch if README.MD file holds useful information
-#'    and prepare ignore entries for the files that have
-#'    just the header line.
-#' @root character string. Directory, pointing to the branch
+#' @param root character string. Directory, pointing to the branch
 #'     of pISA-tree to be checked.
 #'     Default is the investigation of current assay.
-#' @exclude.nokey logical value. If TRUE, the layer will be ignored
+#' @param exclude.nokey logical value. If TRUE, the layer will be ignored
 #'     if the "Upload to FAIRDOMHub" is not present.
-#' @exclude.md logical value. If TRUE, the file will be ignored
+#' @param exclude.md logical value. If TRUE, the file will be ignored
 #'     if it contains just the header line.
-#' @verbose logical. Shold print progress details?
-#' @quiet logical. Should print final report?
-#' @recursive logical. Should the listing recurse into directories?
+#' @param verbose logical. Shold print progress details?
+#' @param quiet logical. Should print final report?
+#' @param recursive logical. Should the listing recurse into directories?
 #' @value A character vector with patterns of files to
 #'     be completely ignored for upload.
 #' @note This function is primarily used by the function skFilesToUpload.
+#' Check pISA-tree branch if README.MD file holds useful information
+#'    and prepare ignore entries for the files that have
+#'    just a header line.
 #' @export
 #' @keywords pisa, seekr
 #' @seealso \code{\link{skFilesToUpload}}
@@ -1922,15 +1921,17 @@ for(fn in mdir) {
 <<skFilesToUpload>>=
 #' Prepare the list of files for upload
 #'
-#' @root character string. Directory, pointing to the branch
+#' @param root character string. Directory, pointing to the branch
 #'     of pISA-tree to be checked.
 #'     Default is the investigation of current assay.
-#' @exclude.nokey
-#' @exclude.md logical value. If TRUE, the file will be ignored
+#' @param exclude.nokey logical value. If TRUE, the layer will be ignored
+#'     if the "Upload to FAIRDOMHub" is not present.
+#' @param exclude.md logical value. If TRUE, the file will be ignored
 #'     if it contains just the header line.
-#' @verbose logical. Shold print progress details?
-#' @quiet logical. Should print final report?
-#' @recursive logical. Should the listing recurse into directories?
+#' @param verbose logical. Shold print progress details?
+#' @param quiet logical. Should print final report?
+#' @param skignore sharacter. FIle name or path to seekignore file.
+#' @param recursive logical. Should the listing recurse into directories?
 #' @value A character vector with names of files to be uploaded.
 #' @note Function `skFilesToUpload` will first create a list
 #' of files in root directory. Then, it will read the seekignore.txt
@@ -1939,7 +1940,7 @@ for(fn in mdir) {
 #' In addition, seekignre list will be appended with the list of empty
 #' README.MD files that might clutter the FAIRDOMHub list of files.
 #' Then it will filter it according to declarations in the combined
-#' seekignore pattern list. 
+#' seekignore pattern list.
 #' @export
 #' @keywords pisa, seekr
 #' @seealso \code{\link{skIgnoreBlankReadme}}, \code{\link{skDoNotUpload}}
@@ -1954,7 +1955,111 @@ for(fn in mdir) {
 #' skFilesToUpload(skignore=seekignore)
 #' skFilesToUpload(file.path(.iroot),skignore=NULL)
 #' }
+#'
 skFilesToUpload <- function(root="../..", exclude.nokey=FALSE, exclude.md=TRUE, verbose=TRUE, quiet=FALSE, skignore=file.path(root,"seekignore.txt"), recursive=TRUE){
+##!##################################################################
+##!# FUNCTIONS
+##!#
+##!##!<<skDoNotUpload>>=
+##!#' Decide if the layer should not be uploaded.
+##!#'
+##!#' Check pISA-tree branch metadata files for the "Upload to FAIRDOMHub" key
+##!#'    and prepare ignore entries for the sub-branches
+##!#'    that should not be uploaded.
+##!#'
+##!#' @param root character string. Directory, pointing to the branch
+##!#'     of pISA-tree to be checked.
+##!#'     Default is the investigation of current assay.
+##!#' @param exclude.nokey logical value. If TRUE, the layer will be ignored
+##!#'     if the "Upload to FAIRDOMHub" is not present.
+##!#' @param verbose logical. Shold print progress details?
+##!#' @param quiet logical. Should print final report?
+##!#' @param recursive logical. Should the listing recurse into directories?
+##!#' @value A character vector with patterns of directories to
+##!#'     be completely ignored for upload (including subdirectories).
+##!#' @note This function is primarily used by the function skFilesToUpload.
+##!#' @export
+##!#' @keywords pisa, seekr
+##!#' @seealso \code{\link{skFilesToUpload}}
+##!#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+##!#' @examples
+##!#' \dontrun{
+##!#'
+##!#' proot <- "../../.."
+##!#' skDoNotUpload(proot)
+##!#' skDoNotUpload(proot,verbose=FALSE, quiet=TRUE)
+##!#' }
+skDoNotUpload <- function(root = "../.." ,exclude.nokey=FALSE, verbose=TRUE, quiet=FALSE, recursive=TRUE){
+#
+mdir <- dir(root,pattern="*_METADATA.TXT", recursive=recursive)
+mlength <- length(mdir)
+ignore <- NULL
+for(fn in mdir) {
+#fn <- mdir[2]
+    mdata <- read.table(file.path(root,fn), sep="\t",header=TRUE)
+    select <- mdata[,1]=="Upload to FAIRDOMHub:"
+    value <- substr(mdata[select,2][1],1,1)
+    if(  value %in% c("n", "N")  | (is.na(value)& exclude.nokey)  ) {
+     ignore <- c(ignore, dirname(fn))
+    if(verbose & !quiet) cat("Ignoring pISA layer:", dirname(fn),"\n")
+    }
+  }
+if(!quiet) cat("Ignored pISA layers:", length(ignore),"/",mlength, "\n")
+  return(sort(ignore))
+}
+##!##!@
+##!
+##!##!<<skIgnoreBlankReadme>>=
+##!#' Decide which README.MD files should not be uploaded.
+##!#'
+##!#' @param root character string. Directory, pointing to the branch
+##!#'     of pISA-tree to be checked.
+##!#'     Default is the investigation of current assay.
+##!#' @param exclude.nokey logical value. If TRUE, the layer will be ignored
+##!#'     if the "Upload to FAIRDOMHub" is not present.
+##!#' @param exclude.md logical value. If TRUE, the file will be ignored
+##!#'     if it contains just the header line.
+##!#' @param verbose logical. Shold print progress details?
+##!#' @param quiet logical. Should print final report?
+##!#' @param recursive logical. Should the listing recurse into directories?
+##!#' @value A character vector with patterns of files to
+##!#'     be completely ignored for upload.
+##!#' @note This function is primarily used by the function skFilesToUpload.
+##!#' Check pISA-tree branch if README.MD file holds useful information
+##!#'    and prepare ignore entries for the files that have
+##!#'    just a header line.
+##!#' @export
+##!#' @keywords pisa, seekr
+##!#' @seealso \code{\link{skFilesToUpload}}
+##!#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+##!#' @examples
+##!#' \dontrun{
+##!#' proot <- "../../.."
+##!#' skIgnoreBlankReadme("../../..")
+##!#' skIgnoreBlankReadme("../../..",exclude.empty=FALSE)
+##!#' skIgnoreBlankReadme("../../..", verbose=FALSE,
+##!#' quiet=TRUE, recursive=FALSE)
+##!#' }
+skIgnoreBlankReadme <- function(root = "../.." , exclude.md=TRUE,
+      verbose=TRUE, quiet=FALSE, recursive=TRUE){
+#
+mdir <- dir(root,pattern="README.MD", recursive=recursive)
+#print(mdir)
+ignore <- NULL
+if(exclude.md){
+for(fn in mdir) {
+    mdata <- scan(file.path(root,fn),"character",sep="\n",quiet=TRUE)
+    if(  length(mdata)<2  ) {
+     ignore <- c(ignore, fn)
+    } else      if(verbose) cat("Keep .md file:",fn,"\n")
+  }
+  }
+  if(!quiet) cat("Ignored README.MD files:",length(ignore),"/",length(mdir),"\n")
+  return(ignore)
+}
+##!@
+####################################################################
+#
 if(length(skignore)==1 ){
 if(file.exists(skignore)) seekignore <- readLines(skignore)
     }

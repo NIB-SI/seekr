@@ -21,7 +21,7 @@ skOptions()
 }
 }
 \seealso{
-
+\code{\link{skOptions}}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

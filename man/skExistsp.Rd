@@ -4,7 +4,7 @@
 \alias{skExistsp}
 \title{Check if component exist within the project.}
 \usage{
-skExistsp(type, title, pid = options("sk.pid"), verbose = FALSE)
+skExistsp(type, title, pid = getOption("sk.pid"), verbose = FALSE)
 }
 \arguments{
 \item{type}{Component type (possibly shortened e.g. 'pe' for 'people',
@@ -12,6 +12,8 @@ skExistsp(type, title, pid = options("sk.pid"), verbose = FALSE)
 
 \item{title}{Character string with the identifier
 of the component (title part).}
+
+\item{pid}{numeric or character. Parent component id. Note: might be not needed.}
 
 \item{verbose}{logical, if TRUE, details are printed.}
 }

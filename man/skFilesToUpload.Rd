@@ -14,6 +14,25 @@ skFilesToUpload(
   recursive = TRUE
 )
 }
+\arguments{
+\item{root}{character string. Directory, pointing to the branch
+of pISA-tree to be checked.
+Default is the investigation of current assay.}
+
+\item{exclude.nokey}{logical value. If TRUE, the layer will be ignored
+if the "Upload to FAIRDOMHub" is not present.}
+
+\item{exclude.md}{logical value. If TRUE, the file will be ignored
+if it contains just the header line.}
+
+\item{verbose}{logical. Shold print progress details?}
+
+\item{quiet}{logical. Should print final report?}
+
+\item{skignore}{sharacter. FIle name or path to seekignore file.}
+
+\item{recursive}{logical. Should the listing recurse into directories?}
+}
 \description{
 Prepare the list of files for upload
 }
@@ -37,6 +56,7 @@ seekignore <- c("# ignore patterns","*.zip","*.txt")
 skFilesToUpload(skignore=seekignore)
 skFilesToUpload(file.path(.iroot),skignore=NULL)
 }
+
 }
 \seealso{
 \code{\link{skIgnoreBlankReadme}}, \code{\link{skDoNotUpload}}

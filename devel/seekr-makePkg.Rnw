@@ -148,7 +148,9 @@ usethis::use_package('RCurl')
 usethis::use_package('httr')
 usethis::use_package('jsonlite')
 usethis::use_package('pisar')
+usethis::use_package('utils')
 usethis::use_build_ignore(c("devel"))
+
 @
 \clearpage
 \subsection{Check}

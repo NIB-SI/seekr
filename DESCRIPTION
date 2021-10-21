@@ -18,7 +18,8 @@ Imports:
     RCurl,
     httr,
     jsonlite,
-    pisar
+    pisar,
+    utils
 VignetteBuilder: knitr
 Suggests: 
     rmarkdown

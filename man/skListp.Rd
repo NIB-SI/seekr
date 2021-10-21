@@ -7,12 +7,14 @@
 skListp(
   class = projects,
   type,
-  pid = options("sk.pid"),
+  pid = getOption("sk.pid"),
   uri = options("sk.url"),
   ...
 )
 }
 \arguments{
+\item{class}{Type of parent layer (e.g. "projects").}
+
 \item{type}{Type of information (e.g. "person").}
 
 \item{pid}{Id of a project giving the scope of the list.}
