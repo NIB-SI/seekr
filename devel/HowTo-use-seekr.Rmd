@@ -213,7 +213,7 @@ Package pisar has a method to nicely print metadata.
  im
 ```
 
-The last touched object id is stored in the appropriate seekr options. 
+The last touched object id is stored in the appropriate seekr options.
 
 ```{r}
 print.simple.list(skOptions())
@@ -250,58 +250,85 @@ for(sname in snames) {
 }
 ```
 
-Get the directory listing of all studies in the parent investigation
-and exclude files listed in file `seekignore.txt`. In our case, seekignore file is in the investigation layer.
+###!Get the directory listing of all studies in the parent investigation
+###!and exclude files listed in file `seekignore.txt`. In our case, seekignore file is in the investigation layer.
+###!
+###!```{r}
+###!# Get SEEK ignore file
+###!ignore_file <- file.path(.iroot,"seekignore.txt")
+###!if(file.exists(ignore_file))
+###!seekignore <- read.table(ignore_file)[,1] else seekignore <- ""
+###!#seekignore <- c("_A_Work-R")
+###!seekignore
+###!
+###!# Create directory listing
+###!
+###!dirs <-  dir(.iroot
+###!             , full.names = FALSE
+###!             , recursive=TRUE
+###!             , include.dirs=FALSE)
+###!head(dirs,10)
+###!length(dirs)
+###!
+###!# Ignore files with patterns in seekignore file
+###!dirlength <- length(dirs)
+###!for(pat in toupper(seekignore)){
+###!  ldir <- length(dirs)
+###!  at <- gsub("\\.","\\\\.",pat)
+###!  dirs <- dirs[!grepl(pat,toupper(dirs))]
+###!  cat("Ignoring" , ldir-length(dirs), "files [",pat," ]\n")
+###!}
+###!cat("Files to upload:", length(dirs), "/",dirlength)
+###!
+###!# Keep only files in Assays
+###!
+###!head(dirs)
+###!
+###!dirs <- dirs[grepl("/_A_", dirs)]
+###!
+###!head(dirs)
+###!tail(dirs)
+###!dirs
+###!cat("Files to upload:", length(dirs), "/",dirlength,"\n")
+###!```
+###!
+###!```{r eval=FALSE, include=FALSE, echo=FALSE}
+###!if(FALSE){
+###!dirs=c("xx/other/","bla/other-file.txt")
+###!pat="other/"
+###!dirs[!grepl(toupper(pat),toupper(dirs),fixed=TRUE)]
+###!grep(toupper(pat),toupper(dirs),fixed=TRUE, value=TRUE, invert=TRUE)
+###!glob2rx(pat,trim.head=TRUE,trim.tail=TRUE)
+###!}
+###!```
+
+## Prepare list of files
+
+The most important task is to prepare the list of files to be uploaded. Typically one will upload files in one investigation, usually with all related branches (studies and assays). The metadata key "Upload to FAIRDOMHub" (Yes/No) controls if the layer (together with all subordinated layers) should be included or ignored by the upload process. In addition,  specific files or paths can be declared as ignored by the upload process.
+File `seekignore.txt` in the investigation layer contains file names, directory names or name patterns that are used to filter and exclude the list of files to be uploaded. An example of the seekignore file is here:
 
 ```{r}
-# Get SEEK ignore file
-ignore_file <- file.path(.iroot,"seekignore.txt")
-if(file.exists(ignore_file))
-seekignore <- read.table(ignore_file)[,1] else seekignore <- ""
-#seekignore <- c("_A_Work-R")
+seekignore <- readLines(file.path(.iroot, "seekignore.txt"))
 seekignore
-
-# Create directory listing
-
-dirs <-  dir(.iroot
-             , full.names = FALSE
-             , recursive=TRUE
-             , include.dirs=FALSE)
-head(dirs,10)
-length(dirs)
-
-# Ignore files with patterns in seekignore file
-dirlength <- length(dirs)
-for(pat in toupper(seekignore)){
-  ldir <- length(dirs)
-  at <- gsub("\\.","\\\\.",pat)
-  dirs <- dirs[!grepl(pat,toupper(dirs))]
-  cat("Ignoring" , ldir-length(dirs), "files [",pat," ]\n")
-}
-cat("Files to upload:", length(dirs), "/",dirlength)
-
-# Keep only files in Assays
-
-head(dirs)
-
-dirs <- dirs[grepl("/_A_", dirs)]
-
-head(dirs)
-tail(dirs)
-dirs
-cat("Files to upload:", length(dirs), "/",dirlength,"\n")
 ```
 
-```{r eval=FALSE, include=FALSE, echo=FALSE}
-if(FALSE){
-dirs=c("xx/other/","bla/other-file.txt")
-pat="other/"
-dirs[!grepl(toupper(pat),toupper(dirs),fixed=TRUE)]
-grep(toupper(pat),toupper(dirs),fixed=TRUE, value=TRUE, invert=TRUE)
-glob2rx(pat,trim.head=TRUE,trim.tail=TRUE)
-}
+Lines three and four have slash (/) at the end to ignore directories. Line five and six will prevent upload of batch files and files with specific name (in any directory). One can add other patterns into the seekignore.txt file before running the code below.
+
+Function `skFilesToUpload` will first create a list of files in root directory. Then, it will read the seekignore.txt and extend it with patterns of layers that should not be uploaded according to metadata key "Upload to FAIRDOMHub".
+In addition, seekignre list will be appended with the list of empty README.MD files that might clutter the FAIRDOMHub list of files.
+Then it will filter it according to declarations in the combined seekignore pattern list.
+
+```{r}
+forUpload <- skFilesToUpload( root = pini$I$root)
 ```
 
+Final list of files for upload is
+
+```{r}
+head(forUpload)
+tail(forUpload)
+dirs <- forUpload
+```
 
 
 
@@ -328,20 +355,24 @@ ind <- 1:length(dirs)
 Loop through list of files and upload
 
 ```{r}
+ind <- 1:3
 for(i in ind){
-  i <- 1
   x <- dirs[i]
  cat("\n\n|", rep("-",50*i/nind-1),">", rep(" ",50*(nind-i)/nind),"| ", i, "/", nind, "\n", x ,"\n\n", rep("-",50),"\n", sep="")
 sname <- gsub("^.*(_S_[^/]*)/_A.*","\\1",x)
+if(sname==x) sname <- "" else sname <- sname
 aname <- gsub("^.*/(_A_[^/]*)/.*","\\1",x)
+if(aname==x) aname <- "" else aname <- aname
 fname <- gsub("^.*/(_[AS]_[^/]*)/(.*)","\\2",x)
 .sname <- sname
 .aname <- aname
-.aname
+print(c(.sname, .aname, fname))
 #
 # Check if the study exists, create if not
 #
+if(sname!=""){
 # Find Study id
+
 sid <- skFindId("studies",sname)["id"]
 sid
 sresp <- skRead("studies",sid)
@@ -355,6 +386,7 @@ if(sid==0) { sresp <- skCreate("studies",meta)
   print(sresp)
   sid <- sresp$id
   }
+
 sid
 #skRead("studies",sid)
 skIni(pid=pid,iid=iid,sid=sid)
@@ -385,7 +417,20 @@ print(aresp)
 aid <- aresp$id
 }
 aid
-skIni(pid=pid,iid=iid,sid=sid,aid=aid)
+  } else {
+  sid <- ""
+  aid <- ""
+  }
+  skSetOption("studies", sid)
+  skSetOption("assays",aid)
+#skIni(pid=pid,iid=iid,sid=sid,aid=aid)
+}
+print.simple.list(skOptions())
+}
+
+```
+```{r}
+
 #
 # Upload file
 #

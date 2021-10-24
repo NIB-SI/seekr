@@ -133,17 +133,17 @@ Use options() to declare url, your credentials and pISA-tree identifcations (see
 #' @note Function options() is used to store server location,
 #'        user credentials and pISA layer identifications.
 #'        Options that can be declared:
-#'   \itemize{
-#'   \item sk.url:  server location,
-#'   \item sk.usr:  username,
-#'   \item sk.pwd:  password,
-#'   \item sk.myid:  user id on server,
-#'   \item sk.instid:  user's institution id,
-#'   \item sk.prid:  program id,
-#'   \item sk.pid:  project id,
-#'   \item sk.iid:  investigation id,
-#'   \item sk.sid:  study id,
-#'   \item sk.aid:  assay id.
+#'   \describe{
+#'   \item {sk.url:} {server location}
+#'   \item {sk.usr:} {username}
+#'   \item {sk.pwd:} {password}
+#'   \item {sk.myid:} {user id on server}
+#'   \item {sk.instid:} {user's institution id}
+#'   \item {sk.prid:} {program id}
+#'   \item {sk.pid:} {project id}
+#'   \item {sk.iid:} {investigation id}
+#'   \item {sk.sid:} {study id}
+#'   \item {sk.aid:} {assay id}
 #'     }
 #' @export
 #' @seealso \code{\link{startsWith}, \link{endsWith}}
@@ -895,7 +895,7 @@ skExists <- function(type, title, ptype, pid, verbose=FALSE) {
 }
 @
 
-<<skSetOptions>>=
+<<skSetOption>>=
 #' Sets seekr option according to the type.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -1661,7 +1661,7 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
       , data_files = {
         s$data$attributes$title  <-  paste0("/",file)
         s$data$attributes$description  <-  ""
-        s$data$attributes$tags  <- c("data","demo")
+        s$data$attributes$tags  <- c("data")
         s$data$attributes$content_blobs$original_filename <- paste0("/",file)
         s$data$attributes$content_blobs$content_type <- contentType(file)
         s$data$attributes$policy$permissions$resource$id <- pid
