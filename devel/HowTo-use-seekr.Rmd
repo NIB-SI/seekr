@@ -68,7 +68,7 @@ getMeta(.pmeta,"Description")
 Restart the log file.
 
 ```{r}
-skLog("Starting upload for demo project", append=FALSE)
+skLog("Starting upload for demo project", append=!FALSE)
 ```
 
 Initialize connection with SEEK cloud service. Cloud service url and project creator name and SEEK service id are expected in the project metadata file. They should be stored in options().
@@ -95,6 +95,7 @@ myid <- crid
 myid
 ```
 
+Store creator id in options.
 
 ```{r}
 options(sk.myid = crid)
@@ -113,7 +114,14 @@ skContent(inst)$attributes$title
 ```
 
 
-### Get project and Investigation ids:
+### Get programme, project and Investigation ids:
+
+On FAIRDOMHub projects are parts of programmes. Find the id of programme
+connected to pISA-tree:
+
+```{r}
+skFindId("prog","pISA-tree")
+```
 
 Usually, the project on FAIRDOMHub will be created interactively by the programme admin. First, we will check the existence of our demo project `r pini$p$name`on the FAIRDOMHub.
 
@@ -162,31 +170,34 @@ prid
 More elegant way might be a call to skRelationships.
 
 ```{r}
-skRelationships("proj",pid,"program")
+skRelated("proj",pid,"program")
 ```
 
 The first line lists the investigated object info and then list of zero or more related objects of the type specified by the third argument.
 
-If the layer (investigation) does not exist, the function skFindId returns zero in the place of 'id'. There is a convenience functio \fct{skExists} that checks existence of a layer of object.
+If the layer (investigation) does not exist, the function skFindId returns zero in the place of 'id'. There is a convenience function \fct{skExists} that checks existence of a layer of object.
 
 ```{r}
 iid
 pini$I$name
-skExists("inv",pini$I$name, verbose=TRUE)
+skExists("inv",pini$I$name,  "proj", verbose=TRUE)
 ```
 If it is so, one can create the appropriate layer. Created object id is stored in options or can be found by a call to function \fct{skFindId}.
 
 ```{r eval=(iid == 0)}
-if( !skExists("inv",pini$I$name)) skCreate("investigations", meta=.imeta)
+if( !skExists("inv", pini$I$name , "proj" )) 
+     skCreate("investigations", meta=.imeta)
 skFindId("investigations", pini$I$name)
 options("sk.iid")
+skExists("inv", pini$I$name,  "proj", verbose=TRUE)
+skRelated("inv", select="proj", verbose=TRUE)
 ```
 
 
 So far,  in SEEK files can be associated only to assays. As a workaround, metadata are recorded in the description field of attributes.. This is how the metadata can be retrieved:
 
 ```{r}
-r <- skRead("investigations", options("sk.iid"))
+r <- skRead("investigations", getOption("sk.iid"))
 r <- skContent(r)
 names(r$attributes)
 (desc <- r$attributes$description)
@@ -219,12 +230,12 @@ The last touched object id is stored in the appropriate seekr options.
 print.simple.list(skOptions())
 ```
 
-If you wants to be sure, you can update the seekr  seekr options.
+If you wants to be sure, you can update the seekr options.
 
 ```{r}
-options(prid)
-options(pid)
-options(iid)
+options("sk.prid")
+options("sk.pid")
+options("sk.iid")
 skOptions()
 ```
 

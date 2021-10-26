@@ -194,6 +194,7 @@ skReset <- function(all=FALSE){
     options(sk.url = NULL)
     }
 }
+
 @
 
 
@@ -299,7 +300,7 @@ invisible(x)
 }
 @
 
-<<expand>>=
+<<skExpand>>=
 #' Expand shortened type name into full name.
 #'
 #' @param type Component type (possibly shortened e.g. 'pe' for 'people',
@@ -308,19 +309,19 @@ invisible(x)
 #' @export
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
-#' expand("pe")
-#' expand("proj")
-#' expand("inv")
-#' expand("st")
-#' expand("a")
-#' expand(c("a","inv"))
-#' # expand("p")
-#' # Error in expand("p") : No such type or duplicate entry for 'p'
+#' skExpand("pe")
+#' skExpand("proj")
+#' skExpand("inv")
+#' skExpand("st")
+#' skExpand("a")
+#' skExpand(c("a","inv"))
+#' # skExpand("p")
+#' # Error in skExpand("p") : No such type or duplicate entry for 'p'
 #'
-expand <- function(type){
-           types <- c("assays", "collections", "data_files", "documents", "events", "institutions", "investigations", "models", "organisms", "people", "presentations", "programmes", "projects", "publications", "sample_types", "sops", "studies", "workflows")
+skExpand <- function(type){
+           types <- c("assays", "collections", "data_files", "documents", "events", "institutions", "investigations", "models", "organisms", "people", "presentations", "programmes", "projects", "publications", "sample_types", "sops", "studies", "workflows","creator")
      tip <- types[pmatch(type,types)]
-     if(any(is.na(tip))) stop("No such type or duplicate entry for: ", paste(type[!is.na(tip)],collaps=", "))
+     if(any(is.na(tip))) tip <- type
      tip
      }
 
@@ -440,6 +441,8 @@ skGet <- function(type, id,
 #' }
 skRead <- function(type, id,
                    uri=options("sk.url"), content=FALSE, ... ){
+  type <- skExpand(type)
+  if(missing(id)) id <- skGetOption(type) 
   r <- skGet( type=type, id=id, uri = uri, ...)
   if(content) r <- skContent(r)
   return(r)
@@ -505,8 +508,8 @@ skList <- function(type,
 #' }
 skListp <- function(class=projects, type, pid=getOption("sk.pid"),
                    uri=options("sk.url"), ... ){
-  class <- expand(class)
-  type <- expand(type)
+  class <- skExpand(class)
+  type <- skExpand(type)
   pr <- skRead( class, pid, uri, content=TRUE, ... )
   data <- pr$relationships[[type]]$data
   ids <- sapply(data, function(x) x$id)
@@ -521,7 +524,8 @@ skListp <- function(class=projects, type, pid=getOption("sk.pid"),
 #' List of relationships within an object.
 #'
 #' @param type Object type (e.g. "project").
-#' @param id Id of the object giving the scope of the list.
+#' @param id Id of the object giving the scope of the list. 
+#'     If missing, appropriate part of skOptions is used.
 #' @param select Vector of character strings with object types of interest.
 #' @param uri Repository base address (URI).
 #' @param ... further arguments.
@@ -549,14 +553,15 @@ skRelated <- function( type, id, select=NULL,
         uri=options("sk.url"), ... ){
     #r <- skRead("projects",100,content=TRUE)
     #r <- skRead("programmes",26,content=TRUE) # LARGE !!!
-    type <- expand(type)
+    type <- skExpand(type)
+    if(missing(id)) id <- skGetOption(type)
     id <- unlist(id)
     r <- skRead(type, id , uri, content=TRUE)
     u <- unlist(r$relationships)
     role <- sapply(strsplit(names(u[seq(1,length(u),2)]),"\\."),function(x) x[1])
     u <- matrix(unlist(r$relationships),ncol=2, byrow=TRUE)
     if(!is.null(select)) {
-        select <- expand(select)
+        select <- skExpand(select)
         filter <- u[,2] %in% select
         u <- u[filter,]
         role <- role[filter]
@@ -667,12 +672,11 @@ skSearch <- function(type="data_files", q,
 #' }
 skDelete <- function(type, id,
                    uri=options("sk.url"), ... ){
+  type <- skExpand(type)                 
   bkp <- skRead(type, id)
-  print(bkp)
   if(missing(type)) stop('Argument "type" is missing, with no default')
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
-  print(uri)
   ua <- httr::user_agent("https://github.com/nib-si/seekr")
   skLog("skDelete", uri)
   fht <- system.time(
@@ -681,18 +685,17 @@ skDelete <- function(type, id,
          , ua
          )
   )
-  cat("Status code: delete",resp$status_code,"\n")
+  cat("Status code: Delete",resp$status_code,"\n")
 
   if( resp$status_code < 300) {
   parsed <- skParse(resp)
-  if(!missing(id)) skSetOption( type, parsed$id )
+  if(is.null(parsed$id) ) skSetOption( type, 0 )
   skLog( resp$status_code, round(fht["elapsed"],2), parsed$url)
   } else {
   parsed <- resp$status_code
   skLog( resp$status_code, round(fht["elapsed"],2))
   }
-  print(skRead(type,id))
-  return(bkp)
+  return(skRead(type,id))
 }
 #
 
@@ -779,6 +782,7 @@ skContent <- function(r, node, ...){
 #' tail(projects)
 #' }
 skFindId <- function(type, title){
+     type <- skExpand(type)
      r <- skList(type)
      d <- skContent(r)
      titles <- t(sapply(d,function(x) c(id=x$id, type=x$type, title=x$attributes$title)))
@@ -815,7 +819,7 @@ skFindId <- function(type, title){
 #' skExistsa("pe", "Guest")
 #' }
 skExistsa <- function(type, title, verbose=FALSE) {
-    type <- expand(type)
+    type <- skExpand(type)
     r <- skFindId(type, title)
     if(verbose) print(r)
     ok <- (as.numeric(r["id"]) > 0)
@@ -848,7 +852,7 @@ skExistsa <- function(type, title, verbose=FALSE) {
 #' skExistsp("pe", "Guest")
 #' }
 skExistsp <- function(type, title, pid=getOption("sk.pid"), verbose=FALSE) {
-    type <- expand(type)
+    type <- skExpand(type)
     obj <- skListp(type,pid)
     ind <- pmatch(title, obj$title)
     if(verbose) print(obj[ind,])
@@ -866,7 +870,8 @@ skExistsp <- function(type, title, pid=getOption("sk.pid"), verbose=FALSE) {
 #' 'proj' for 'projects', ...).
 #' @param title Character string,  component name.
 #' @param ptype Parent component type (possibly shortened).
-#' @param pid Parent component id.
+#' @param pid Parent component id. If missing, appropriate part 
+#'  skOptions is used.
 #' @param verbose logical, if TRUE, details are printed.
 #' @return logical value indicating whether the component named by
 #'      argument title exists.
@@ -884,15 +889,18 @@ skExistsp <- function(type, title, pid=getOption("sk.pid"), verbose=FALSE) {
 #' skExists("investigations","_I_Test", "proj", options("sk.pid"),TRUE)
 #' skExists("pe", "Guest", "proj", options("sk.pid"))
 #' }
-skExists <- function(type, title, ptype, pid, verbose=FALSE) {
-    type <- expand(type)
-    ptype <- expand(ptype)
+skExists <- function(type, title, ptype, pid , verbose=FALSE) {
+    type <- skExpand(type)
+    ptype <- skExpand(ptype)
+    if(missing(pid)) pid <- skGetOption(ptype)
     obj <- skRelated(ptype, pid, select=type)
     ind <- pmatch(title, obj[-1,"title"])
     if(verbose) print(obj[ind+1,])
     ok <- !is.na(ind)
     return(ok)
 }
+skExists("people", "Andrej Blejec", "proj", verbose=TRUE)
+
 @
 
 <<skSetOption>>=
@@ -910,14 +918,25 @@ skExists <- function(type, title, ptype, pid, verbose=FALSE) {
 #' skSetOption("people",111)
 #' skSetOption("myid", 368)
 #' skOptions()
-#' skSetOption("bla",1)
+#' skSetOption("bla",1) # can not be set
+#' # Set option sk.aid
+#' skSetOption("assay",1234)
+#' skOptions()
+#' # Delete/reset option sk.aid
+#' skSetOption("assay",NULL)
+#' skOptions()
+#' Get options
+#' skGetOption("myid")
+#' skGetOption("inv")
 #' }
 skSetOption <- function( type, id){
+       type <- skExpand(type)
        types  <-  c(
             url = "sk.url",
             usr = "sk.usr",
             pwd = "sk.pwd",
             myid = "sk.myid",
+            creator = "sk.crid",
             programmes = "sk.prid",
             projects = "sk.pid",
             investigations = "sk.iid",
@@ -927,13 +946,47 @@ skSetOption <- function( type, id){
             institutions = "sk.instid",
             data_files = "sk.fileid"
             )
-            if(!is.na(types[type])) { names(id) = types[type]
+            if(!is.na(types[type])) { 
+                if(!is.null(id)) {names(id) = types[type]
             options(as.list(id))
-            options( types[type] ) }
+            options( types[type] ) } else {
+            x <- list(name=id)
+            names(x) <- types[type]
+            options(x)
+            }
+            }
             #else {
             #warning("No such type: ", type)}
 
 }
+#
+skGetOption <- function( type ){
+       type <- skExpand(type)
+       types  <-  c(
+            url = "sk.url",
+            usr = "sk.usr",
+            pwd = "sk.pwd",
+            myid = "sk.myid",
+            creator = "sk.crid",
+            programmes = "sk.prid",
+            projects = "sk.pid",
+            investigations = "sk.iid",
+            studies = "sk.sid",
+            assays = "sk.aid",
+            people = "sk.ppid",
+            institutions = "sk.instid",
+            data_files = "sk.fileid"
+            )
+            x <- types[type]
+            if(!is.na(x)) {
+            getOption(x)
+            }
+            else {
+            warning("No option for type: ", type)
+            }
+}
+
+
 @
 
 <<skFindTitle>>=
@@ -956,6 +1009,7 @@ skSetOption <- function( type, id){
 #' skFindTitle("people",0)
 #' }
 skFindTitle <- function(type, id){
+      type <- skExpand(type)
      id <- as.vector(id[1])
      r <- skRead(type, id )
      if( class(r)=="integer" && r > 300) {
@@ -976,7 +1030,6 @@ skFindTitle <- function(type, id){
 #' Creates *sk* object with required structure.
 #'
 #' @param type Component type (e.g. 'people', 'projects', ...).
-#' @param meta a data frame with pISA metadata or
 #' a list with minimal information (Title, Description, *ToDo: add fields*).
 #' @return A list with the minimal information structure.
 #' @export
@@ -986,37 +1039,25 @@ skFindTitle <- function(type, id){
 #' @examples
 #' \dontrun{
 #' require(jsonlite)
-#' meta <- list(Title = "Test layer", Description = "Some description")
 #' type <- "projects"
-#' sp <- skSkeleton( type = type
-#'   , meta= meta
-#'   )
+#' sp <- skSkeleton( type = type )
 #' str(sp)
 #' type = "investigations"
-#' si <- skSkeleton( type = type
-#'   , meta= meta
-#'   )
+#' si <- skSkeleton( type = type )
 #' str(si)
 #' type = "studies"
-#' ss <- skSkeleton( type = type
-#'   , meta= meta
-#'   )
+#' ss <- skSkeleton( type = type )
 #' str(ss)
 #' type = "assays"
-#' sa <- skSkeleton( type = type
-#'   , meta= meta
-#'   )
+#' sa <- skSkeleton( type = type )
 #' str(sa)
-#'
 #' type = "data_files"
 #' file =
-#' sdata <- skSkeleton( type = type
-#'   , meta= meta
-#'   )
+#' sdata <- skSkeleton( type = type )
 #' str(sdata)
 #' }
 #'
-skSkeleton <- function (type = "assay", meta){
+skSkeleton <- function (type = "assay" ){
 sj <- switch( type
 , projects =
 '{
@@ -1599,6 +1640,7 @@ contentType <- function(file){
 #' if(interactive()) shell.exec(item_link)
 #' }
 skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
+     type <- skExpand(type)
      myid <- as.character(getOption("sk.myid"))
      prid <- as.character(getOption("sk.prid"))
      pid <-  as.character(getOption("sk.pid"))
@@ -1610,17 +1652,20 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
      instid <- skContent(skRead("people",myid))$relationships$institutions$data[[1]]$id
      options(sk.instid=instid)
      }
-     s <- skSkeleton(type, meta)
+     s <- skSkeleton(type)
 # Common fileds
 
 # Type specific fields
      switch(s$data$type,
      projects = {
+     print(getMeta(meta,"project"))
        s$data$attributes$title  <-  getMeta(meta,"project")
        s$data$attributes$description  <-  pasteMeta(meta)
+  
        s$data$attributes$members <- list(list(person_id = myid,
        institution_id = instid))
        s$data$attributes$default_policy$permissions$resource$id <- myid
+        if(length(prid)==0) stop("No programme id. Set 'sk.prid' in options", prid) else
        s$data$relationships$programmes$data$id <- prid
        s$data$relationships$creators$data$id <- myid
        s$data$relationships$project_administrators$data$id <- myid
@@ -1716,7 +1761,6 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
          )
          )
      parsed <- skParse(resp)
-     print(resp)
      skLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
 # Upload file blob
      if(FALSE && s$data$type %in% c("data_files", "documents")){
@@ -1749,11 +1793,12 @@ skCreate <- function (type = "assays", meta=list(), class="EXP", file="NA.TXT"){
          , parsed$url)
      }
      }
+#     print(str(parsed))
      skSetOption(type, parsed$id)
      return(parsed)
 }
 #skCreate("documents",meta,file=file)
-
+#skCreate("projects", .pmeta)
 @
 
 <<skUpload>>=
