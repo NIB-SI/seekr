@@ -4,7 +4,13 @@
 \alias{skCreate}
 \title{Create pISA layer or *sk* component.}
 \usage{
-skCreate(type = "assays", meta = list(), class = "EXP", file = "NA.TXT")
+skCreate(
+  type = "assays",
+  meta = list(),
+  title = NULL,
+  class = "EXP",
+  file = "NA.TXT"
+)
 }
 \arguments{
 \item{type}{Component type (e.g. 'people', 'projects', ...).}

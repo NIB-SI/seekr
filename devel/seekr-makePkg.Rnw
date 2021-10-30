@@ -163,7 +163,6 @@ miss
 \subsection{Check results}
 <<>>=
 check()
-
 @
 \clearpage
 \subsection{Build a package}
@@ -172,7 +171,6 @@ Build the package
 
 <<build package,eval=purl>>=
 devtools::build(pkgPath,manual=TRUE,quiet=FALSE)
-
 @
 
 

@@ -185,7 +185,7 @@ skExists("inv",pini$I$name,  "proj", verbose=TRUE)
 If it is so, one can create the appropriate layer. Created object id is stored in options or can be found by a call to function \fct{skFindId}.
 
 ```{r eval=(iid == 0)}
-if( !skExists("inv", pini$I$name , "proj" )) 
+if( !skExists("inv", pini$I$name , "proj" ))
      skCreate("investigations", meta=.imeta)
 skFindId("investigations", pini$I$name)
 options("sk.iid")
@@ -259,6 +259,8 @@ for(sname in snames) {
   if(!dir.exists(aspath)) dir.create(aspath)
   #file.copy(file.path(.iroot,sname,"*.*"), aspath)
 }
+asname
+aspath
 ```
 
 ###!Get the directory listing of all studies in the parent investigation

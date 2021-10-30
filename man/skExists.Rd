@@ -14,7 +14,8 @@ skExists(type, title, ptype, pid, verbose = FALSE)
 
 \item{ptype}{Parent component type (possibly shortened).}
 
-\item{pid}{Parent component id.}
+\item{pid}{Parent component id. If missing, appropriate part
+skOptions is used.}
 
 \item{verbose}{logical, if TRUE, details are printed.}
 }
@@ -36,8 +37,11 @@ options(.sk$test)
 skFindId("projects","_p_Demo")
 skOptions()
 skExists("people", "Andrej Blejec", "proj", options("sk.pid"))
+skExists("people", "Andrej Blejec", "proj", verbose=TRUE)
 skExists("investigations","_I_Test", "proj", options("sk.pid"),TRUE)
 skExists("pe", "Guest", "proj", options("sk.pid"))
+ skExists("proj","_p_Demo","progr",26,verbose=TRUE)
+skOptions()
 }
 }
 \author{

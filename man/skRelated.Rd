@@ -9,7 +9,8 @@ skRelated(type, id, select = NULL, uri = options("sk.url"), ...)
 \arguments{
 \item{type}{Object type (e.g. "project").}
 
-\item{id}{Id of the object giving the scope of the list.}
+\item{id}{Id of the object giving the scope of the list.
+If missing, appropriate part of skOptions is used.}
 
 \item{select}{Vector of character strings with object types of interest.}
 

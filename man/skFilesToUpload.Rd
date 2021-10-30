@@ -5,7 +5,7 @@
 \title{Prepare the list of files for upload}
 \usage{
 skFilesToUpload(
-  root = "../..",
+  root,
   exclude.nokey = FALSE,
   exclude.md = TRUE,
   verbose = TRUE,
@@ -16,8 +16,7 @@ skFilesToUpload(
 }
 \arguments{
 \item{root}{character string. Directory, pointing to the branch
-of pISA-tree to be checked.
-Default is the investigation of current assay.}
+of pISA-tree to be checked.}
 
 \item{exclude.nokey}{logical value. If TRUE, the layer will be ignored
 if the "Upload to FAIRDOMHub" is not present.}
@@ -29,7 +28,7 @@ if it contains just the header line.}
 
 \item{quiet}{logical. Should print final report?}
 
-\item{skignore}{sharacter. FIle name or path to seekignore file.}
+\item{skignore}{sharacter. File name or path to seekignore file.}
 
 \item{recursive}{logical. Should the listing recurse into directories?}
 }
@@ -48,7 +47,9 @@ seekignore pattern list.
 }
 \examples{
 \dontrun{
-dirs <- skFilesToUpload()
+skFilesToUpload(.sroot)
+skFilesToUpload(.aroot)
+dirs <- skFilesToUpload(.iroot)
 dirs
 skFilesToUpload(exclude.md=FALSE)
 skFilesToUpload( verbose=FALSE, quiet=TRUE)
