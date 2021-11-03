@@ -212,6 +212,7 @@ skSetOption <- function( type, id){
             people = "sk.ppid",
             institutions = "sk.instid",
             data_files = "sk.fileid",
+            documents = "sk.docid",
             root  = "sk.root"
             )
             if(!is.na(types[type])) {
@@ -269,6 +270,7 @@ skGetOption <- function( type ){
             people = "sk.ppid",
             institutions = "sk.instid",
             data_files = "sk.fileid",
+            documents = "sk.docid",
             root = "sk.root"
             )
             x <- types[type]
@@ -305,6 +307,8 @@ skReset <- function(all=FALSE){
     options(sk.myid = NULL)
     options(sk.ppid = NULL)
     options(sk.root = NULL)
+    options(sk.docid = NULL)
+    options(sk.fileid = NULL) 
     if(all) {
     options(sk.usr = NULL)
     options(sk.pwd = NULL)
@@ -1924,7 +1928,7 @@ skUpload <- function( object, file){
 #' @param file character. File name and path (from the root directory).
 #' @param root character. Root directory.
 #' @note Argument file is usually a result of a function skFilesToUpload
-#'      that sets the option 'root' taht was used.
+#'      that sets the option 'root' that was used.
 #' @export
 #' @keywords pisa
 #' @seealso \code{\link{skFilesToUpload}}, \code{\link{skUpload}}
@@ -1937,21 +1941,19 @@ skUpload <- function( object, file){
 skUploadFile <- function(file, root = skGetOption("root")){
   uplimit <- 3*10^9
 path <- normalizePath(file.path(root))
-path
 description <- paste(basename(dirname(path)),basename(path),sep="/")
 layers <- skSetLayers(file, root)
 meta <- list(
        Title=layers$fname
      , Description=layers$fdesc
      )
-print(meta)
-skFindId("investigations",layers$iname)
-skFindId("studies",layers$sname)
-skFindId("assays",layers$aname)
+#
 ## ToDo
 #if(toupper(fileType(fname)))
-  if(regexpr("METADATA",file)>0) {
-  type <- "documents" } else {type <- "data_files"}
+  ftype <- toupper(c("\\.TXT","\\.xls","\\.csv","\\.tsv"))
+  isreadable <- any(sapply(ftype,function(x) grepl(x,toupper(file))))
+  if(isreadable) {
+  type <- "data_files" } else {type <- "documents"}
 #type <- "documents"
 s <- skCreate(type, meta, file = file)
 if(.testing) print(s)
@@ -1966,6 +1968,75 @@ f <- skUpload(s, file)
 }
 }
 
+@
+
+<<skUploadFiles>>=
+#' Create appropriate layers and upload files.
+#'
+#' Create an object of type 'documents' or 'data_files'
+#' and upload file content as a blob.
+#'
+#' @param files character. Vector of file names with paths
+#'      (from the root directory).
+#' @param root character. Root directory.
+#' @param test logical. If TRUE, original investigation name will be extended
+#'      with the date-time to ensure unique name.
+#' @param append logical. Should log entries be appended to the existing log?
+#' @param invname character. Name that overrides automatic investigation name
+#'    if test is TRUE.
+#' @note Argument files is usually a result of a function skFilesToUpload
+#'      that sets the option 'root' that was used.
+#' @export
+#' @keywords pisa
+#' @seealso \code{\link{skFilesToUpload}}, \code{\link{skUpload}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' skUploadFiles(files)
+#' }
+#'
+skUploadFiles <- function(files, root=skGetOption("root"), test=FALSE, append=TRUE, invname){
+skLog("############################",append=append)
+skLog("Start of upload")
+skLog("############################")
+oldLayers <- list(pname="", iname="", sname="", aname="")
+if(test&missing(invname)) {
+  invname <- paste(skGetLayer("I",normalizePath(root)),Sys.time(),sep=" | ")
+  skLog("############################")
+  skLog("Extended investigation name:",invname)
+  skLog("############################")
+}
+ind <- 1:length(files)
+nind <- length(ind)
+#
+for( i in ind ){
+file <- files[i]
+ cat("|", rep("-",50*i/nind-1),">", rep(" ",50*(nind-i)/nind),"| ", i, "/", nind, "\n", file, "\n", sep="")
+layers <- skSetLayers(file)
+if(test) layers$iname <- invname
+#
+# Investigation
+if(layers$iname!=oldLayers$iname){
+  skCheckAndCreate("investigations", layers)
+}
+# Study
+if(layers$sname!=oldLayers$sname){
+  skCheckAndCreate("studies", layers)
+}
+# Assay
+if(layers$aname!=oldLayers$aname){
+  meta <- ""
+  skCheckAndCreate("assays", layers)
+}
+# File
+skLog("Uploading file: ", layers$fdesc," | ", layers$fname)
+skUploadFile(file)
+oldLayers <- layers
+}
+skLog("############################")
+skLog("End of upload")
+skLog("############################")
+}
 @
 
 
@@ -2331,7 +2402,7 @@ skGetLayer <- function (layer="p", path = getwd(), verbose=FALSE)
 #' getwd()
 #' }
 #
-skSetLayers <- function(path, root=.iroot ,studyForFiles="Investigation files", assaySuffix="-files"){
+skSetLayers <- function(path, root=.iroot ,studyForFiles="Investigation files", assaySuffix="-files", verbose=FALSE){
     x <- unlist(strsplit(path,"/"))
     fl <- paste0(x[!grepl("_[pISA]_.*",x)],collapse="/")
     path <- normalizePath(file.path(root,path))
@@ -2358,12 +2429,14 @@ skSetLayers <- function(path, root=.iroot ,studyForFiles="Investigation files", 
                           , Value=sl)
          al <- paste0(sl,assaySuffix)
      }
-    return(list(pname=pl, iname=il, sname=sl, aname=al, fname=fl, 
-                pdesc=pd, idesc=id, sdesc=sd, adesc=ad, fdesc=fd))
+     r <- list(pname=pl, iname=il, sname=sl, aname=al, fname=fl,
+                pdesc=pd, idesc=id, sdesc=sd, adesc=ad, fdesc=fd)
+     if(verbose) print.simple.list(r)
+    return(r)
 }
 @
 
-<<skCheckLayer>>=
+<<skCheckAndCreate>>=
 #' Check if layer exists and create if not.
 #'
 #' @param type character. ISA layer type (words starting with 

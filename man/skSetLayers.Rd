@@ -8,16 +8,17 @@ skSetLayers(
   path,
   root = .iroot,
   studyForFiles = "Investigation files",
-  assaySuffix = "-files"
+  assaySuffix = "-files",
+  verbose = FALSE
 )
 }
 \arguments{
 \item{path}{Directory path, defaults to working directory.}
 
+\item{verbose}{logical. Should warnings be printed?}
+
 \item{layer}{character. pISA-tree layer prefix (one of characters "p",
 "I", "S" or "A").}
-
-\item{verbose}{logical. Should warnings be printed?}
 }
 \description{
 Set seek layer names based on pISA-tree file path.

@@ -191,15 +191,15 @@ if( skFindTitle("projects", skGetOption("proj"))["title"]!=.pname) {cat("Wrong p
 
 To enable unique investigation name date and time will be appended to the original investigation name.
 
-```{r}
+```{r, eval=FALSE,echo=FALSE}
 #
 #
-skUploadFiles <- function(files, root=skGetOption("root"), test=FALSE){
-skLog("############################")
+skUploadFiles <- function(files, root=skGetOption("root"), test=FALSE,append=TRUE,invname){
+skLog("############################",append=append)
 skLog("Start of upload")
 skLog("############################")
 oldLayers <- list(pname="", iname="", sname="", aname="")
-if(test) {
+if(test&missing(invname)) {
   invname <- paste(skGetLayer("I",normalizePath(root)),Sys.time(),sep=" | ")
   skLog("############################")
   skLog("Extended investigation name:",invname)
@@ -228,7 +228,7 @@ if(layers$aname!=oldLayers$aname){
   skCheckAndCreate("assays", layers)
 }
 # File
-skLog("Upload file: ", layers$fdesc,layers$fname)
+skLog("Uploading file: ", layers$fdesc," | ", layers$fname)
 skUploadFile(file)
 oldLayers <- layers
 }
@@ -239,7 +239,7 @@ skLog("############################")
 ```
 
 ```{r}
-skUploadFiles(forUpload[1], test=TRUE)
+skUploadFiles(forUpload, test=TRUE, append=FALSE)
 ```
 
 

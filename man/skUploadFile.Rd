@@ -17,7 +17,7 @@ and upload file content as a blob.
 }
 \note{
 Argument file is usually a result of a function skFilesToUpload
-     that sets the option 'root' taht was used.
+     that sets the option 'root' that was used.
 }
 \examples{
 \dontrun{
