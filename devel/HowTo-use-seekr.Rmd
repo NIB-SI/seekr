@@ -453,6 +453,7 @@ if(.testing) {
   (skRead("assays" , options()$seekr$aid))
 }
 # create and upload file
+uplimit <- 3*10^9
 x
 fname
 meta <- list(

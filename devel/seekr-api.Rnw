@@ -500,11 +500,13 @@ skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
 #' # Non existent user
 #' skGet("people",0)
 #' }
-skGet <- function(type, id,
+skGet <- function(type, id, filter,
                    uri=options("sk.url"), verbose=FALSE, ... ){
 #                  uri="https://www.fairdomhub.org", ... ){
   if(!missing(type)) uri <- paste0(uri,"/",type)
   if(!missing(id)) uri <- paste0(uri,"/",id)
+  if(!missing(filter)) uri <- paste0(uri,"/",filter)
+
   ua <- httr::user_agent("https://github.com/nib-si/seekr")
   skLog("skGet", uri)
   fht <- system.time(
@@ -571,6 +573,7 @@ skRead <- function(type, id,
 #' to which the authenticated user has access.
 #'
 #' @param type Type of information (e.g. "person").
+#' @param filter character. For future use, not implemented
 #' @param uri Repository base address (URI).
 #' @param ... further arguments.
 #' @return An object (list) of class \code{seek_api}.
@@ -592,10 +595,14 @@ skRead <- function(type, id,
 #' length(l)
 #' # Short list of users
 #' head(sort(sapply(l, function(x) x$attributes$title)),10)
+#' # ToDO
+#' # Querries like:
+#' # https://testing.sysmo-db.org/people?filter[programme]=26
+#' # https://testing.sysmo-db.org/people/368/items#institutions
 #' }
-skList <- function(type,
+skList <- function(type, filter="" ,
                    uri=options("sk.url"), ... ){
-  skGet( type=type, uri = uri, ...)
+  skGet( type=type, uri = uri, filter, ...)
   }
 @
 
@@ -674,9 +681,14 @@ skRelated <- function( type, id, select=NULL,
     if(missing(id)) id <- skGetOption(type)
     id <- unlist(id)
     r <- skRead(type, id , uri, content=TRUE)
-    u <- unlist(r$relationships)
-    role <- sapply(strsplit(names(u[seq(1,length(u),2)]),"\\."),function(x) x[1])
+    if( is.numeric(r) && r == 404) stop("No such instance: ",type," ", id)
     u <- matrix(unlist(r$relationships),ncol=2, byrow=TRUE)
+    uu <- unlist(r$relationships)
+    if(length(u)<1) role=NA else
+    role <- sapply(strsplit(names(uu[seq(1,length(u),2)]),"\\."),
+    function(x) x[1])
+#    nm <- names(unlist(r$relationships))
+#    role <- unique(matrix(unlist(strsplit(nm,"\\.")),ncol=3,byrow=TRUE)[,1])
     if(!is.null(select)) {
         select <- skExpand(select)
         filter <- u[,2] %in% select
@@ -1691,6 +1703,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
      instid <- skContent(skRead("people",myid))$relationships$institutions$data[[1]]$id
      options(sk.instid=instid)
      }
+     tags <- c("pISA")
      s <- skSkeleton(type)
 # Common fileds
 
@@ -1745,39 +1758,36 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$assay_type$key <- ""
             }
       , data_files = {
-        s$data$attributes$title  <-  paste0("/",file)
-        s$data$attributes$description  <-  ""
+        document_title <- meta$Title
+        document_description <- meta$Description
+                content_type <- contentType(file)
+        s$data$attributes$title  <-  document_title
+        s$data$attributes$description  <-  document_description
         s$data$attributes$tags  <- c("data")
-        s$data$attributes$content_blobs$original_filename <- paste0("/",file)
-        s$data$attributes$content_blobs$content_type <- contentType(file)
+       s$data$attributes$content_blobs$original_filename <- document_title
+        s$data$attributes$content_blobs$content_type <- content_type
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$projects$data$id <- pid
         s$data$relationships$assays$data$id <- aid
+        s$data$attributes$other_creators <- ""
+        s$data$attributes$tags <- c("pISA", "data")
       }
       , documents = {
-        document_title <- paste0("/",file)
-        document_description <- ""
+        document_title <- getMeta(meta,"Title")
+        document_description <- getMeta(meta,"Description")
         content_type <- contentType(file)
         tags <- content_type
-        #
-        fpath <- file.path(".", file)
-        #
         s$data$attributes$title <- document_title
         s$data$attributes$description <- document_description
         s$data$relationships$creators$data$id <- myid
-        s$data$relationships$creators$data
         s$data$relationships$projects$data$id <- pid
-        s$data$relationships$projects$data
         s$data$relationships$assays$data$id <- aid
-        s$data$relationships$assays$data
         s$data$attributes$policy$permissions$resource$id <- pid
-        s$data$attributes$policy$permissions
         s$data$attributes$content_blobs$content_type <- content_type
         s$data$attributes$content_blobs$original_filename <- document_title
-        s$data$attributes$content_blobs
         s$data$attributes$other_creators <- ""
-        s$data$attributes$tags <- c("pISA", tags)
+        s$data$attributes$tags <- c("pISA", "document")
       }
      )
      baseurl <- getOption("sk.url")
@@ -1804,6 +1814,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
      parsed <- skParse(resp)
      skLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
 # Upload file blob
+######
      if(FALSE && s$data$type %in% c("data_files", "documents")){
      skLog("Upload file:", file)
      res <- parsed$content
@@ -1811,7 +1822,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
      blob_link <- res$attributes$content_blobs[[1]]$link
      # Fill the content blob with data
      uri <- blob_link
-     fpath <- file.path(".",.aroot, file)
+     fpath <- file.path(skGetOption("root"), file)
      if(file.exists(fpath)) {
      skLog("skUpload",uri)
      fht <- system.time(
@@ -1844,7 +1855,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
 @
 
 <<skUpload>>=
-#' Upload file.
+#' Upload file content as a blob.
 #'
 #' Upload file to a created object of type 'documents' or 'data_files'.
 #'
@@ -1875,7 +1886,7 @@ skUpload <- function( object, file){
      blob_link <- res$attributes$content_blobs[[1]]$link
      # Fill the content blob with data
      uri <- blob_link
-     fpath <- file.path(".",file)
+     fpath <- file.path(skGetOption("root"),file)
      if(file.exists(fpath)) {
      skLog("skUpload",uri)
      fht=-1
@@ -1890,13 +1901,11 @@ skUpload <- function( object, file){
     , encode="json"
     , accept("*.*")
     ))
-    print(resp)
     fs <- round(as.numeric(rawToChar(resp$content))/1024^2,3)
-    file_size <- paste0(fpath, " | ", fs,"MB")
+    file_size <- paste0(fpath, " | ", fs," MB")
     } else {
     resp_blob <- paste("Error: File not found:" ,fpath)
     }
-    sklog( file )
     skLog( resp$headers$status
          , round(fht["elapsed"],2)
          , file_size
@@ -1905,6 +1914,60 @@ skUpload <- function( object, file){
   resp
 }
 @
+
+<<skUploadFile>>=
+#' Upload file.
+#'
+#' Create an object of type 'documents' or 'data_files' 
+#' and upload file content as a blob.
+#'
+#' @param file character. File name and path (from the root directory).
+#' @param root character. Root directory.
+#' @note Argument file is usually a result of a function skFilesToUpload
+#'      that sets the option 'root' taht was used.
+#' @export
+#' @keywords pisa
+#' @seealso \code{\link{skFilesToUpload}}, \code{\link{skUpload}}
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' skUploadFile(file)
+#' }
+#'
+skUploadFile <- function(file, root = skGetOption("root")){
+  uplimit <- 3*10^9
+path <- normalizePath(file.path(root))
+path
+description <- paste(basename(dirname(path)),basename(path),sep="/")
+layers <- skSetLayers(file, root)
+meta <- list(
+       Title=layers$fname
+     , Description=layers$fdesc
+     )
+print(meta)
+skFindId("investigations",layers$iname)
+skFindId("studies",layers$sname)
+skFindId("assays",layers$aname)
+## ToDo
+#if(toupper(fileType(fname)))
+  if(regexpr("METADATA",file)>0) {
+  type <- "documents" } else {type <- "data_files"}
+#type <- "documents"
+s <- skCreate(type, meta, file = file)
+if(.testing) print(s)
+#
+f_size <- file.size(file.path(.iroot,file))
+if(!is.na(f_size)){
+if(f_size< uplimit) {
+cat("---> Uploading ", file,"\n")
+f <- skUpload(s, file)
+} else { f <- paste( "Not uploaded, File too large", f_size ,">",  uplimit/10^9,"GB") } } else  { f <-  file
+        cat("Length NA, not uploaded: ")
+}
+}
+
+@
+
 
 <<skDoNotUpload,purl=FALSE>>=
 #' Decide if the layer should not be uploaded.
@@ -2173,7 +2236,7 @@ dirs <- list.files(root, full.names=FALSE, recursive=TRUE)
 #  Protect files in the root directory
   ind <- substr(dirs,1,1)!="_"
   dirs[ind] <- paste0("XX/",dirs[ind])
-
+print(dirs)
 
 # Ignore files with patterns in seekignore file
 dirlength <- length(dirs)
@@ -2259,40 +2322,116 @@ skGetLayer <- function (layer="p", path = getwd(), verbose=FALSE)
 #' options(.sk$test)
 #' seekignore <- readLines(file.path(.iroot, "seekignore.txt"))
 #' seekignore
-#' dirs <- skFilesToUpload(.sroot)
-#' skSetLayers(dirs[1], root=.sroot)
-#' skSetLayers(dirs[2], root=.sroot)
-#' skSetLayers(dirs[length(dirs)], root=.sroot)
+#' dirs <- skFilesToUpload(.iroot)
+#' skSetLayers(dirs[1], root=.iroot)
+#' skSetLayers(dirs[2], root=.iroot)
+#' skSetLayers(dirs[length(dirs)], root=.iroot)
 #' sapply(dirs, function(x) skSetLayers(x))
 #' if(interactive()) setwd(oldwd)
 #' getwd()
 #' }
 #
-skSetLayers <- function(path, root=.iroot ,studyForFiles="Investigation and study files", assaySuffix="-files"){
+skSetLayers <- function(path, root=.iroot ,studyForFiles="Investigation files", assaySuffix="-files"){
+    x <- unlist(strsplit(path,"/"))
+    fl <- paste0(x[!grepl("_[pISA]_.*",x)],collapse="/")
     path <- normalizePath(file.path(root,path))
     pl <- skGetLayer("p", path)
     il <- skGetLayer("I", path)
     sl <- skGetLayer("S", path)
     al <- skGetLayer("A", path)
+#
+    pd <- ""
+    id <- ""
     sd <- ""
     ad <- ""
-    sl1 <- sl
-    sl1[al==""] <- studyForFiles
-    if( al=="" & sl=="" ) {
-        ad <- data.frame(Key="Files connected to investigation:",Value=il)
-        al <- paste0(il,assaySuffix)
-    }
-    if( al=="" ) {
-        ad <- data.frame(Key="Files connected to study:",Value=sl)
-        
-        al <- paste0(sl,assaySuffix)
-    }
-    if(sl1!=sl) sd <- data.frame(Key=studyForFiles, Value="...")
-    return(list(pname=pl, iname=il, sname=sl1, aname=al,sdesc=sd,adesc=ad))
+    fd <- paste0(c(pl,il,sl,al,""),collapse="/")
+    fd <- gsub("/+","/",fd)
+    if( (al=="") & sl=="" ) {
+           sd <- data.frame(Key="Investigation files",Value=il)
+           sl <- "Investigation files"
+           al <- paste0(il,assaySuffix)
+           ad <- data.frame(Key="Files connected to investigation:"
+                          , Value=il)
+     }
+     if( al=="" ) {
+         ad <- data.frame(Key="Files connected to study:"
+                          , Value=sl)
+         al <- paste0(sl,assaySuffix)
+     }
+    return(list(pname=pl, iname=il, sname=sl, aname=al, fname=fl, 
+                pdesc=pd, idesc=id, sdesc=sd, adesc=ad, fdesc=fd))
 }
 @
 
+<<skCheckLayer>>=
+#' Check if layer exists and create if not.
+#'
+#' @param type character. ISA layer type (words starting with 
+#'    I, S, or A, can be lowercase)
+#' @param layers character vector. Info about layers, 
+#'     usually the result of a call to skSetLayers.
+#' @param root character. Root used to create the file list, 
+#'      usually pointing to investigation.
+#' @param create logical. Create layer if not existing?
+#' @param verbose logical. Print intermediate results?
+#' @param quiet logical. Print result?
+#' @value SEEK Object found or created.
+#' @export
+#' @keywords pisa, seekr
+#' @author Andrej Blejec \email{andrej.blejec@nib.si}
+#' @examples
+#' \dontrun{
+#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
+#' oldwd <- setwd(system.file("extdata",astring,package="seekr"))
+#' oldwd
+#' require(pisar)
+#' pisa <- pisa()
+#' options(.sk$test)
+#' seekignore <- readLines(file.path(.iroot, "seekignore.txt"))
+#' seekignore
+#' dirs <- skFilesToUpload(.iroot)
+#' layers <- skSetLayers(dirs[1], root=.iroot)
+#' skCheckAndCreate("I",layers, create=TRUE, verbose=TRUE)
+#' if(interactive()) setwd(oldwd)
+#' getwd()
+#' }
+#
+skCheckAndCreate <- function(type, layers, root=skGetOption("root"), create = TRUE, verbose=FALSE, quiet=FALSE) {
+   if(toupper(substr(type,1,1)) == "I") {
+       layer <- "investigations"
+       parent <- "projects"
+       name <- layers$iname
+       meta <- layers$idesc
+       root <- root
+       }
+   if(toupper(substr(type,1,1)) == "S") {
+       layer <- "studies"
+       parent <- "investigations"
+       name <- layers$sname
+       meta <- layers$sdesc
+       root <- file.path(root,layers$sname)
+       }
+   if(toupper(substr(type,1,1)) == "A") {
+       layer <- "assays"
+       parent <- "studies"
+       name <- layers$aname
+       meta <- layers$adesc
+       root <- file.path(root,layers$sname,layers$aname)
+       }
+#
+   r <- "skCheckAndCreate" 
+   quiet <- quiet & !verbose
+   if(!skExists(layer,name, parent, verbose=verbose)){
+     if(length(meta) == 1) {
+        meta <- readMeta(root)
+        } 
+     if(!quiet) cat("Create: ", layer, "'",name,"'\n", sep="")
+     if(create) r <- skCreate(layer, meta, title=name)
+   } else r <- skFindId(layer,name)
+   return(r)
+}
 
+@
 
 
 

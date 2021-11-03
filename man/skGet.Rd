@@ -4,7 +4,7 @@
 \alias{skGet}
 \title{Get information from repository.}
 \usage{
-skGet(type, id, uri = options("sk.url"), verbose = FALSE, ...)
+skGet(type, id, filter, uri = options("sk.url"), verbose = FALSE, ...)
 }
 \arguments{
 \item{type}{Type of information (e.g. "person").}

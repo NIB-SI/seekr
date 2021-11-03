@@ -5,10 +5,12 @@
 \title{List operations return a list of all objects of the specified type,
 to which the authenticated user has access.}
 \usage{
-skList(type, uri = options("sk.url"), ...)
+skList(type, filter = "", uri = options("sk.url"), ...)
 }
 \arguments{
 \item{type}{Type of information (e.g. "person").}
+
+\item{filter}{character. For future use, not implemented}
 
 \item{uri}{Repository base address (URI).}
 
@@ -39,6 +41,10 @@ l <- skContent(r)
 length(l)
 # Short list of users
 head(sort(sapply(l, function(x) x$attributes$title)),10)
+# ToDO
+# Querries like:
+# https://testing.sysmo-db.org/people?filter[programme]=26
+# https://testing.sysmo-db.org/people/368/items#institutions
 }
 }
 \seealso{

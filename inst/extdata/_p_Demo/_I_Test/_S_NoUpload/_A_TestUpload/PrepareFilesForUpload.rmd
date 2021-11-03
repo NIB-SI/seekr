@@ -94,6 +94,7 @@ Then it will filter it according to declarations in the combined seekignore patt
 
 ```{r}
 forUpload <- skFilesToUpload( root = pini$I$root, skignore=seekignore)
+forUpload <- forUpload[order(sapply(strsplit(forUpload,"/"),length))]
 ```
 
 Final list of files for upload is
@@ -191,91 +192,54 @@ if( skFindTitle("projects", skGetOption("proj"))["title"]!=.pname) {cat("Wrong p
 To enable unique investigation name date and time will be appended to the original investigation name.
 
 ```{r}
-skUploadFile <- function(file, root = skGetOption("root")){
-  uplimit <- 3*10^9
-path <- normalizePath(file.path(root,file))
-path
-sname <- gsub("^.*(_S_[^/]*)/_A.*","\\1",file)
-if(sname==file) sname <- "" else sname <- sname
-aname <- gsub("^.*/(_A_[^/]*)/.*","\\1",file)
-if(aname==file) aname <- "" else aname <- aname
-fname <- gsub("^.*/(_[AS]_[^/]*)/(.*)","\\2",file)
-.sname <- sname
-.aname <- aname
-print(c(.sname, .aname, fname))
-description <- gsub(".*(_p_)","\\1",dirname(normalizePath(file.path(root,file))))
-description <- gsub(paste0("/",dirname(fname)),"",description)
-meta <- list(
-       Title=paste0("/",fname)
-     , Description=description
-     )
-meta
-layers <- skSetLayers(file, root)
-skFindId("studies",layers$sname)
-skFindId("assays",layers$aname)
-## ToDo
-#if(toupper(fileType(fname)))
-  if(regexpr("METADATA",fname)>0) {
-  type <- "documents" } else {type <- "data_files"}
-type <- "documents"
-s <- skCreate(type, meta, file= file)
-if(.testing) print(s)
 #
-f_size <- file.size(file.path(.iroot,file))
-if(!is.na(f_size)){
-if(f_size< uplimit) {
-cat("Uploading ", fname)
-f <- skUpload(s, file)
-} else { f <- paste( "Not uploaded, File too large", f_size ,">",  uplimit/10^9,"GB") } } else  { f <-  file
-        cat("Length NA, not uploaded: ")
+#
+skUploadFiles <- function(files, root=skGetOption("root"), test=FALSE){
+skLog("############################")
+skLog("Start of upload")
+skLog("############################")
+oldLayers <- list(pname="", iname="", sname="", aname="")
+if(test) {
+  invname <- paste(skGetLayer("I",normalizePath(root)),Sys.time(),sep=" | ")
+  skLog("############################")
+  skLog("Extended investigation name:",invname)
+  skLog("############################")
 }
-print(f)
-}
-file=dirs[3]
-skUploadFile(file)
-```
-
-
-```{r}
-
-invname <- paste(.iname,Sys.time(),sep=" | ")
-invname
-oldLayers <- list(pname="", iname="", sname="", aname="", sdesc="", adesc="")
-ind <- 1:length(forUpload)
+ind <- 1:length(files)
 nind <- length(ind)
 #
 for( i in ind ){
-file <- forUpload[i]
+file <- files[i]
  cat("|", rep("-",50*i/nind-1),">", rep(" ",50*(nind-i)/nind),"| ", i, "/", nind, "\n", file, "\n", sep="")
 layers <- skSetLayers(file)
-layers
-layers$iname <- invname
+if(test) layers$iname <- invname
+#
 # Investigation
 if(layers$iname!=oldLayers$iname){
-if(!skExists("investigations",layers$iname, "proj",verbose=!TRUE)){
-  cat("Create investigation:", layers$iname,"\n")
-  skCreate("investigations", .imeta, title=layers$iname)
-}
+  skCheckAndCreate("investigations", layers)
 }
 # Study
 if(layers$sname!=oldLayers$sname){
-if(!skExists("studies",layers$sname, "inv",verbose=!TRUE)){
-  if(length(layers$sdesc) == 1) meta <- .smeta else meta <- layers$sdesc
-  cat("Create study:", layers$sname,"\n")
-  skCreate("studies", meta, title=layers$sname)
-}
+  skCheckAndCreate("studies", layers)
 }
 # Assay
 if(layers$aname!=oldLayers$aname){
-if(!skExists("assays",layers$aname, "studies",verbose=!TRUE)) {
-  if(length(layers$adesc) == 1) meta <- .ameta else meta <- layers$adesc
-   cat("Create assay:", layers$aname,"\n")
-  skCreate("assays", meta, title=layers$aname)
+  meta <- ""
+  skCheckAndCreate("assays", layers)
 }
-}
+# File
+skLog("Upload file: ", layers$fdesc,layers$fname)
 skUploadFile(file)
-#cat(rep("-",50),"\n",sep="")
 oldLayers <- layers
-} 
+}
+skLog("############################")
+skLog("End of upload")
+skLog("############################")
+}
 ```
+
+```{r}
+skUploadFiles(forUpload[1], test=TRUE)
+```
+
 

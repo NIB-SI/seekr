@@ -2,6 +2,7 @@
 
 S3method(print,seek_api)
 export(contentType)
+export(skCheckAndCreate)
 export(skContent)
 export(skCreate)
 export(skDelete)
@@ -28,3 +29,4 @@ export(skSetLayers)
 export(skSetOption)
 export(skSkeleton)
 export(skUpload)
+export(skUploadFile)

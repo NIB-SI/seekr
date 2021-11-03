@@ -2,7 +2,7 @@
 % Please edit documentation in R/seekr-api.R
 \name{skUpload}
 \alias{skUpload}
-\title{Upload file.}
+\title{Upload file content as a blob.}
 \usage{
 skUpload(object, file)
 }

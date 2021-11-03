@@ -7,7 +7,7 @@
 skSetLayers(
   path,
   root = .iroot,
-  studyForFiles = "Investigation and study files",
+  studyForFiles = "Investigation files",
   assaySuffix = "-files"
 )
 }
@@ -37,10 +37,10 @@ pisa <- pisa()
 options(.sk$test)
 seekignore <- readLines(file.path(.iroot, "seekignore.txt"))
 seekignore
-dirs <- skFilesToUpload(.sroot)
-skSetLayers(dirs[1], root=.sroot)
-skSetLayers(dirs[2], root=.sroot)
-skSetLayers(dirs[length(dirs)], root=.sroot)
+dirs <- skFilesToUpload(.iroot)
+skSetLayers(dirs[1], root=.iroot)
+skSetLayers(dirs[2], root=.iroot)
+skSetLayers(dirs[length(dirs)], root=.iroot)
 sapply(dirs, function(x) skSetLayers(x))
 if(interactive()) setwd(oldwd)
 getwd()
