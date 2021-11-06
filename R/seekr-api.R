@@ -1816,7 +1816,7 @@ skUpload <- function( object, file){
 #' skUploadFile(file)
 #' }
 #'
-skUploadFile <- function(file, root = skGetOption("root")){
+skUploadFile <- function(file, root = skGetOption("root"),verbose=FALSE,  reportFile=NULL){
   uplimit <- 3*10^9
 path <- normalizePath(file.path(root))
 description <- paste(basename(dirname(path)),basename(path),sep="/")
@@ -1834,18 +1834,28 @@ meta <- list(
   type <- "data_files" } else {type <- "documents"}
 #type <- "documents"
 s <- skCreate(type, meta, file = file)
-if(.testing) print(s)
+if(.testing) print(names(s))
 #
 f_size <- file.size(file.path(.iroot,file))
 if(!is.na(f_size)){
-if(f_size< uplimit) {
-cat("---> Uploading ", file,"\n")
-f <- skUpload(s, file)
-} else { f <- paste( "Not uploaded, File too large", f_size ,">",  uplimit/10^9,"GB") } } else  { f <-  file
-        cat("Length NA, not uploaded: ")
-}
-}
+   if(f_size< uplimit) {
+        cat("---> Uploading ", file,"\n")
+        f <- skUpload(s, file)
+        if(verbose) cat(s$url,"\n")
+        #
+        day <- format(Sys.time(), '%Y-%m-%d')
+        tajm <- format(Sys.time(), '%H:%M:%S')
+        if(!is.null(reportFile)) cat( layers$fdesc, layers$fname, s$url, 
+        day, tajm, "\n", sep="\t", file=reportFile, append=TRUE)
+        return(s)
+   } else {
+   f <- paste( "Not uploaded, File too large", f_size ,">",  uplimit/10^9,"GB")
+          }
+  } else   f <-  "Length NA, not uploaded"
+        if(!is.null(reportFile)) cat(layers$fdesc, layers$fname, f , 
+        day,tajm, "\n", ,sep="\t", file=reportFile, append=TRUE)
 
+}
 
 
 ## ----skUploadFiles--------------------------------------------------
@@ -1873,11 +1883,13 @@ f <- skUpload(s, file)
 #' skUploadFiles(files)
 #' }
 #'
-skUploadFiles <- function(files, root=skGetOption("root"), test=FALSE, append=TRUE, invname){
+skUploadFiles <- function(files, root=skGetOption("root"), test=FALSE, append=TRUE, verbose=FALSE, reportFile=NULL, invname){
 skLog("############################",append=append)
 skLog("Start of upload")
 skLog("############################")
 oldLayers <- list(pname="", iname="", sname="", aname="")
+if(is.null(reportFile) ) reportFile <- paste0("Upload-",gsub("[ :]","_",Sys.time()),".txt")
+cat("Path", "File_name",  "URL" ,"Date", "Time", "\n", sep="\t", file=reportFile)
 if(test&missing(invname)) {
   invname <- paste(skGetLayer("I",normalizePath(root)),Sys.time(),sep=" | ")
   skLog("############################")
@@ -1908,7 +1920,7 @@ if(layers$aname!=oldLayers$aname){
 }
 # File
 skLog("Uploading file: ", layers$fdesc," | ", layers$fname)
-skUploadFile(file)
+r <- skUploadFile(file, verbose=verbose, reportFile=reportFile)
 oldLayers <- layers
 }
 skLog("############################")
@@ -2088,7 +2100,6 @@ dirs <- list.files(root, full.names=FALSE, recursive=TRUE)
 #  Protect files in the root directory
   ind <- substr(dirs,1,1)!="_"
   dirs[ind] <- paste0("XX/",dirs[ind])
-print(dirs)
 
 # Ignore files with patterns in seekignore file
 dirlength <- length(dirs)
@@ -2102,6 +2113,7 @@ for(pat in seekignore){
 # Unprotect files in the root directory
 
 dirs <- gsub("^XX/","",dirs)
+dirs <- dirs[order(sapply(strsplit(dirs,"/"),length))]
 if(!quiet) cat("Files to upload:", length(dirs), "/",dirlength,"\n")
 return(dirs)
 }
@@ -2239,12 +2251,18 @@ skSetLayers <- function(path, root=.iroot ,studyForFiles="Investigation files", 
 #' oldwd <- setwd(system.file("extdata",astring,package="seekr"))
 #' oldwd
 #' require(pisar)
+#' require(httr)
+#' require(jsonlite)
 #' pisa <- pisa()
+#' skReset()
 #' options(.sk$test)
 #' seekignore <- readLines(file.path(.iroot, "seekignore.txt"))
 #' seekignore
 #' dirs <- skFilesToUpload(.iroot)
 #' layers <- skSetLayers(dirs[1], root=.iroot)
+#' skFindId("projects", layers$pname)
+#' print.simple.list(skOptions())
+#' (layers$iname <- paste(layers$iname, date()))
 #' skCheckAndCreate("I",layers, create=TRUE, verbose=TRUE)
 #' if(interactive()) setwd(oldwd)
 #' getwd()

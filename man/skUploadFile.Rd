@@ -4,7 +4,12 @@
 \alias{skUploadFile}
 \title{Upload file.}
 \usage{
-skUploadFile(file, root = skGetOption("root"))
+skUploadFile(
+  file,
+  root = skGetOption("root"),
+  verbose = FALSE,
+  reportFile = NULL
+)
 }
 \arguments{
 \item{file}{character. File name and path (from the root directory).}

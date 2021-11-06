@@ -9,6 +9,8 @@ skUploadFiles(
   root = skGetOption("root"),
   test = FALSE,
   append = TRUE,
+  verbose = FALSE,
+  reportFile = NULL,
   invname
 )
 }

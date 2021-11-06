@@ -38,12 +38,18 @@ astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
 oldwd <- setwd(system.file("extdata",astring,package="seekr"))
 oldwd
 require(pisar)
+require(httr)
+require(jsonlite)
 pisa <- pisa()
+skReset()
 options(.sk$test)
 seekignore <- readLines(file.path(.iroot, "seekignore.txt"))
 seekignore
 dirs <- skFilesToUpload(.iroot)
 layers <- skSetLayers(dirs[1], root=.iroot)
+skFindId("projects", layers$pname)
+print.simple.list(skOptions())
+(layers$iname <- paste(layers$iname, date()))
 skCheckAndCreate("I",layers, create=TRUE, verbose=TRUE)
 if(interactive()) setwd(oldwd)
 getwd()
