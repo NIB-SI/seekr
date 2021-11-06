@@ -315,89 +315,10 @@ seekignore</code></pre>
 ## [12] &quot;/Interacitve&quot;</code></pre>
 <p>Lines three and four have slash (/) at the end to ignore directories. Line five and six will prevent upload of batch files and files with specific name (in any directory). One can add other patterns into the seekignore.txt file before running the code below.</p>
 <p>Function <code>skFilesToUpload</code> will first create a list of files in root directory. Then, it will read the seekignore.txt and extend it with patterns of layers that should not be uploaded according to metadata key “Upload to FAIRDOMHub”. In addition, seekignre list will be appended with the list of empty README.MD files that might clutter the FAIRDOMHub list of files. Then it will filter it according to declarations in the combined seekignore pattern list.</p>
-<pre class="r"><code>forUpload &lt;- skFilesToUpload( root = pini$I$root, skignore=seekignore)</code></pre>
+<pre class="r"><code>forUpload &lt;- skFilesToUpload( root = pini$I$root, skignore = seekignore)</code></pre>
 <pre><code>## Ignoring pISA layer: _S_NoUpload/_A_TestUpload 
 ## Ignoring pISA layer: _S_NoUpload 
 ## Ignored pISA layers: 2 / 6 
-##  [1] &quot;_INVESTIGATION_METADATA.TXT&quot;                             
-##  [2] &quot;_S_NoUpload/_A_TestUpload/_A_TestUpload.Rproj&quot;           
-##  [3] &quot;_S_NoUpload/_A_TestUpload/_Assay_METADATA.TXT&quot;           
-##  [4] &quot;_S_NoUpload/_A_TestUpload/_outputFile.R&quot;                 
-##  [5] &quot;_S_NoUpload/_A_TestUpload/FAIRDOM.log&quot;                   
-##  [6] &quot;_S_NoUpload/_A_TestUpload/FAIRDOMHub.log&quot;                
-##  [7] &quot;_S_NoUpload/_A_TestUpload/PrepareFilesForUpload.html&quot;    
-##  [8] &quot;_S_NoUpload/_A_TestUpload/PrepareFilesForUpload.pdf&quot;     
-##  [9] &quot;_S_NoUpload/_A_TestUpload/PrepareFilesForUpload.rmd&quot;     
-## [10] &quot;_S_NoUpload/_A_TestUpload/Upload-2021-11-06_22_34_41.txt&quot;
-## [11] &quot;_S_NoUpload/_A_TestUpload/Upload-2021-11-06_22_35_34.txt&quot;
-## [12] &quot;_S_NoUpload/_A_TestUpload/Upload-2021-11-06_22_36_51.txt&quot;
-## [13] &quot;_S_NoUpload/_A_TestUpload/Upload-2021-11-06_22_41_55.txt&quot;
-## [14] &quot;_S_NoUpload/_A_TestUpload/Upload-2021-11-06_22_43_06.txt&quot;
-## [15] &quot;_S_NoUpload/_A_TestUpload/Upload-2021-11-06_22_47_24.txt&quot;
-## [16] &quot;_S_NoUpload/_A_TestUpload/Upload-2021-11-06_22_51_29.txt&quot;
-## [17] &quot;_S_NoUpload/_A_TestUpload/Upload-2021-11-06_22_54_09.txt&quot;
-## [18] &quot;_S_NoUpload/_A_TestUpload/Upload-2021-11-06_22_55_48.txt&quot;
-## [19] &quot;_S_NoUpload/_A_TestUpload/Upload-2021-11-06_23_01_08.txt&quot;
-## [20] &quot;_S_NoUpload/_A_Work-R/_Assay_METADATA.TXT&quot;               
-## [21] &quot;_S_NoUpload/_A_Work-R/_outputFile.R&quot;                     
-## [22] &quot;_S_NoUpload/_A_Work-R/data&quot;                              
-## [23] &quot;_S_NoUpload/_A_Work-R/FAIRDOM.log&quot;                       
-## [24] &quot;_S_NoUpload/_A_Work-R/input/README.MD&quot;                   
-## [25] &quot;_S_NoUpload/_A_Work-R/input/some-data.txt&quot;               
-## [26] &quot;_S_NoUpload/_A_Work-R/other/_outputFile.R&quot;               
-## [27] &quot;_S_NoUpload/_A_Work-R/other/README.MD&quot;                   
-## [28] &quot;_S_NoUpload/_A_Work-R/output/README.MD&quot;                  
-## [29] &quot;_S_NoUpload/_A_Work-R/README.MD&quot;                         
-## [30] &quot;_S_NoUpload/_A_Work-R/reports/README.MD&quot;                 
-## [31] &quot;_S_NoUpload/_A_Work-R/scripts/README.MD&quot;                 
-## [32] &quot;_S_NoUpload/_A_Work-R/showMetadata.bat&quot;                  
-## [33] &quot;_S_NoUpload/_A_Work-R/showTree.bat&quot;                      
-## [34] &quot;_S_NoUpload/_A_Work-R/xcheckMetadata.bat&quot;                
-## [35] &quot;_S_NoUpload/_STUDY_METADATA.TXT&quot;                         
-## [36] &quot;_S_NoUpload/common.ini&quot;                                  
-## [37] &quot;_S_NoUpload/makeAssay.bat&quot;                               
-## [38] &quot;_S_NoUpload/meta_A_Template.txt&quot;                         
-## [39] &quot;_S_NoUpload/README.MD&quot;                                   
-## [40] &quot;_S_NoUpload/reports/README.MD&quot;                           
-## [41] &quot;_S_NoUpload/showMetadata.bat&quot;                            
-## [42] &quot;_S_NoUpload/showTree.bat&quot;                                
-## [43] &quot;_S_NoUpload/xcheckMetadata.bat&quot;                          
-## [44] &quot;_S_Show/_A_Work-R/_Assay_METADATA.TXT&quot;                   
-## [45] &quot;_S_Show/_A_Work-R/_outputFile.R&quot;                         
-## [46] &quot;_S_Show/_A_Work-R/FAIRDOM.log&quot;                           
-## [47] &quot;_S_Show/_A_Work-R/input/README.MD&quot;                       
-## [48] &quot;_S_Show/_A_Work-R/input/some-data.txt&quot;                   
-## [49] &quot;_S_Show/_A_Work-R/other/_outputFile.R&quot;                   
-## [50] &quot;_S_Show/_A_Work-R/other/README.MD&quot;                       
-## [51] &quot;_S_Show/_A_Work-R/output/README.MD&quot;                      
-## [52] &quot;_S_Show/_A_Work-R/README.MD&quot;                             
-## [53] &quot;_S_Show/_A_Work-R/reports/README.MD&quot;                     
-## [54] &quot;_S_Show/_A_Work-R/reports/README.MD.bak&quot;                 
-## [55] &quot;_S_Show/_A_Work-R/scripts/README.MD&quot;                     
-## [56] &quot;_S_Show/_A_Work-R/showMetadata.bat&quot;                      
-## [57] &quot;_S_Show/_A_Work-R/showTree.bat&quot;                          
-## [58] &quot;_S_Show/_A_Work-R/xcheckMetadata.bat&quot;                    
-## [59] &quot;_S_Show/_STUDY_METADATA.TXT&quot;                             
-## [60] &quot;_S_Show/common.ini&quot;                                      
-## [61] &quot;_S_Show/makeAssay.bat&quot;                                   
-## [62] &quot;_S_Show/meta_A_Template.txt&quot;                             
-## [63] &quot;_S_Show/README.MD&quot;                                       
-## [64] &quot;_S_Show/reports/README.MD&quot;                               
-## [65] &quot;_S_Show/showMetadata.bat&quot;                                
-## [66] &quot;_S_Show/showTree.bat&quot;                                    
-## [67] &quot;_S_Show/xcheckMetadata.bat&quot;                              
-## [68] &quot;XX/common.ini&quot;                                           
-## [69] &quot;XX/FAIRDOMHub.log&quot;                                       
-## [70] &quot;XX/makeStudy.bat&quot;                                        
-## [71] &quot;XX/meta_S_Template.txt&quot;                                  
-## [72] &quot;XX/phenodata_20191015.txt&quot;                               
-## [73] &quot;XX/presentations/README.MD&quot;                              
-## [74] &quot;XX/README.MD&quot;                                            
-## [75] &quot;XX/reports/README.MD&quot;                                    
-## [76] &quot;XX/seekignore.txt&quot;                                       
-## [77] &quot;XX/showMetadata.bat&quot;                                     
-## [78] &quot;XX/showTree.bat&quot;                                         
-## [79] &quot;XX/xcheckMetadata.bat&quot;                                   
 ## Ignoring 0 files [ DoNotUpload/  ]
 ## Ignoring 4 files [ other/  ]
 ## Ignoring 18 files [ *\.bat  ]
@@ -408,7 +329,7 @@ seekignore</code></pre>
 ## Ignoring 5 files [ *\.log  ]
 ## Ignoring 3 files [ _outputFile\.R  ]
 ## Ignoring 0 files [ /Interacitve  ]
-## Ignoring 26 files [ _S_NoUpload  ]
+## Ignoring 35 files [ _S_NoUpload  ]
 ## Ignoring 0 files [ _S_NoUpload/_A_TestUpload  ]
 ## Ignoring 0 files [ _S_NoUpload/_A_Work-R/input/README\.MD  ]
 ## Ignoring 0 files [ _S_NoUpload/_A_Work-R/other/README\.MD  ]
@@ -428,8 +349,7 @@ seekignore</code></pre>
 ## Ignoring 1 files [ _S_Show/reports/README\.MD  ]
 ## Ignoring 1 files [ XX/presentations/README\.MD  ]
 ## Ignoring 1 files [ XX/reports/README\.MD  ]
-## Files to upload: 8 / 79</code></pre>
-<pre class="r"><code>forUpload &lt;- forUpload[order(sapply(strsplit(forUpload,&quot;/&quot;),length))]</code></pre>
+## Files to upload: 8 / 88</code></pre>
 <p>Final list of files for upload is</p>
 <pre class="r"><code>forUpload</code></pre>
 <pre><code>## [1] &quot;_INVESTIGATION_METADATA.TXT&quot;          
@@ -459,7 +379,7 @@ skOptions()</code></pre>
 # Relace values with your username and password
 skSetOption(&quot;usr&quot;, &quot;&lt;user name&gt;&quot;)
 skSetOption(&quot;pwd&quot;, &quot;&lt;password&gt;&quot;)
-skSetOption(&quot;myid&quot;, &quot;&lt;id number&gt;&quot;)</code></pre>
+skSetOption(&quot;myid&quot;, &quot;&lt;FAIRDOMHub user id number&gt;&quot;)</code></pre>
 <p>With some hidden code, the options are set to my credentials.</p>
 <pre class="r"><code>skOptions()</code></pre>
 <pre><code>## Hidden: sk.pwd</code></pre>
@@ -530,7 +450,7 @@ if( skFindTitle(&quot;projects&quot;, skGetOption(&quot;proj&quot;))[&quot;title
 <pre class="r"><code>skUploadFiles(forUpload, test=TRUE, append=FALSE)</code></pre>
 <pre><code>## |-----&gt;                                           | 1/8
 ## _INVESTIGATION_METADATA.TXT
-## Create: investigations&#39;_I_Test | 2021-11-06 23:04:15&#39;
+## Create: investigations&#39;_I_Test | 2021-11-06 23:28:16&#39;
 ## Create: studies&#39;Investigation files&#39;
 ## Create: assays&#39;_I_Test-files&#39;
 ## ---&gt; Uploading  _INVESTIGATION_METADATA.TXT 

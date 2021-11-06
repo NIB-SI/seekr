@@ -94,9 +94,8 @@ Function `skFilesToUpload` will first create a list of files in root directory. 
 In addition, seekignre list will be appended with the list of empty README.MD files that might clutter the FAIRDOMHub list of files.
 Then it will filter it according to declarations in the combined seekignore pattern list.
 
-```{r}
-forUpload <- skFilesToUpload( root = pini$I$root, skignore=seekignore)
-forUpload <- forUpload[order(sapply(strsplit(forUpload,"/"),length))]
+```{r prepare_list_of_files_for_upload}
+forUpload <- skFilesToUpload( root = pini$I$root, skignore = seekignore)
 ```
 
 Final list of files for upload is
