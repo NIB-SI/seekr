@@ -1947,6 +1947,8 @@ meta <- list(
        Title=layers$fname
      , Description=layers$fdesc
      )
+        day <- format(Sys.time(), '%Y-%m-%d')
+        tajm <- format(Sys.time(), '%H:%M:%S')
 #
 ## ToDo
 #if(toupper(fileType(fname)))
@@ -1958,7 +1960,7 @@ meta <- list(
 s <- skCreate(type, meta, file = file)
 if(.testing) print(names(s))
 #
-f_size <- file.size(file.path(.iroot,file))
+f_size <- file.size(file.path(root,file))
 if(!is.na(f_size)){
    if(f_size< uplimit) {
         cat("---> Uploading ", file,"\n")
@@ -1974,9 +1976,12 @@ if(!is.na(f_size)){
    f <- paste( "Not uploaded, File too large", f_size ,">",  uplimit/10^9,"GB")
           }
   } else   f <-  "Length NA, not uploaded"
-        if(!is.null(reportFile)) cat(layers$fdesc, layers$fname, f , 
-        day,tajm, "\n", ,sep="\t", file=reportFile, append=TRUE)
-
+        if(!is.null(reportFile)) {
+        day <- format(Sys.time(), '%Y-%m-%d')
+        tajm <- format(Sys.time(), '%H:%M:%S')
+        cat(layers$fdesc, layers$fname, f , 
+        day,tajm, "\n", sep="\t", file=reportFile, append=TRUE)
+        }
 }
 @
 
@@ -2414,7 +2419,7 @@ skGetLayer <- function (layer="p", path = getwd(), verbose=FALSE)
 #' getwd()
 #' }
 #
-skSetLayers <- function(path, root=.iroot ,studyForFiles="Investigation files", assaySuffix="-files", verbose=FALSE){
+skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investigation files", assaySuffix="-files", verbose=FALSE){
     x <- unlist(strsplit(path,"/"))
     fl <- paste0(x[!grepl("_[pISA]_.*",x)],collapse="/")
     path <- normalizePath(file.path(root,path))
@@ -2466,49 +2471,70 @@ skSetLayers <- function(path, root=.iroot ,studyForFiles="Investigation files", 
 #' @author Andrej Blejec \email{andrej.blejec@nib.si}
 #' @examples
 #' \dontrun{
-#' astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
-#' oldwd <- setwd(system.file("extdata",astring,package="seekr"))
-#' oldwd
-#' require(pisar)
-#' require(httr)
-#' require(jsonlite)
-#' pisa <- pisa()
-#' skReset()
-#' options(.sk$test)
-#' seekignore <- readLines(file.path(.iroot, "seekignore.txt"))
-#' seekignore
-#' dirs <- skFilesToUpload(.iroot)
-#' layers <- skSetLayers(dirs[1], root=.iroot)
-#' skFindId("projects", layers$pname)
-#' print.simple.list(skOptions())
-#' (layers$iname <- paste(layers$iname, date()))
-#' skCheckAndCreate("I",layers, create=TRUE, verbose=TRUE)
-#' if(interactive()) setwd(oldwd)
-#' getwd()
+astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/other"
+oldwd <- setwd(system.file("extdata",astring,package="seekr"))
+oldwd
+require(pisar)
+require(httr)
+require(jsonlite)
+pisa <- pisa()
+skReset()
+options(.sk$test)
+seekignore <- readLines(file.path(.sroot, "seekignore.txt"))
+seekignore
+dirs <- skFilesToUpload(.sroot)
+layers <- skSetLayers(dirs[229], root=.sroot)
+skFindId("projects", layers$pname)
+print.simple.list(skOptions())
+(layers$iname <- paste(layers$iname, date()))
+skCheckAndCreate("I",layers, create=TRUE, verbose=TRUE)
+skCheckAndCreate("S",layers, create=TRUE, verbose=TRUE)
+skCheckAndCreate("A",layers, create=TRUE, verbose=TRUE)
+if(interactive()) setwd(oldwd)
+getwd()
 #' }
 #
 skCheckAndCreate <- function(type, layers, root=skGetOption("root"), create = TRUE, verbose=FALSE, quiet=FALSE) {
+root=skGetOption("root")
    if(toupper(substr(type,1,1)) == "I") {
        layer <- "investigations"
        parent <- "projects"
        name <- layers$iname
        meta <- layers$idesc
-       root <- root
+       ly <- substr(basename(root),2,2)
+       root <- switch( ly,
+               "I" = root,
+               "S" = dirname(root),
+               "A" = dirname(dirname(root))
+               )
        }
    if(toupper(substr(type,1,1)) == "S") {
        layer <- "studies"
        parent <- "investigations"
        name <- layers$sname
        meta <- layers$sdesc
-       root <- file.path(root,layers$sname)
+       ly <- substr(basename(root),2,2)
+       root = switch( ly,
+               "I" = file.path(root,layers$sname),
+               "S" = root,
+               "A" = dirname(root)
+               )
        }
    if(toupper(substr(type,1,1)) == "A") {
        layer <- "assays"
        parent <- "studies"
        name <- layers$aname
        meta <- layers$adesc
-       root <- file.path(root,layers$sname,layers$aname)
+       ly <- substr(basename(root),2,2)
+       test(ly)
+       root = switch( ly,
+               "I" = file.path(root,layers$sname,layers$aname),
+               "S" = file.path(root,layers$aname),
+               "A" = root
+               )
        }
+   test(meta)
+   test(root)
 #
    r <- "skCheckAndCreate" 
    quiet <- quiet & !verbose
@@ -2521,7 +2547,6 @@ skCheckAndCreate <- function(type, layers, root=skGetOption("root"), create = TR
    } else r <- skFindId(layer,name)
    return(r)
 }
-
 @
 
 

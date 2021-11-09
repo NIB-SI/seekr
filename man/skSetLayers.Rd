@@ -6,7 +6,7 @@
 \usage{
 skSetLayers(
   path,
-  root = .iroot,
+  root = skGetOption("root"),
   studyForFiles = "Investigation files",
   assaySuffix = "-files",
   verbose = FALSE

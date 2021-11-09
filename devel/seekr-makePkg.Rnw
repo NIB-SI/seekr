@@ -197,10 +197,10 @@ Load
 devtools::load_all()
 cat("Package:",pkgName,"\n")
 library(pkgName, character.only=TRUE)
-help(package=(pkgName))
+help(package=eval(pkgName))
 
 @
-
+D:/DEJAVNOSTI/OMIKE/pISA-projects/_p_VinskaTrta/_I_EnViRoS/_S_01_Integ
 \section{PDF documentation}
 
 <<>>=
@@ -211,11 +211,11 @@ if(file.exists(pdfFile)) file.remove(pdfFile)
 system(paste(shQuote(file.path(R.home("bin"), "R")),
     "CMD", "Rd2pdf", shQuote(instPath)))
 dir(pattern=pkgName)
-
 @
 
 <<>>=
 if(interactive()) help(package=(pkgName), help_type="pdf")
+
 @
 
 Send package to R Windows builder

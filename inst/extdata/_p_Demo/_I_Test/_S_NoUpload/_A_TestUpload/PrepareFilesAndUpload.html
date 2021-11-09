@@ -190,7 +190,7 @@ summary {
 
 <h1 class="title toc-ignore">Prepare list of files for upload to FAIRDOMHub with seekr</h1>
 <h4 class="author">A. Blejec</h4>
-<h4 class="date">Last compiled on 2021-11-06</h4>
+<h4 class="date">Last compiled on 2021-11-08</h4>
 
 </div>
 
@@ -315,7 +315,10 @@ seekignore</code></pre>
 ## [12] &quot;/Interacitve&quot;</code></pre>
 <p>Lines three and four have slash (/) at the end to ignore directories. Line five and six will prevent upload of batch files and files with specific name (in any directory). One can add other patterns into the seekignore.txt file before running the code below.</p>
 <p>Function <code>skFilesToUpload</code> will first create a list of files in root directory. Then, it will read the seekignore.txt and extend it with patterns of layers that should not be uploaded according to metadata key “Upload to FAIRDOMHub”. In addition, seekignre list will be appended with the list of empty README.MD files that might clutter the FAIRDOMHub list of files. Then it will filter it according to declarations in the combined seekignore pattern list.</p>
-<pre class="r"><code>forUpload &lt;- skFilesToUpload( root = pini$I$root, skignore = seekignore)</code></pre>
+<pre class="r"><code>uploadRoot &lt;- pini$I$root
+uploadRoot</code></pre>
+<pre><code>## [1] &quot;../..&quot;</code></pre>
+<pre class="r"><code>forUpload &lt;- skFilesToUpload( root = uploadRoot, skignore = seekignore)</code></pre>
 <pre><code>## Ignoring pISA layer: _S_NoUpload/_A_TestUpload 
 ## Ignoring pISA layer: _S_NoUpload 
 ## Ignored pISA layers: 2 / 6 
@@ -326,10 +329,10 @@ seekignore</code></pre>
 ## Ignoring 3 files [ common\.ini  ]
 ## Ignoring 0 files [ *\.zip  ]
 ## Ignoring 0 files [ *\.tmp  ]
-## Ignoring 5 files [ *\.log  ]
+## Ignoring 4 files [ *\.log  ]
 ## Ignoring 3 files [ _outputFile\.R  ]
 ## Ignoring 0 files [ /Interacitve  ]
-## Ignoring 35 files [ _S_NoUpload  ]
+## Ignoring 20 files [ _S_NoUpload  ]
 ## Ignoring 0 files [ _S_NoUpload/_A_TestUpload  ]
 ## Ignoring 0 files [ _S_NoUpload/_A_Work-R/input/README\.MD  ]
 ## Ignoring 0 files [ _S_NoUpload/_A_Work-R/other/README\.MD  ]
@@ -349,7 +352,7 @@ seekignore</code></pre>
 ## Ignoring 1 files [ _S_Show/reports/README\.MD  ]
 ## Ignoring 1 files [ XX/presentations/README\.MD  ]
 ## Ignoring 1 files [ XX/reports/README\.MD  ]
-## Files to upload: 8 / 88</code></pre>
+## Files to upload: 8 / 72</code></pre>
 <p>Final list of files for upload is</p>
 <pre class="r"><code>forUpload</code></pre>
 <pre><code>## [1] &quot;_INVESTIGATION_METADATA.TXT&quot;          
@@ -360,6 +363,13 @@ seekignore</code></pre>
 ## [6] &quot;_S_Show/_A_Work-R/_Assay_METADATA.TXT&quot;
 ## [7] &quot;_S_Show/_A_Work-R/input/some-data.txt&quot;
 ## [8] &quot;_S_Show/_A_Work-R/reports/README.MD&quot;</code></pre>
+<pre class="r"><code>head(forUpload)</code></pre>
+<pre><code>## [1] &quot;_INVESTIGATION_METADATA.TXT&quot;          
+## [2] &quot;phenodata_20191015.txt&quot;               
+## [3] &quot;README.MD&quot;                            
+## [4] &quot;seekignore.txt&quot;                       
+## [5] &quot;_S_Show/_STUDY_METADATA.TXT&quot;          
+## [6] &quot;_S_Show/_A_Work-R/_Assay_METADATA.TXT&quot;</code></pre>
 </div>
 <div id="connect-with-the-fairdomhub" class="section level2">
 <h2>Connect with the FAIRDOMHub</h2>
@@ -414,11 +424,43 @@ skSetOption(&quot;myid&quot;, &quot;&lt;FAIRDOMHub user id number&gt;&quot;)</co
 <div id="set-the-root-directory-for-uploading" class="section level2">
 <h2>Set the root directory for uploading</h2>
 <p>Above we decided to upload files in the Investigation branch on the local computer. This decision has to be set in the options by setting the ‘root’ option:</p>
-<pre class="r"><code>skSetOption(&quot;root&quot;, pini$I$root)</code></pre>
+<pre class="r"><code>skSetOption(&quot;root&quot;, uploadRoot)</code></pre>
 <pre><code>## $sk.root
 ## [1] &quot;../..&quot;</code></pre>
 <p>The Investigation branch should be connected to an existing project on the host. The project is usually set by the creator using the web forms on the host early after the project starts. The creator can add members, institutions, set sharing permissions and license.</p>
 <p>For our purpose, we will use an existing project named ‘_p_Demo’ within a programme ‘pISA-tree’. First we change the project name in pisa information list</p>
+<pre class="r"><code>skSetLayers(path=&quot;.&quot;,root=skGetOption(&quot;root&quot;))</code></pre>
+<pre><code>## $pname
+## [1] &quot;_p_Demo&quot;
+## 
+## $iname
+## [1] &quot;_I_Test&quot;
+## 
+## $sname
+## [1] &quot;Investigation files&quot;
+## 
+## $aname
+## [1] &quot;_I_Test-files&quot;
+## 
+## $fname
+## [1] &quot;.&quot;
+## 
+## $pdesc
+## [1] &quot;&quot;
+## 
+## $idesc
+## [1] &quot;&quot;
+## 
+## $sdesc
+##                   Key   Value
+## 1 Investigation files _I_Test
+## 
+## $adesc
+##                                 Key   Value
+## 1 Files connected to investigation: _I_Test
+## 
+## $fdesc
+## [1] &quot;_p_Demo/_I_Test/&quot;</code></pre>
 <pre class="r"><code>.pname &lt;- &quot;_p_Demo&quot;
 pini$p$name &lt;- .pname
 .prname &lt;- &quot;pISA-tree&quot;</code></pre>
@@ -446,11 +488,11 @@ pini$p$name &lt;- .pname
 if( skFindTitle(&quot;projects&quot;, skGetOption(&quot;proj&quot;))[&quot;title&quot;]!=.pname) {cat(&quot;Wrong project name or id. Create project&quot;, layers[1],&quot;\n&quot;)} else {cat(&quot;Project exists:&quot;, .pname, &quot;\n&quot;)}</code></pre>
 <pre><code>## Project exists: _p_Demo</code></pre>
 <p>To enable unique investigation name date and time will be appended to the original investigation name.</p>
-<p>For each file in the list of files function ‘skUploadFiles’ ensures that necessary layers exist and uploads the file itself.</p>
+<p>For each file in the list of files function ‘skUploadFiles’ ensures that necessary layers exist and uploads the file itself. The argument ‘test’ creates unique investigation name, which is useful in the test period.</p>
 <pre class="r"><code>skUploadFiles(forUpload, test=TRUE, append=FALSE)</code></pre>
 <pre><code>## |-----&gt;                                           | 1/8
 ## _INVESTIGATION_METADATA.TXT
-## Create: investigations&#39;_I_Test | 2021-11-06 23:28:16&#39;
+## Create: investigations&#39;_I_Test | 2021-11-08 20:04:38&#39;
 ## Create: studies&#39;Investigation files&#39;
 ## Create: assays&#39;_I_Test-files&#39;
 ## ---&gt; Uploading  _INVESTIGATION_METADATA.TXT 
@@ -478,6 +520,30 @@ if( skFindTitle(&quot;projects&quot;, skGetOption(&quot;proj&quot;))[&quot;title
 ## |-------------------------------------------------&gt;| 8/8
 ## _S_Show/_A_Work-R/reports/README.MD
 ## ---&gt; Uploading  _S_Show/_A_Work-R/reports/README.MD</code></pre>
+</div>
+<div id="after-upload" class="section level1">
+<h1>After upload</h1>
+<p>You can follow the progress of the upload in console. In addition, you get the upload details in two files: the log-file (FAIRDOM.log) and and file with the name that starts with ’Upload …” and date tim (e.g. Upload-2021-11-07_16_20_23.txt). This file contains uploaded file names and links to uploaded files on FAIRBOMHub. Both files appear in the working directory.</p>
+<pre class="r"><code>dir(pattern=&quot;*.log&quot;)</code></pre>
+<pre><code>## [1] &quot;FAIRDOM.log&quot;</code></pre>
+<pre class="r"><code>fn &lt;- rev(dir(pattern=&quot;Upload*&quot;))[1]
+fn</code></pre>
+<pre><code>## [1] &quot;Upload-2021-11-08_20_04_38.txt&quot;</code></pre>
+<pre class="r"><code>head(read.table(fn,sep=&quot;\t&quot;, header=TRUE))</code></pre>
+<pre><code>##                                 Path                   File_name
+## 1                   _p_Demo/_I_Test/ _INVESTIGATION_METADATA.TXT
+## 2                   _p_Demo/_I_Test/      phenodata_20191015.txt
+## 3                   _p_Demo/_I_Test/                   README.MD
+## 4                   _p_Demo/_I_Test/              seekignore.txt
+## 5           _p_Demo/_I_Test/_S_Show/         _STUDY_METADATA.TXT
+## 6 _p_Demo/_I_Test/_S_Show/_A_Work-R/         _Assay_METADATA.TXT
+##                                                      URL       Date     Time  X
+## 1 https://testing.sysmo-db.org/data_files/1686?version=1 2021-11-08 20:05:16 NA
+## 2 https://testing.sysmo-db.org/data_files/1687?version=1 2021-11-08 20:05:18 NA
+## 3   https://testing.sysmo-db.org/documents/600?version=1 2021-11-08 20:05:19 NA
+## 4 https://testing.sysmo-db.org/data_files/1688?version=1 2021-11-08 20:05:22 NA
+## 5 https://testing.sysmo-db.org/data_files/1689?version=1 2021-11-08 20:05:27 NA
+## 6 https://testing.sysmo-db.org/data_files/1690?version=1 2021-11-08 20:05:30 NA</code></pre>
 </div>
 
 

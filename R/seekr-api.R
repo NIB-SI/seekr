@@ -1825,6 +1825,8 @@ meta <- list(
        Title=layers$fname
      , Description=layers$fdesc
      )
+        day <- format(Sys.time(), '%Y-%m-%d')
+        tajm <- format(Sys.time(), '%H:%M:%S')
 #
 ## ToDo
 #if(toupper(fileType(fname)))
@@ -1836,7 +1838,7 @@ meta <- list(
 s <- skCreate(type, meta, file = file)
 if(.testing) print(names(s))
 #
-f_size <- file.size(file.path(.iroot,file))
+f_size <- file.size(file.path(root,file))
 if(!is.na(f_size)){
    if(f_size< uplimit) {
         cat("---> Uploading ", file,"\n")
@@ -1852,9 +1854,12 @@ if(!is.na(f_size)){
    f <- paste( "Not uploaded, File too large", f_size ,">",  uplimit/10^9,"GB")
           }
   } else   f <-  "Length NA, not uploaded"
-        if(!is.null(reportFile)) cat(layers$fdesc, layers$fname, f , 
-        day,tajm, "\n", ,sep="\t", file=reportFile, append=TRUE)
-
+        if(!is.null(reportFile)) {
+        day <- format(Sys.time(), '%Y-%m-%d')
+        tajm <- format(Sys.time(), '%H:%M:%S')
+        cat(layers$fdesc, layers$fname, f , 
+        day,tajm, "\n", sep="\t", file=reportFile, append=TRUE)
+        }
 }
 
 
@@ -2195,7 +2200,7 @@ skGetLayer <- function (layer="p", path = getwd(), verbose=FALSE)
 #' getwd()
 #' }
 #
-skSetLayers <- function(path, root=.iroot ,studyForFiles="Investigation files", assaySuffix="-files", verbose=FALSE){
+skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investigation files", assaySuffix="-files", verbose=FALSE){
     x <- unlist(strsplit(path,"/"))
     fl <- paste0(x[!grepl("_[pISA]_.*",x)],collapse="/")
     path <- normalizePath(file.path(root,path))
