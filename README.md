@@ -15,7 +15,7 @@ if (!require(devtools)) {
 devtools::install_github("nib-si/seekr")
 ```
 
-**From this repo (development version)**
+**From development repo**
 
 ```R
 if (!require(devtools)) {
