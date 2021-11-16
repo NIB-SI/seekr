@@ -2,7 +2,9 @@
 
 S3method(print,seek_api)
 export(contentType)
+export(skCheck)
 export(skCheckAndCreate)
+export(skCheckAndCreate2)
 export(skContent)
 export(skCreate)
 export(skDelete)

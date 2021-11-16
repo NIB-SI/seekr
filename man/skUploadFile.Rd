@@ -17,7 +17,7 @@ skUploadFile(
 \item{root}{character. Root directory.}
 }
 \description{
-Create an object of type 'documents' or 'data_files' 
+Create an object of type 'documents' or 'data_files'
 and upload file content as a blob.
 }
 \note{
