@@ -1,0 +1,13 @@
+Assay:	_A_TestUpload
+Short Name:	TestUpload
+Assay Class:	DRY
+Assay Type:	R
+Title:	Testing upload
+Description:	This assay is meant for testing the seekr functions.
+pISA Assay creation date:	2021-10-29
+pISA Assay creator:	Andrej Blejec
+Analyst:	AB
+Phenodata:	
+Featuredata:	
+Data:	
+Upload to FAIRDOMHub:	No

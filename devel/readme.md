@@ -10,3 +10,13 @@ This one is maybe more testing?
 Script:
 
 FAIRDOMHub-Upload-with-seekr.Rmd 
+
+
+# Links to some useful places:
+
+* seek on github: <https://github.com/seek4science/seek> 
+* seek API documentation (moved away from Swagger ??): <>
+* FAIRDOMHub: <https://github.com/FAIRdom/fairdom.github.io>
+* Testsite: <https://testing.sysmo-db.org/>
+* API Workshop <https://github.com/FAIRdom/api-workshop>
+* Study batch upload: <https://github.com/seek4science/seek/blob/master/public/batch_upload_template>

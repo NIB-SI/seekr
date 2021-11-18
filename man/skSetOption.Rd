@@ -23,7 +23,16 @@ Sets seekr option according to the type.
 skSetOption("people",111)
 skSetOption("myid", 368)
 skOptions()
-skSetOption("bla",1)
+skSetOption("bla",1) # can not be set
+# Set option sk.aid
+skSetOption("assay",1234)
+skOptions()
+# Delete/reset option sk.aid
+skSetOption("assay",NULL)
+skOptions()
+Get options
+skGetOption("myid")
+skGetOption("inv")
 }
 }
 \seealso{

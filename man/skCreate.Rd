@@ -4,14 +4,20 @@
 \alias{skCreate}
 \title{Create pISA layer or *sk* component.}
 \usage{
-skCreate(type = "assays", meta = list(), class = "EXP", file = "NA.TXT")
+skCreate(
+  type = "assays",
+  meta = list(),
+  title = NULL,
+  class = "EXP",
+  file = "NA.TXT"
+)
 }
 \arguments{
-\item{type}{Component name (e.g. 'people', 'projets', ...).}
+\item{type}{Component type (e.g. 'people', 'projects', ...).}
 
 \item{meta}{Data frame with pISA metadata or
-a list with minimal information (Title,
-Description, *ToDo: add fields*).}
+a list with minimal information (short layer name, Title,
+Description, *ToDo: add fields*). See Examples.}
 
 \item{class}{Assay class key string.
 Possible values are 'EXP' and 'MODEL'.}
@@ -38,16 +44,18 @@ options(.sk$test)
 options(sk.prid = 26)
 skOptions("id")
 meta= list(
-      Title=paste("Test project", Sys.time())
+      project=paste("Test project", Sys.time())
+    , Title="Test project"
     , Description="Testing upload")
 meta
 rm(sp)
  sp <- skCreate( type = "projects"
     , meta = meta
     )
-    (r <- skFindId("projects",meta$Title))
+ skFindId("projects",meta$project)
  sp
- str(skContent(sp))
+ cat(skContent(sp)$attributes$description)
+ sp$url
 # Call to API does not set the 'member' field
 # Add member manually in the project page on the web site:
 # /Actions/Administer project members
@@ -55,7 +63,8 @@ rm(sp)
  options(sk.prid=26, sk.pid=sp$id)
  skOptions("id")
  meta= list(
-      Title=paste("Test investigation", Sys.time())
+      Investigation=paste("Test investigation", Sys.time())
+    , Title = "Test investigation"
     , Description="Testing upload")
     meta
     rm(si)
@@ -64,45 +73,40 @@ rm(sp)
     )
  si
  skContent(si)$id
- skFindId("investigations",meta$Title)
- options(sk.iid=si$id)
+ skFindId("investigations",meta$Investigation)
  skOptions("id")
-#'
- iid=skContent(si)$id
+# Create Study
+ iid <- si$id
  options(sk.prid=26, sk.pid=sp$id, sk.iid=si$id)
  skOptions("id")
- ss <- skCreate( type = "studies"
-  , meta= list(
-      Title=paste("Test study", Sys.time())
+ meta= list(
+      Study=paste("Test study", Sys.time())
+    , Title="Test Study"
     , Description="Testing upload")
-    )
+ ss <- skCreate( type = "studies", meta)
  ss
- skContent(ss)$id
-#'
+ss$id
+ skFindId("studies",meta$Study)
+# Assay
  options(sk.prid = 26
        , sk.pid=skContent(sp)$id
        , sk.iid=skContent(si)$id
        , sk.sid=skContent(ss)$id
        )
  skOptions()
- sa <- skCreate( type = "assays"
-  , meta= list(
-      Title=paste("Test assay", Sys.time())
-    , Description="Testing upload")
+ meta= list(
+      Assay=paste("Test Assay", Sys.time())
+    , Title="Test Assay"
+    , Description="Testing upload"
     , class="EXP"
     )
- str(sa)
+ sa <- skCreate( type = "assays"  , meta)
+ sa
+ sa$id
  skContent(sa)$relationships$submitter
  skContent(sa)$links
 }
 
-# Type: data_file
-astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
-oldwd <- setwd(system.file("extdata",astring,package="seekr"))
-oldwd
-.aname <- getLayer("A")
-.aroot <- getRoot("A")
-.ameta  <- readMeta()
  file <- "input/README.MD"
  options(sk.prid = 26, sk.pid=sp$id, sk.iid=si$id , sk.sid=ss$id , sk.aid=sa$id)
  skOptions()
@@ -110,7 +114,7 @@ oldwd
  type <- "documents"
  sdat <- skCreate( type = type
   , meta= list(
-      Title=paste("Test assay", Sys.time())
+      Title=paste("Test document", Sys.time())
     , Description="Testing of upload")
   , file=file
     )
@@ -120,7 +124,7 @@ oldwd
 if(interactive()) setwd(oldwd)
 getwd()
 res <- sdat$content
-item_link <- file.path(res$meta$base_url,res$links$self)
+item_link <- paste0(res$meta$base_url,res$links$self)
 if(interactive()) shell.exec(item_link)
 }
 }

@@ -2,9 +2,9 @@
 % Please edit documentation in R/seekr-api.R
 \name{skGet}
 \alias{skGet}
-\title{Get inormation from repository.}
+\title{Get information from repository.}
 \usage{
-skGet(type, id, uri = options("sk.url"), ...)
+skGet(type, id, filter, uri = options("sk.url"), verbose = FALSE, ...)
 }
 \arguments{
 \item{type}{Type of information (e.g. "person").}
@@ -13,18 +13,21 @@ skGet(type, id, uri = options("sk.url"), ...)
 
 \item{uri}{Repository base address (URI).}
 
+\item{verbose}{logical, print details if TRUE.}
+
 \item{...}{further arguments.}
 }
 \value{
 An object (list) of class \code{seek_api}.
 }
 \description{
-Get inormation from repository.
+Get information from repository.
 }
 \note{
 Parameter ... is ignored at this time.
 
-Touched component id is set in options.
+Touched component id is set in the options (see:
+     \code{\link{skOptions}}).
 }
 \examples{
 \dontrun{
@@ -40,7 +43,7 @@ skGet("people",0)
 }
 }
 \seealso{
-\code{\link{get}}
+\code{\link{get}}, \code{\link{skRead}}, \code{\link{skList}}
 }
 \author{
 Andrej Blejec \email{andrej.blejec@nib.si}

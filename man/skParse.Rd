@@ -21,13 +21,13 @@ Parse the response from SEEK API and convert to a list.
 \dontrun{
 options(.sk$test)
 options("sk.myid")
-r <- skGet("people",options("sk.myid"))
+r <- skRead("people",options("sk.myid"))
 names(r)
 r$response$status_code
 status_code(r$response)
 names(r$content)
 r
-r <- skGet("people")
+r <- skRead("people")
 length(r$content)
 names(r$content)
 r$content[[1]]

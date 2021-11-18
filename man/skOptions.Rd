@@ -34,20 +34,24 @@ At the moment two locations are available: main FAIRDOMHub
 Function options() is used to store server location,
        user credentials and pISA layer identifications.
        Options that can be declared:
-         sk.url (server location),
-         sk.usr (username),
-         sk.pwd (password),
-         sk.myid (user id on server),
-         sk.instid (user's institution id),
-         sk.prid (program id),
-         sk.pid (project id),
-         sk.iid (investigation id),
-         sk.sid (study id),
-         sk.aid (assay id).
+
+  \describe{
+  \item{sk.url}{server location}
+  \item{sk.usr}{username}
+  \item{sk.pwd}{password}
+  \item{sk.myid}{user id on server}
+  \item{sk.instid}{user's institution id}
+  \item{sk.prid}{program id}
+  \item{sk.pid}{project id}
+  \item{sk.iid}{investigation id}
+  \item{sk.sid}{study id}
+  \item{sk.aid}{assay id}
+  \item{sk.root}{root of files for upload}
+    }
 }
 \examples{
 \dontrun{
-options(sk.myid=368)
+options(sk.myid=368, sk.pid=166, sk.usr="Username")
 skOptions()
 skOptions("id")
 skOptions(hide=NULL)

@@ -1,0 +1,193 @@
+---
+title: "Upload to FAIRDOMHub with seekr"
+author: "A. Blejec"
+date: "Last compiled on `r format(Sys.time(), '%Y-%m-%d')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+.testing <- TRUE
+```
+
+## Introduction
+
+I will organize a batch upload to FAIRDOMHub. For the operation I have prepared the R package `seekr`, available at [GitHub](https://github.com/NIB-SI/seekr). Package operations are based on SEEK API [documentation]{https://fairdomhub.org/api}.
+
+```{r}
+library(pisar)
+#library(rio)
+library(jsonlite)
+library(httr)
+library(seekr)
+```
+
+
+## Prepare pISA environment
+
+Package `seekr` contains demo pISA-tree project. For this demonstration we can use the demo project. It is assumed, that our working directory is a layer of the pISA project. It is recommended that working directory is an assay, so we will start in an assay that is available in the package `seekr`.
+
+```{r}
+astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
+oldwd <- setwd(system.file("extdata", astring, package="seekr"))
+oldwd
+dir()
+```
+
+First wee need to initialize the pISA-tree. Function `pisa` returns information of the Function `pisa` will complain, if the working directory is not a pISA layer.
+
+```{r}
+pini <- pisa()
+```
+
+For a short orientation, here is the structure of the information about the pISA-tree:
+
+```{r}
+str(pini)
+```
+
+Information can be extracted from the list with information, e.g. assay name: 
+```{r}
+pini$A$name
+```
+
+Many parts are present in dot-variables, for assay we have `.a????`:
+
+```{r}
+.aname  # pini$A$name
+.aroot  # pini$A$root
+.ameta  # pini$A$meta
+```
+
+For other layers, shorter dot-variables are set `.s????`, `.i????` and `.p????`. Compare `pini` structure to construct other dot-names:
+```{r}
+pini$inroot
+.inroot
+```
+
+## Prepare list of files
+
+The most important task is to prepare the list of files to be uploaded. Typically one will upload files in one investigation, usually with all related branches (studies and assays). The metadata key "Upload to FAIRDOMHub" (Yes/No) controls if the layer (together with all subordinated layers) should be included or ignored by the upload process. In addition,  specific files or paths can be declared as ignored by the upload process. 
+File `seekignore.txt` in the investigation layer contains file names, directory names or name patterns that are used to filter and exclude the list of files to be uploaded. An example of the seekignore file is here:
+
+```{r}
+seekignore <- readLines(file.path(.iroot, "seekignore.txt"))
+seekignore
+```
+
+Lines three and four have slash (/) at the end to ignore directories. Line five and six will prevent upload of batch files and files with specific name (in any directory). One can add other patterns into the seekignore.txt file before running the code below.
+
+Function `skFilesToUpload` will first create a list of files in root directory. Then, it will read the seekignore.txt and extend it with patterns of layers that should not be uploaded according to metadata key "Upload to FAIRDOMHub".
+In addition, seekignre list will be appended with the list of empty README.MD files that might clutter the FAIRDOMHub list of files.
+Then it will filter it according to declarations in the combined seekignore pattern list.
+
+```{r}
+forUpload <- skFilesToUpload( root = pini$I$root)
+```
+
+Final list of files for upload is
+
+```{r}
+forUpload
+```
+
+## Prepare connection with FAIRDOMHub
+
+Restart the log file.
+
+```{r}
+logfn <- "Test-upload.log"
+skLog("Starting upload for demo project", file=logfn, append=FALSE)
+readLines(logfn)
+```
+
+Initialize connection with SEEK cloud service. Cloud service url and project creator name and SEEK service id are expected in the project metadata file. They should be stored in options().
+
+```{r}
+skReset()
+options(.sk$test)
+# options(.sk$main)
+skOptions()
+```
+
+A part of the settings is shown above (to not reveal my password). Option "sk.myid" will be used as creator or uploader id. You can replace it with your preffered one like this:
+
+```{r eval=FALSE}
+options(sk.myid = <your id>)
+```
+
+Eventually you can perform an automatic check of creator's FAIRDOMHub id from project metadata. Project creator name should be spelled exactly as in the FAIRDOMHub account.
+
+```{r}
+meta <- pini$p$meta
+creatorName <- meta[grepl("creator",meta$Key),]$Value
+creatorName
+crid <- skFindId("people",creatorName)["id"]
+crid
+if(crid == 0 ) crid <- 368 # just in case if not found : )
+myid <- crid
+```
+
+Save creator id into seekr options.
+
+```{r}
+options(sk.myid = crid)
+```
+
+
+### Get and set programme and project info
+
+Usually, the project on FAIRDOMHub will be created interactively by the programme admin. First, we will check the existence of our demo project `r pini$p$name`on the FAIRDOMHub. The project name might be just the name, without prefix a layer prefix `\_p\_`. The function skExists sets the "sk.pid" option to project id. If the project is not found, it sets "sk.pid" to zero.
+
+Functions of seekr package that communicate with the FAIRDOMHub automatically store the resulting layer ids in the seekr part of options.
+
+Let us check. First we have to set/check the programme (pISA-tree) we want to use. Function skExists will check and set the programme id option ("sk.prid")
+```{r}
+options("sk.prid")
+skExists("programme","pISA-tree")
+options("sk.prid")
+```
+
+
+
+```{r}
+found <- skExists("projects", pini$p$name)
+found
+if(!found) found <- skExists("projects", gsub("_p_", "", pini$p$name))
+if(found) {
+pinfo <- skFindTitle("projects", options("sk.pid"))
+cat("Project found:", pinfo$title, "\n")
+} else {
+# create project
+pinfo <- skCreate("projects", meta = pini$p$meta)
+}
+# project identification number
+pid <- pinfo$id
+# project name
+pname <-  pinfo["title"]
+pname
+pini$p$name == pname
+#
+```
+The local project name and the name on the cloud match. On the FAIRDOMHub, project components have identification numbers. Our project has the identification number `r pid`:
+
+```{r}
+(pid <- getOption("sk.pid"))
+```
+Project id is part of the path to the project on the cloud:
+
+```{r}
+skRead("projects",pid)$url
+```
+
+For demonstration purposes we will change investigation name into unique name by appending current date and time to the original name.
+
+```{r}
+if(FALSE){
+pini$I$name
+pini$I$name <- paste(pini$p$name,  Sys.time())
+pini$I$meta[1,]$Value <- pini$I$name
+pini$I$meta[1:3,]
+}
+```
+

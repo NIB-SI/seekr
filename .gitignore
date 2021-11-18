@@ -10,7 +10,7 @@ packrat/lib*/
 .RData
 .Ruserdata
 inst/doc
-devel/
+#devel/
 # Tex related
 *.gz
 *.synctex
@@ -58,3 +58,6 @@ Temporary Items
 .apdisk
 Meta
 doc
+Upload-2021*.txt
+
+*.log

@@ -1,0 +1,153 @@
+---
+title: "Prepare list of files for upload to FAIRDOMHub with seekr"
+author: "A. Blejec"
+date: "Last compiled on `r format(Sys.time(), '%Y-%m-%d')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+.testing <- TRUE
+```
+
+## Introduction
+
+I will organize a batch upload to FAIRDOMHub. For the operation I have prepared the R package `seekr`, available at [GitHub](https://github.com/NIB-SI/seekr). Package operations are based on SEEK API [documentation]{https://fairdomhub.org/api}.
+
+```{r}
+library(pisar)
+#library(rio)
+library(jsonlite)
+library(httr)
+library(seekr)
+```
+
+
+## Prepare pISA environment
+
+Package `seekr` contains demo pISA-tree project. For this demonstration we can use the demo project. It is assumed, that our working directory is a layer of the pISA project. It is recommended that working directory is an assay, so we will start in an assay that is available in the package `seekr`.
+
+Note: If R is already started in an existing assay, the folowing chunk is not needed, set eval to FALSE.
+
+```{r eval=TRUE}
+astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
+oldwd <- setwd(system.file("extdata", astring, package="seekr"))
+oldwd
+dir()
+```
+
+First wee need to initialize the pISA-tree. Function `pisa` returns information of the Function `pisa` will complain, if the working directory is not a pISA layer.
+
+```{r}
+pini <- pisa()
+```
+
+For a short orientation, here is the structure of the information about the pISA-tree:
+
+```{r}
+str(pini)
+```
+
+Information can be extracted from the list with information, e.g. assay name:
+```{r}
+pini$A$name
+```
+
+Many parts are present in dot-variables, for assay we have `.a????`:
+
+```{r}
+.aname  # pini$A$name
+.aroot  # pini$A$root
+.ameta  # pini$A$meta
+```
+
+For other layers, shorter dot-variables are set `.s????`, `.i????` and `.p????`. Compare `pini` structure to construct other dot-names:
+```{r}
+pini$inroot
+.inroot
+```
+
+## Prepare list of files
+
+The most important task is to prepare the list of files to be uploaded. Typically one will upload files in one investigation, usually with all related branches (studies and assays). The metadata key "Upload to FAIRDOMHub" (Yes/No) controls if the layer (together with all subordinated layers) should be included or ignored by the upload process. In addition,  specific files or paths can be declared as ignored by the upload process.
+File `seekignore.txt` in the investigation layer contains file names, directory names or name patterns that are used to filter and exclude the list of files to be uploaded. An example of the seekignore file is here:
+
+```{r}
+seekignore <- readLines(file.path(.iroot, "seekignore.txt"))
+seekignore
+```
+
+Lines three and four have slash (/) at the end to ignore directories. Line five and six will prevent upload of batch files and files with specific name (in any directory). One can add other patterns into the seekignore.txt file before running the code below.
+
+Function `skFilesToUpload` will first create a list of files in root directory. Then, it will read the seekignore.txt and extend it with patterns of layers that should not be uploaded according to metadata key "Upload to FAIRDOMHub".
+In addition, seekignre list will be appended with the list of empty README.MD files that might clutter the FAIRDOMHub list of files.
+Then it will filter it according to declarations in the combined seekignore pattern list.
+
+```{r}
+forUpload <- skFilesToUpload( root = pini$I$root )
+```
+
+Final list of files for upload is
+
+```{r}
+forUpload
+```
+
+## Connect with the FAIRDOMHub
+
+The user has to have credentials (username, password and FAIRDOMHub id) for the SEEK supported host (url). Production host for FAIRDOMHub as located at <https://fairdomhub.org>. In this document, we will use the test host, located at <https://testing.sysmo-db.org>.
+
+### Options
+
+Functions of package `seekr` intensively use R options() function that is extended by several wrapper functions (e. g. skSetOption, skGetOption,skOptions, skReset). All relevant information are kept in options() list with typical prefix 'sk.'. In addition to credentials and host url, options keep track of the last objects that were created or used during the upload process. This minimizes the need of explicitly referring to the object ids. To eliminate problems with some incorrectly set options, it is a good practice to reset the options before the start of the upload process.
+
+```{r}
+skReset( all=TRUE )
+skOptions()
+```
+
+### Prepare and set the credentials
+
+User has to set the credential options.
+
+```{r}
+skSetOption("url", "https://testing.sysmo-db.org")
+# Relace values with your username and password
+skSetOption("usr", "<user name>")
+skSetOption("pwd", "<password>")
+skSetOption("myid", "<id number>")
+```
+
+With some hidden code, the options are set to my credentials.
+
+```{r, echo=FALSE}
+options(.sk$test)
+```
+```{r}
+skOptions()
+```
+
+We can test if the settings are set correctly by finding user's name
+
+```{r}
+skFindTitle("people", skGetOption("myid"))
+skOptions()
+```
+
+If you see correct user's name in the title field, the connection is alive and set correctly.
+
+## Set the root directory for uploading
+
+Above we decided to upload files in the Investigation branch. This decision has to be set in the options by setting the 'root' option:
+
+```{r}
+skSetOption("root", pini$I$root)
+```
+
+```{r}
+setwd(oldwd)
+```
+
+
+
+
