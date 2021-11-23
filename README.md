@@ -26,6 +26,3 @@ if (!require(devtools)) {
 }
 devtools::install_github("ablejec/seekr")
 ```
-
-## Webpage
-[https://nib-si.github.io/seekr/](https://nib-si.github.io/seekr/)
