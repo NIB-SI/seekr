@@ -170,7 +170,7 @@ pini$p$name <- .pname
 .prname <- "pISA-tree"
 ```
 
-By checking the existence of the programme and project, the seekr options will be set. SEEK snforces unique programme and project names. For other ISA layers uniqness must be checked within the parent levels. pISA-tree layer names are also folder names and therefore unique within the parent layer. This is very important for finding appropriate layer for updates. 
+By checking the existence of the programme and project, the seekr options will be set. SEEK snforces unique programme and project names. For other ISA layers uniqness must be checked within the parent levels. pISA-tree layer names are also folder names and therefore unique within the parent layer. This is very important for finding appropriate layer for updates.
 
 ```{r}
 skFindId("programme", .prname)
@@ -186,7 +186,7 @@ print.simple.list(skOptions("id"))
 Communication with the host is logged in the log-file. Let's start a new log-file.
 
 ```{r restart_log_file}
-skLog("Testing upload", 
+skLog("Testing upload",
     file="FAIRDOM.log", append=FALSE)
 ```
 
@@ -205,7 +205,8 @@ ind <- c(1:5,sample(1:length(forUpload),100))
 ind <- 1:8
 head(forUpload[ind])
 #
-skUploadFiles(forUpload[ind], test=TRUE, append=FALSE, verbose=TRUE, invname="_I_01_LabTrials-test2")
+#skUploadFiles(forUpload, test=TRUE, append=FALSE)
+skUploadFiles(forUpload[ind], test=TRUE, append=FALSE, verbose=TRUE, invname="_I_01_LabTrials-test-private1")
 ```
 
 # After upload
