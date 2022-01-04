@@ -935,7 +935,7 @@ skFindId <- function(type, title){
 <<skCheck>>=
 #' Check if component exists within the parent layer.
 #'
-#' This is a faster version of skExists, intended mostly to check existence 
+#' This is a faster version of skExists, intended mostly to check existence
 #'     of ISA layers in the parent layer.
 #' @param type Component type (possibly shortened e.g. 'pe' for 'people',
 #' 'proj' for 'projects', ...).
@@ -1003,7 +1003,7 @@ skCheck <- function(type, title, ptype, pid = skGetOption(ptype),  verbose=FALSE
      r <- skSearch(type, title)
      d <- skContent(r)
      ok <- length(d) > 0
-     if(!ok)  { 
+     if(!ok)  {
          skSetOption(type, NULL)
          return(FALSE)
          } else {
@@ -1793,7 +1793,7 @@ contentType <- function(file){
 #'       Study=paste("Test study", Sys.time())
 #'     , Title="Test Study"
 #'     , Description="Testing upload")
-#'  ss <- skCreate( type = "studies", meta)
+#'  ss <- skCreate( type = "studies", meta, access="no_access")
 #'  ss
 #' ss$id
 #'  skFindId("studies",meta$Study)
@@ -1837,7 +1837,7 @@ contentType <- function(file){
 #' item_link <- paste0(res$meta$base_url,res$links$self)
 #' if(interactive()) shell.exec(item_link)
 #' }
-skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", file="NA.TXT"){
+skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", file="NA.TXT", access="no_access"){
      type <- skExpand(type)
      myid <- as.character(getOption("sk.myid"))
      prid <- as.character(getOption("sk.prid"))
@@ -1850,9 +1850,9 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
      instid <- skContent(skRead("people",myid))$relationships$institutions$data[[1]]$id
      options(sk.instid=instid)
      }
-     tags <- c("pISA")
+     tags <- c("pISA-tree")
      s <- skSkeleton(type)
-# Common fileds
+# Common fields
 
 # Type specific fields
      switch(s$data$type,
@@ -1862,6 +1862,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
        s$data$attributes$description  <-  pasteMeta(meta)
        s$data$attributes$members <- list(list(person_id = myid,
        institution_id = instid))
+       s$data$attributes$policy$access <- access         
        s$data$attributes$default_policy$permissions$resource$id <- myid
         if(length(prid)==0) stop("No programme id. Set 'sk.prid' in options", prid) else
        s$data$relationships$programmes$data$id <- prid
@@ -1874,6 +1875,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$title  <- title
         s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$projects$data$id <- pid
+        s$data$attributes$policy$access <- access        
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$creators$data$type <- "people"
@@ -1884,6 +1886,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$investigation$data$id <-iid
         s$data$attributes$person_responsible_id <- myid
+        s$data$attributes$policy$access <- access
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$creators$data$type <- "people"
@@ -1894,6 +1897,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$study$data$id <-sid
         s$data$attributes$person_responsible_id <- myid
+        s$data$attributes$policy$access <- access
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$creators$data$type <- "people"
@@ -1911,8 +1915,9 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$title  <-  document_title
         s$data$attributes$description  <-  document_description
         s$data$attributes$tags  <- c("data")
-       s$data$attributes$content_blobs$original_filename <- document_title
+        s$data$attributes$content_blobs$original_filename <- document_title
         s$data$attributes$content_blobs$content_type <- content_type
+        s$data$attributes$policy$access <- access
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$projects$data$id <- pid
@@ -1930,6 +1935,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$projects$data$id <- pid
         s$data$relationships$assays$data$id <- aid
+        s$data$attributes$policy$access <- access
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$attributes$content_blobs$content_type <- content_type
         s$data$attributes$content_blobs$original_filename <- document_title
@@ -2641,7 +2647,7 @@ skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investig
 #' getwd()
 #' }
 #
-skCheckAndCreate <- 
+skCheckAndCreate <-
 function (type, layers, root = skGetOption("root"), create = TRUE,
     verbose = FALSE, quiet = FALSE)
 {type <- toupper(substr(type, 1, 1))
@@ -2689,7 +2695,7 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
 <<skCheckAndCreate2>>=
 #' Check if layer exists and create if not.
 #'
-#' New function that wouldnt depend on the position of the 
+#' New function that wouldnt depend on the position of the
 #'   working directory within the pISA-tree.
 #' @param type character. ISA layer type (words starting with
 #'    I, S, or A, can be lowercase)
