@@ -2680,14 +2680,17 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
     if (!layerExists) {
         if (length(meta) == 1) {
             meta <- readMeta(root)
+            access <- getMeta(meta,"Sharing permission:")
+            if(access == "Private") access <- "no_access" else access <- "download"
         }
         if (!quiet)
             cat("Create: ", layer, "'", name, "'\n",
                 sep = "")
         if (create)
-            r <- skCreate(layer, meta, title = name)
+            r <- skCreate(layer, meta, title = name, access = access)
     }
     else r <- skFindId(layer, name)
+    cat(r$url,"\n")
     return(r)
 }
 @
