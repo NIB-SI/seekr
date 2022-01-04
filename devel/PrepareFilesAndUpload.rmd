@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-.testing <- !TRUE
+.testing <- TRUE
 ```
 
 
@@ -201,7 +201,11 @@ To enable unique investigation name date and time will be appended to the origin
 For each file in the list of files function 'skUploadFiles' ensures that necessary layers exist and uploads the file itself. The argument 'test' creates unique investigation name, which is useful in the test period.
 
 ```{r upload_files}
-skUploadFiles(forUpload, test=TRUE, append=FALSE)
+ind <- c(1:5,sample(1:length(forUpload),100))
+ind <- 1:8
+head(forUpload[ind])
+#
+skUploadFiles(forUpload[ind], test=TRUE, append=FALSE, verbose=TRUE, invname="_I_01_LabTrials-test2")
 ```
 
 # After upload
@@ -218,4 +222,7 @@ fn
 head(read.table(fn,sep="\t", header=TRUE))
 ```
 
+```{r}
+
+```
 
