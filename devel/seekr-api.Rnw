@@ -2681,6 +2681,7 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
         if (length(meta) == 1) {
             meta <- readMeta(root)
             access <- getMeta(meta,"Sharing permission:")
+            if(is.na(access)) access <- "download"
             if(access == "Private") access <- "no_access" else access <- "download"
         }
         if (!quiet)
