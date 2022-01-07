@@ -24,7 +24,7 @@ logical value indicating whether the component named by
      argument title exists.
 }
 \description{
-This is a faster version of skExists, intended mostly to check existence 
+This is a faster version of skExists, intended mostly to check existence
     of ISA layers in the parent layer.
 }
 \note{

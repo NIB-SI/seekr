@@ -30,7 +30,7 @@ usually pointing to investigation.}
 \item{quiet}{logical. Print result?}
 }
 \description{
-New function that wouldnt depend on the position of the 
+New function that wouldn't depend on the position of the
   working directory within the pISA-tree.
 }
 \examples{

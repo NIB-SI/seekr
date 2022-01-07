@@ -9,7 +9,8 @@ skCreate(
   meta = list(),
   title = NULL,
   class = "EXP",
-  file = "NA.TXT"
+  file = "NA.TXT",
+  access = "no_access"
 )
 }
 \arguments{
@@ -83,7 +84,7 @@ rm(sp)
       Study=paste("Test study", Sys.time())
     , Title="Test Study"
     , Description="Testing upload")
- ss <- skCreate( type = "studies", meta)
+ ss <- skCreate( type = "studies", meta, access="no_access")
  ss
 ss$id
  skFindId("studies",meta$Study)
