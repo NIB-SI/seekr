@@ -353,7 +353,7 @@ skParse <- function(resp, ...){
      if (http_error(resp)) {
      stop(
       sprintf(
-        "SEEK API request failed [%s]\n%s\n<%s>",
+        "seekr: SEEK API request failed [%s]\n%s\n<%s>",
         status_code(resp),
         resp$header$status,
         "https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.3.1"
@@ -1923,7 +1923,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$relationships$projects$data$id <- pid
         s$data$relationships$assays$data$id <- aid
         s$data$attributes$other_creators <- ""
-        s$data$attributes$tags <- c("pISA", "data")
+        s$data$attributes$tags <- c("pISA-tree", "data")
       }
       , documents = {
         document_title <- getMeta(meta,"Title")
@@ -1940,7 +1940,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$content_blobs$content_type <- content_type
         s$data$attributes$content_blobs$original_filename <- document_title
         s$data$attributes$other_creators <- ""
-        s$data$attributes$tags <- c("pISA", "document")
+        s$data$attributes$tags <- c("pISA-tree", "document")
       }
      )
      baseurl <- getOption("sk.url")
@@ -1964,6 +1964,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
          , ua
          )
          )
+     if(as.numeric(resp$status) !=200) print( resp$status)
      parsed <- skParse(resp)
      skLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
 # Upload file blob
@@ -2087,7 +2088,7 @@ skUpload <- function( object, file){
 #' skUploadFile(file)
 #' }
 #'
-skUploadFile <- function(file, root = skGetOption("root"),verbose=FALSE,  reportFile=NULL){
+skUploadFile <- function(file, root = skGetOption("root"),verbose=FALSE,  reportFile=NULL, access="no_access"){
   uplimit <- 3*10^9
 path <- normalizePath(file.path(root))
 description <- paste(basename(dirname(path)),basename(path),sep="/")
@@ -2106,20 +2107,20 @@ meta <- list(
   if(isreadable) {
   type <- "data_files" } else {type <- "documents"}
 #type <- "documents"
-s <- skCreate(type, meta, file = file)
+s <- skCreate(type, meta, file = file, access=access)
 if(.testing) print(names(s))
 #
 f_size <- file.size(file.path(root,file))
 if(!is.na(f_size)){
    if(f_size< uplimit) {
-        cat("---> Uploading ", file,"\n")
+        cat("... Uploading:", file,"\n")
         f <- skUpload(s, file)
         if(verbose) cat(s$url,"\n")
         #
         day <- format(Sys.time(), '%Y-%m-%d')
         tajm <- format(Sys.time(), '%H:%M:%S')
         if(!is.null(reportFile)) cat( layers$fdesc, layers$fname, s$url,
-        day, tajm, "\n", sep="\t", file=reportFile, append=TRUE)
+        day, tajm, layers$access, "\n", sep="\t", file=reportFile, append=TRUE)
         return(s)
    } else {
    f <- paste( "Not uploaded, File too large", f_size ,">",  uplimit/10^9,"GB")
@@ -2129,7 +2130,7 @@ if(!is.na(f_size)){
         day <- format(Sys.time(), '%Y-%m-%d')
         tajm <- format(Sys.time(), '%H:%M:%S')
         cat(layers$fdesc, layers$fname, f ,
-        day,tajm, "\n", sep="\t", file=reportFile, append=TRUE)
+        day,tajm, layers$access, "\n", sep="\t", file=reportFile, append=TRUE)
         }
 }
 @
@@ -2165,7 +2166,7 @@ skLog("Start of upload")
 skLog("############################")
 oldLayers <- list(pname="", iname="", sname="", aname="")
 if(is.null(reportFile) ) reportFile <- paste0("Upload-",gsub("[ :]","_",Sys.time()),".txt")
-cat("Path", "File_name",  "URL" ,"Date", "Time", "\n", sep="\t", file=reportFile)
+cat("Path", "File_name",  "URL" ,"Date", "Time", "Public_access", "\n", sep="\t", file=reportFile)
 if(test&missing(invname)) {
   invname <- paste(skGetLayer("I",normalizePath(root)),Sys.time(),sep=" | ")
   skLog("############################")
@@ -2176,28 +2177,28 @@ ind <- 1:length(files)
 nind <- length(ind)
 #
 for( i in ind ){
-file <- files[i]
- cat("|", rep("-",50*i/nind-1),">", rep(" ",50*(nind-i)/nind),"| ", i, "/", nind, "\n", file, "\n", sep="")
-layers <- skSetLayers(file)
-if(test) layers$iname <- invname
-#
-# Investigation
-if(layers$iname!=oldLayers$iname){
-  skCheckAndCreate("investigations", layers)
-}
-# Study
-if(layers$sname!=oldLayers$sname){
-  skCheckAndCreate("studies", layers)
-}
-# Assay
-if(layers$aname!=oldLayers$aname){
-  meta <- ""
-  skCheckAndCreate("assays", layers)
-}
-# File
-skLog("Uploading file: ", layers$fdesc," | ", layers$fname)
-r <- skUploadFile(file, verbose=verbose, reportFile=reportFile)
-oldLayers <- layers
+  file <- files[i]
+   cat("|", rep(".",50*i/nind-1),">", rep("_",50*(nind-i)/nind),"| ", i, "/", nind, "\n", file, "\n", sep="")
+  layers <- skSetLayers(file)
+  if(test) layers$iname <- invname
+  #
+  # Investigation
+  if(layers$iname!=oldLayers$iname){
+    skCheckAndCreate("investigations", layers)
+  }
+  # Study
+  if(layers$sname!=oldLayers$sname){
+    skCheckAndCreate("studies", layers)
+  }
+  # Assay
+  if(layers$aname!=oldLayers$aname){
+    meta <- ""
+    skCheckAndCreate("assays", layers)
+  }
+  # File
+  skLog("Uploading file: ", layers$fdesc," | ", layers$fname)
+  r <- skUploadFile(file, verbose=verbose, reportFile=reportFile, access=layers$access)
+  oldLayers <- layers
 }
 skLog("############################")
 skLog("End of upload")
@@ -2563,6 +2564,7 @@ skGetLayer <- function (layer="p", path = getwd(), verbose=FALSE)
 #' skSetLayers(dirs[1], root=.iroot)
 #' skSetLayers(dirs[2], root=.iroot)
 #' skSetLayers(dirs[length(dirs)], root=.iroot)
+#' skSetLayers(dirs[10], root=.iroot)
 #' sapply(dirs, function(x) skSetLayers(x))
 #' if(interactive()) setwd(oldwd)
 #' getwd()
@@ -2585,7 +2587,6 @@ skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investig
     fd <- gsub("/+","/",fd)
     if( al!="") {
          meta <- readMeta(file.path(root,sl,al))
-         print(meta)
          access <- setPublicAccess(meta)
          }
     if( (al=="") & sl=="" ) {
@@ -2599,14 +2600,13 @@ skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investig
      }
      if( al=="" ) {
          meta <- readMeta(file.path(root,sl))
-         print(meta)
            access <- setPublicAccess(meta)
          ad <- data.frame(Key="Files connected to study:"
                           , Value=sl)
          al <- paste0(sl,assaySuffix)
      }
      r <- list(pname=pl, iname=il, sname=sl, aname=al, fname=fl,
-                pdesc=pd, idesc=id, sdesc=sd, adesc=ad, fdesc=fd,
+                pmeta=pd, imeta=id, smeta=sd, ameta=ad, fdesc=fd,
                 access = access)
      if(verbose) print.simple.list(r)
     return(r)
@@ -2623,6 +2623,7 @@ skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investig
 #' @param na.access character string. Default access, either 'no_access' for #'      Private layer or 'download' for Public layer.
 #' @export
 #' @examples
+#' \dontrun{
 #' meta = data.frame(
 #' Key=c("Assay:","Sharing permission:"), Value=c("_A_Test","Public"))
 #' setPublicAccess(meta)
@@ -2633,6 +2634,7 @@ skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investig
 #' Key=c("Assay:"), Value=c("_A_Test"))
 #' setPublicAccess(meta)
 #' setPublicAccess(meta, "download")
+#' }
 #'
 setPublicAccess <- function(meta, na.access="no_access") {
             access <- getMeta(meta,"Sharing permission:")
@@ -2695,7 +2697,7 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
         layer <- "investigations"
         parent <- "projects"
         name <- layers$iname
-        meta <- layers$idesc
+        meta <- layers$imeta
         root <- root
         layerExists <- skCheck(layer, name, parent, verbose = verbose)
     }
@@ -2703,7 +2705,7 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
         layer <- "studies"
         parent <- "investigations"
         name <- layers$sname
-        meta <- layers$sdesc
+        meta <- layers$smeta
         root <- file.path(root, layers$sname)
         layerExists <- skExists(layer, name, parent, verbose = verbose)
     }
@@ -2711,7 +2713,7 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
         layer <- "assays"
         parent <- "studies"
         name <- layers$aname
-        meta <- layers$adesc
+        meta <- layers$ameta
         root <- file.path(root, layers$sname, layers$aname)
         layerExists <- skExists(layer, name, parent, verbose = verbose)
     }
@@ -2720,16 +2722,19 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
     if (!layerExists) {
         if (length(meta) == 1) {
             meta <- readMeta(root)
-            access <- setPublicAccess(meta)
-        } else access <- layers$access
+#            access <- setPublicAccess(meta)
+        }  
+        access <- layers$access
         if (!quiet)
             cat("Create: ", layer, " '", name, "' (",access, ")\n",
                 sep = "")
-        if (create)
-            r <- skCreate(layer, meta, title = name, access = access)
+        if (create){
+                r <- skCreate(layer, meta, title = name, access = access)
+        }    
     }
     else r <- skFindId(layer, name)
-    cat(r$url,"\n")
+    print(r)
+#    cat(r$url,"\n")
     return(r)
 }
 @
@@ -2783,7 +2788,7 @@ root=skGetOption("root")
        layer <- "investigations"
        parent <- "projects"
        name <- layers$iname
-       meta <- layers$idesc
+       meta <- layers$imeta
        ly <- substr(basename(root),2,2)
        root <- switch( ly,
                "I" = root,
@@ -2795,7 +2800,7 @@ root=skGetOption("root")
        layer <- "studies"
        parent <- "investigations"
        name <- layers$sname
-       meta <- layers$sdesc
+       meta <- layers$smeta
        ly <- substr(basename(root),2,2)
        root = switch( ly,
                "I" = file.path(root,layers$sname),
@@ -2807,7 +2812,7 @@ root=skGetOption("root")
        layer <- "assays"
        parent <- "studies"
        name <- layers$aname
-       meta <- layers$adesc
+       meta <- layers$ameta
        ly <- substr(basename(root),2,2)
        test(ly)
        root = switch( ly,

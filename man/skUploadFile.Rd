@@ -8,7 +8,8 @@ skUploadFile(
   file,
   root = skGetOption("root"),
   verbose = FALSE,
-  reportFile = NULL
+  reportFile = NULL,
+  access = "no_access"
 )
 }
 \arguments{

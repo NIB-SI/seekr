@@ -16,6 +16,7 @@ Set public access permission according to the "Sharing permission:"
 key in metadata.
 }
 \examples{
+\dontrun{
 meta = data.frame(
 Key=c("Assay:","Sharing permission:"), Value=c("_A_Test","Public"))
 setPublicAccess(meta)
@@ -26,5 +27,6 @@ meta = data.frame(
 Key=c("Assay:"), Value=c("_A_Test"))
 setPublicAccess(meta)
 setPublicAccess(meta, "download")
+}
 
 }

@@ -198,8 +198,9 @@ devtools::load_all()
 cat("Package:",pkgName,"\n")
 library(pkgName, character.only=TRUE)
 help(package=eval(pkgName))
-
 @
+
+
 D:/DEJAVNOSTI/OMIKE/pISA-projects/_p_VinskaTrta/_I_EnViRoS/_S_01_Integ
 \section{PDF documentation}
 

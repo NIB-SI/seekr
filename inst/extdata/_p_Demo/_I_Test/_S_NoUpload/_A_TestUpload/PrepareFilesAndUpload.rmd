@@ -84,7 +84,7 @@ seekignore
 To keep the number of files shorter we will add a pattern, excluding files in folder Interactive:
 
 ```{r}
-seekignore <- c(seekignore, "/Interacitve")
+seekignore <- c(seekignore, "/Interacitve", "Upload*")
 seekignore
 ```
 
@@ -146,7 +146,7 @@ skOptions()
 We can test if the settings are set correctly by finding user's name
 
 ```{r}
-skFindTitle("people", 368)
+skFindTitle("people", skGetOption("myid"))
 skOptions()
 ```
 
@@ -192,7 +192,10 @@ skLog("Testing upload",
 
 ```{r check_project}
 # project already exists
-if( skFindTitle("projects", skGetOption("proj"))["title"]!=.pname) {cat("Wrong project name or id. Create project", layers[1],"\n")} else {cat("Project exists:", .pname, "\n")}
+if( skFindTitle("projects", skGetOption("proj"))["title"] != .pname) {
+  cat("Wrong project name or id. Create project", layers[1],"\n")} else {
+    cat("Project exists:", .pname, "\n")
+    }
 ```
 
 
@@ -201,7 +204,7 @@ To enable unique investigation name date and time will be appended to the origin
 For each file in the list of files function 'skUploadFiles' ensures that necessary layers exist and uploads the file itself. The argument 'test' creates unique investigation name, which is useful in the test period.
 
 ```{r upload_files}
-skUploadFiles(forUpload, test=TRUE, append=FALSE)
+skUploadFiles(forUpload, verbose=TRUE, test=TRUE, append=FALSE) #, invname="Test Public access")
 ```
 
 # After upload
