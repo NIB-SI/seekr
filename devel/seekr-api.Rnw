@@ -1862,7 +1862,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
        s$data$attributes$description  <-  pasteMeta(meta)
        s$data$attributes$members <- list(list(person_id = myid,
        institution_id = instid))
-       s$data$attributes$policy$access <- access         
+       s$data$attributes$policy$access <- access
        s$data$attributes$default_policy$permissions$resource$id <- myid
         if(length(prid)==0) stop("No programme id. Set 'sk.prid' in options", prid) else
        s$data$relationships$programmes$data$id <- prid
@@ -1875,7 +1875,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$title  <- title
         s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$projects$data$id <- pid
-        s$data$attributes$policy$access <- access        
+        s$data$attributes$policy$access <- access
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$creators$data$type <- "people"
@@ -2583,27 +2583,67 @@ skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investig
     ad <- ""
     fd <- paste0(c(pl,il,sl,al,""),collapse="/")
     fd <- gsub("/+","/",fd)
+    if( al!="") {
+         meta <- readMeta(file.path(root,sl,al))
+         print(meta)
+         access <- setPublicAccess(meta)
+         }
     if( (al=="") & sl=="" ) {
-           sd <- data.frame(Key="Investigation files",Value=il)
-           sl <- "Investigation files"
+           meta <- readMeta(root)
+           access <- setPublicAccess(meta)
+           sd <- data.frame(Key=studyForFiles,Value=il)
+           sl <- studyForFiles
            al <- paste0(il,assaySuffix)
            ad <- data.frame(Key="Files connected to investigation:"
                           , Value=il)
      }
      if( al=="" ) {
+         meta <- readMeta(file.path(root,sl))
+         print(meta)
+           access <- setPublicAccess(meta)
          ad <- data.frame(Key="Files connected to study:"
                           , Value=sl)
          al <- paste0(sl,assaySuffix)
      }
      r <- list(pname=pl, iname=il, sname=sl, aname=al, fname=fl,
-                pdesc=pd, idesc=id, sdesc=sd, adesc=ad, fdesc=fd)
+                pdesc=pd, idesc=id, sdesc=sd, adesc=ad, fdesc=fd,
+                access = access)
      if(verbose) print.simple.list(r)
     return(r)
 }
 @
 
+<<setPublicAccess>>=
+#' Set public access permission.
+#'
+#' Set public access permission according to the "Sharing permission:"
+#' key in metadata.
+#'
+#' @param meta data frame or list. pISA metadata object.
+#' @param na.access character string. Default access, either 'no_access' for #'      Private layer or 'download' for Public layer.
+#' @export
+#' @examples
+#' meta = data.frame(
+#' Key=c("Assay:","Sharing permission:"), Value=c("_A_Test","Public"))
+#' setPublicAccess(meta)
+#' meta = data.frame(
+#' Key=c("Assay:","Sharing permission:"), Value=c("_A_Test","Private"))
+#' setPublicAccess(meta)
+#' meta = data.frame(
+#' Key=c("Assay:"), Value=c("_A_Test"))
+#' setPublicAccess(meta)
+#' setPublicAccess(meta, "download")
+#'
+setPublicAccess <- function(meta, na.access="no_access") {
+            access <- getMeta(meta,"Sharing permission:")
+            if(is.na(access)) access <- na.access else
+            if(access == "Private") access <- "no_access" else access <- "download"
+            return(access)
+            }
+@
+
 <<skCheckAndCreate>>=
-#' Check if layer exists and create if not.
+#' Check if layer exists and create it if not.
 #'
 #' @param type character. ISA layer type (words starting with
 #'    I, S, or A, can be lowercase)
@@ -2649,7 +2689,7 @@ skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investig
 #
 skCheckAndCreate <-
 function (type, layers, root = skGetOption("root"), create = TRUE,
-    verbose = FALSE, quiet = FALSE)
+    verbose = FALSE, quiet = FALSE, na.access="no_access")
 {type <- toupper(substr(type, 1, 1))
     if (type == "I") {
         layer <- "investigations"
@@ -2680,12 +2720,10 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
     if (!layerExists) {
         if (length(meta) == 1) {
             meta <- readMeta(root)
-            access <- getMeta(meta,"Sharing permission:")
-            if(is.na(access)) access <- "download"
-            if(access == "Private") access <- "no_access" else access <- "download"
-        }
+            access <- setPublicAccess(meta)
+        } else access <- layers$access
         if (!quiet)
-            cat("Create: ", layer, "'", name, "'\n",
+            cat("Create: ", layer, " '", name, "' (",access, ")\n",
                 sep = "")
         if (create)
             r <- skCreate(layer, meta, title = name, access = access)
@@ -2699,7 +2737,7 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
 <<skCheckAndCreate2>>=
 #' Check if layer exists and create if not.
 #'
-#' New function that wouldnt depend on the position of the
+#' New function that wouldn't depend on the position of the
 #'   working directory within the pISA-tree.
 #' @param type character. ISA layer type (words starting with
 #'    I, S, or A, can be lowercase)

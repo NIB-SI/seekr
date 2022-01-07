@@ -31,7 +31,8 @@ Package `seekr` contains demo pISA-tree project. For this demonstration we can u
 Note: If R is already started in an existing assay, the following chunk is not needed, set eval to FALSE.
 
 ```{r eval=!TRUE}
-if(FALSE){astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
+if(FALSE){
+astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
 oldwd <- setwd(system.file("extdata", astring, package="seekr"))
 oldwd
 dir()
@@ -146,7 +147,7 @@ skOptions()
 We can test if the settings are set correctly by finding user's name
 
 ```{r}
-skFindTitle("people", 368)
+skFindTitle("people",  skGetOption("myid") )
 skOptions()
 ```
 
@@ -204,14 +205,15 @@ For each file in the list of files function 'skUploadFiles' ensures that necessa
 ind <- c(1:5,sample(1:length(forUpload),100))
 ind <- 1:8
 head(forUpload[ind])
+ind <- 1:length(forUpload)
 #
 #skUploadFiles(forUpload, test=TRUE, append=FALSE)
-skUploadFiles(forUpload[ind], test=TRUE, append=FALSE, verbose=TRUE, invname="_I_01_LabTrials-test-private1")
+skUploadFiles(forUpload[ind], test=TRUE, append=FALSE, verbose=TRUE, invname="_I_01_LabTrials-test-private4")
 ```
 
 # After upload
 
-You can follow the progress of the upload in console. In addition, you get the upload details in two files: the log-file (FAIRDOM.log) and and file with the name that starts with 'Upload ..." and date tim (e.g. Upload-2021-11-07_16_20_23.txt). This file contains uploaded file names and links to uploaded files on FAIRBOMHub. Both files appear in the working directory.
+You can follow the progress of the upload in console. In addition, you get the upload details in two files: the log-file (FAIRDOM.log) and and file with the name that starts with 'Upload ...' and date-time (e.g. Upload-2021-11-07_16_20_23.txt). This file contains uploaded file names and links to uploaded files on FAIRBOMHub. Both files appear in the working directory.
 
 ```{r}
 dir(pattern="*.log")
