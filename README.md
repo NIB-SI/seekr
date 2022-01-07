@@ -5,7 +5,7 @@ R interface for SEEK API (connection to FAIRDOMHub)
 
 ## Installation
 
-**From release repo (nib.si)**
+**From the release repo (nib.si)**
 
 ```R
 if (!require(devtools)) {
@@ -15,7 +15,7 @@ if (!require(devtools)) {
 devtools::install_github("nib-si/seekr")
 ```
 
-**From development repo**
+**From the development repo**
 
 ```R
 if (!require(devtools)) {
