@@ -190,7 +190,7 @@ summary {
 
 <h1 class="title toc-ignore">Prepare list of files for upload to FAIRDOMHub with seekr</h1>
 <h4 class="author">A. Blejec</h4>
-<h4 class="date">Last compiled on 2021-11-08</h4>
+<h4 class="date">Last compiled on 2022-01-07</h4>
 
 </div>
 
@@ -271,7 +271,7 @@ dir()
 ##  Description:              This assay is meant for testing the seekr functions.
 ##  pISA Assay creation date: 2021-10-29
 ##  pISA Assay creator:       Andrej Blejec
-##  Analyst:                  AB
+##  Analyst:                  Andrej Blejec
 ##  Phenodata:                
 ##  Featuredata:              
 ##  Data:                     
@@ -299,7 +299,7 @@ seekignore</code></pre>
 ## [10] &quot;*.log&quot;                                           
 ## [11] &quot;_outputFile.R&quot;</code></pre>
 <p>To keep the number of files shorter we will add a pattern, excluding files in folder Interactive:</p>
-<pre class="r"><code>seekignore &lt;- c(seekignore, &quot;/Interacitve&quot;)
+<pre class="r"><code>seekignore &lt;- c(seekignore, &quot;/Interacitve&quot;, &quot;Upload*&quot;)
 seekignore</code></pre>
 <pre><code>##  [1] &quot;# File patterns to be ignored by SEEK API upload&quot;
 ##  [2] &quot;#&quot;                                               
@@ -312,7 +312,8 @@ seekignore</code></pre>
 ##  [9] &quot;*.tmp&quot;                                           
 ## [10] &quot;*.log&quot;                                           
 ## [11] &quot;_outputFile.R&quot;                                   
-## [12] &quot;/Interacitve&quot;</code></pre>
+## [12] &quot;/Interacitve&quot;                                    
+## [13] &quot;Upload*&quot;</code></pre>
 <p>Lines three and four have slash (/) at the end to ignore directories. Line five and six will prevent upload of batch files and files with specific name (in any directory). One can add other patterns into the seekignore.txt file before running the code below.</p>
 <p>Function <code>skFilesToUpload</code> will first create a list of files in root directory. Then, it will read the seekignore.txt and extend it with patterns of layers that should not be uploaded according to metadata key “Upload to FAIRDOMHub”. In addition, seekignre list will be appended with the list of empty README.MD files that might clutter the FAIRDOMHub list of files. Then it will filter it according to declarations in the combined seekignore pattern list.</p>
 <pre class="r"><code>uploadRoot &lt;- pini$I$root
@@ -321,18 +322,19 @@ uploadRoot</code></pre>
 <pre class="r"><code>forUpload &lt;- skFilesToUpload( root = uploadRoot, skignore = seekignore)</code></pre>
 <pre><code>## Ignoring pISA layer: _S_NoUpload/_A_TestUpload 
 ## Ignoring pISA layer: _S_NoUpload 
-## Ignored pISA layers: 2 / 6 
+## Ignored pISA layers: 2 / 7 
 ## Ignoring 0 files [ DoNotUpload/  ]
-## Ignoring 4 files [ other/  ]
-## Ignoring 18 files [ *\.bat  ]
+## Ignoring 7 files [ other/  ]
+## Ignoring 21 files [ *\.bat  ]
 ## Ignoring 3 files [ _template\.txt  ]
 ## Ignoring 3 files [ common\.ini  ]
 ## Ignoring 0 files [ *\.zip  ]
 ## Ignoring 0 files [ *\.tmp  ]
-## Ignoring 4 files [ *\.log  ]
-## Ignoring 3 files [ _outputFile\.R  ]
+## Ignoring 5 files [ *\.log  ]
+## Ignoring 4 files [ _outputFile\.R  ]
 ## Ignoring 0 files [ /Interacitve  ]
-## Ignoring 20 files [ _S_NoUpload  ]
+## Ignoring 56 files [ Upload*  ]
+## Ignoring 0 files [ _S_NoUpload  ]
 ## Ignoring 0 files [ _S_NoUpload/_A_TestUpload  ]
 ## Ignoring 0 files [ _S_NoUpload/_A_Work-R/input/README\.MD  ]
 ## Ignoring 0 files [ _S_NoUpload/_A_Work-R/other/README\.MD  ]
@@ -342,6 +344,12 @@ uploadRoot</code></pre>
 ## Ignoring 0 files [ _S_NoUpload/_A_Work-R/scripts/README\.MD  ]
 ## Ignoring 0 files [ _S_NoUpload/README\.MD  ]
 ## Ignoring 0 files [ _S_NoUpload/reports/README\.MD  ]
+## Ignoring 1 files [ _S_Show/_A_Private-R/input/README\.MD  ]
+## Ignoring 0 files [ _S_Show/_A_Private-R/other/README\.MD  ]
+## Ignoring 1 files [ _S_Show/_A_Private-R/output/README\.MD  ]
+## Ignoring 1 files [ _S_Show/_A_Private-R/README\.MD  ]
+## Ignoring 1 files [ _S_Show/_A_Private-R/reports/README\.MD\.bak  ]
+## Ignoring 1 files [ _S_Show/_A_Private-R/scripts/README\.MD  ]
 ## Ignoring 1 files [ _S_Show/_A_Work-R/input/README\.MD  ]
 ## Ignoring 0 files [ _S_Show/_A_Work-R/other/README\.MD  ]
 ## Ignoring 1 files [ _S_Show/_A_Work-R/output/README\.MD  ]
@@ -352,24 +360,28 @@ uploadRoot</code></pre>
 ## Ignoring 1 files [ _S_Show/reports/README\.MD  ]
 ## Ignoring 1 files [ XX/presentations/README\.MD  ]
 ## Ignoring 1 files [ XX/reports/README\.MD  ]
-## Files to upload: 8 / 72</code></pre>
+## Files to upload: 12 / 125</code></pre>
 <p>Final list of files for upload is</p>
 <pre class="r"><code>forUpload</code></pre>
-<pre><code>## [1] &quot;_INVESTIGATION_METADATA.TXT&quot;          
-## [2] &quot;phenodata_20191015.txt&quot;               
-## [3] &quot;README.MD&quot;                            
-## [4] &quot;seekignore.txt&quot;                       
-## [5] &quot;_S_Show/_STUDY_METADATA.TXT&quot;          
-## [6] &quot;_S_Show/_A_Work-R/_Assay_METADATA.TXT&quot;
-## [7] &quot;_S_Show/_A_Work-R/input/some-data.txt&quot;
-## [8] &quot;_S_Show/_A_Work-R/reports/README.MD&quot;</code></pre>
+<pre><code>##  [1] &quot;_INVESTIGATION_METADATA.TXT&quot;                     
+##  [2] &quot;phenodata_20191015.txt&quot;                          
+##  [3] &quot;README.MD&quot;                                       
+##  [4] &quot;seekignore.txt&quot;                                  
+##  [5] &quot;_S_Show/_STUDY_METADATA.TXT&quot;                     
+##  [6] &quot;_S_Show/_A_Private-R/_Assay_METADATA.TXT&quot;        
+##  [7] &quot;_S_Show/_A_Work-R/_Assay_METADATA.TXT&quot;           
+##  [8] &quot;_S_Show/_A_Private-R/input/some-data.txt&quot;        
+##  [9] &quot;_S_Show/_A_Private-R/reports/README.MD&quot;          
+## [10] &quot;_S_Show/_A_Work-R/input/filename with blanks.txt&quot;
+## [11] &quot;_S_Show/_A_Work-R/input/some-data.txt&quot;           
+## [12] &quot;_S_Show/_A_Work-R/reports/README.MD&quot;</code></pre>
 <pre class="r"><code>head(forUpload)</code></pre>
-<pre><code>## [1] &quot;_INVESTIGATION_METADATA.TXT&quot;          
-## [2] &quot;phenodata_20191015.txt&quot;               
-## [3] &quot;README.MD&quot;                            
-## [4] &quot;seekignore.txt&quot;                       
-## [5] &quot;_S_Show/_STUDY_METADATA.TXT&quot;          
-## [6] &quot;_S_Show/_A_Work-R/_Assay_METADATA.TXT&quot;</code></pre>
+<pre><code>## [1] &quot;_INVESTIGATION_METADATA.TXT&quot;             
+## [2] &quot;phenodata_20191015.txt&quot;                  
+## [3] &quot;README.MD&quot;                               
+## [4] &quot;seekignore.txt&quot;                          
+## [5] &quot;_S_Show/_STUDY_METADATA.TXT&quot;             
+## [6] &quot;_S_Show/_A_Private-R/_Assay_METADATA.TXT&quot;</code></pre>
 </div>
 <div id="connect-with-the-fairdomhub" class="section level2">
 <h2>Connect with the FAIRDOMHub</h2>
@@ -402,7 +414,7 @@ skSetOption(&quot;myid&quot;, &quot;&lt;FAIRDOMHub user id number&gt;&quot;)</co
 ## $sk.usr
 ## [1] &quot;ablejec&quot;</code></pre>
 <p>We can test if the settings are set correctly by finding user’s name</p>
-<pre class="r"><code>skFindTitle(&quot;people&quot;, 368)</code></pre>
+<pre class="r"><code>skFindTitle(&quot;people&quot;, skGetOption(&quot;myid&quot;))</code></pre>
 <pre><code>##              id            type           title 
 ##           &quot;368&quot;        &quot;people&quot; &quot;Andrej Blejec&quot;</code></pre>
 <pre class="r"><code>skOptions()</code></pre>
@@ -445,22 +457,25 @@ skSetOption(&quot;myid&quot;, &quot;&lt;FAIRDOMHub user id number&gt;&quot;)</co
 ## $fname
 ## [1] &quot;.&quot;
 ## 
-## $pdesc
+## $pmeta
 ## [1] &quot;&quot;
 ## 
-## $idesc
+## $imeta
 ## [1] &quot;&quot;
 ## 
-## $sdesc
+## $smeta
 ##                   Key   Value
 ## 1 Investigation files _I_Test
 ## 
-## $adesc
+## $ameta
 ##                                 Key   Value
 ## 1 Files connected to investigation: _I_Test
 ## 
 ## $fdesc
-## [1] &quot;_p_Demo/_I_Test/&quot;</code></pre>
+## [1] &quot;_p_Demo/_I_Test/&quot;
+## 
+## $access
+## [1] &quot;download&quot;</code></pre>
 <pre class="r"><code>.pname &lt;- &quot;_p_Demo&quot;
 pini$p$name &lt;- .pname
 .prname &lt;- &quot;pISA-tree&quot;</code></pre>
@@ -485,41 +500,102 @@ pini$p$name &lt;- .pname
 <pre class="r"><code>skLog(&quot;Testing upload&quot;, 
     file=&quot;FAIRDOM.log&quot;, append=FALSE)</code></pre>
 <pre class="r"><code># project already exists
-if( skFindTitle(&quot;projects&quot;, skGetOption(&quot;proj&quot;))[&quot;title&quot;]!=.pname) {cat(&quot;Wrong project name or id. Create project&quot;, layers[1],&quot;\n&quot;)} else {cat(&quot;Project exists:&quot;, .pname, &quot;\n&quot;)}</code></pre>
+if( skFindTitle(&quot;projects&quot;, skGetOption(&quot;proj&quot;))[&quot;title&quot;] != .pname) {
+  cat(&quot;Wrong project name or id. Create project&quot;, layers[1],&quot;\n&quot;)} else {
+    cat(&quot;Project exists:&quot;, .pname, &quot;\n&quot;)
+    }</code></pre>
 <pre><code>## Project exists: _p_Demo</code></pre>
 <p>To enable unique investigation name date and time will be appended to the original investigation name.</p>
 <p>For each file in the list of files function ‘skUploadFiles’ ensures that necessary layers exist and uploads the file itself. The argument ‘test’ creates unique investigation name, which is useful in the test period.</p>
-<pre class="r"><code>skUploadFiles(forUpload, test=TRUE, append=FALSE)</code></pre>
-<pre><code>## |-----&gt;                                           | 1/8
+<pre class="r"><code>skUploadFiles(forUpload, verbose=TRUE, test=TRUE, append=FALSE) #, invname=&quot;Test Public access&quot;)</code></pre>
+<pre><code>## |...&gt;_____________________________________________| 1/12
 ## _INVESTIGATION_METADATA.TXT
-## Create: investigations&#39;_I_Test | 2021-11-08 20:04:38&#39;
-## Create: studies&#39;Investigation files&#39;
-## Create: assays&#39;_I_Test-files&#39;
-## ---&gt; Uploading  _INVESTIGATION_METADATA.TXT 
-## |-----------&gt;                                     | 2/8
+## Status code: 200 
+## Create: investigations &#39;_I_Test | 2022-01-07 18:56:42&#39; (download)
+## Status: 200 
+## Object: https://testing.sysmo-db.org/investigations/355 
+## Path  : /investigations/355 
+## Title : _I_Test | 2022-01-07 18:56:42 
+## Create: studies &#39;Investigation files&#39; (download)
+## Status: 200 
+## Object: https://testing.sysmo-db.org/studies/488 
+## Path  : /studies/488 
+## Title : Investigation files 
+## Create: assays &#39;_I_Test-files&#39; (download)
+## Status: 200 
+## Object: https://testing.sysmo-db.org/assays/915 
+## Path  : /assays/915 
+## Title : _I_Test-files 
+## ... Uploading: _INVESTIGATION_METADATA.TXT 
+## https://testing.sysmo-db.org/data_files/2127?version=1 
+## |.......&gt;_________________________________________| 2/12
 ## phenodata_20191015.txt
-## ---&gt; Uploading  phenodata_20191015.txt 
-## |-----------------&gt;                               | 3/8
+## ... Uploading: phenodata_20191015.txt 
+## https://testing.sysmo-db.org/data_files/2128?version=1 
+## |...........&gt;_____________________________________| 3/12
 ## README.MD
-## ---&gt; Uploading  README.MD 
-## |------------------------&gt;                         | 4/8
+## ... Uploading: README.MD 
+## https://testing.sysmo-db.org/documents/1078?version=1 
+## |...............&gt;_________________________________| 4/12
 ## seekignore.txt
-## ---&gt; Uploading  seekignore.txt 
-## |------------------------------&gt;                  | 5/8
+## ... Uploading: seekignore.txt 
+## https://testing.sysmo-db.org/data_files/2129?version=1 
+## |...................&gt;_____________________________| 5/12
 ## _S_Show/_STUDY_METADATA.TXT
-## Create: studies&#39;_S_Show&#39;
-## Create: assays&#39;_S_Show-files&#39;
-## ---&gt; Uploading  _S_Show/_STUDY_METADATA.TXT 
-## |------------------------------------&gt;            | 6/8
+## Create: studies &#39;_S_Show&#39; (download)
+## Status: 200 
+## Object: https://testing.sysmo-db.org/studies/489 
+## Path  : /studies/489 
+## Title : _S_Show 
+## Create: assays &#39;_S_Show-files&#39; (download)
+## Status: 200 
+## Object: https://testing.sysmo-db.org/assays/916 
+## Path  : /assays/916 
+## Title : _S_Show-files 
+## ... Uploading: _S_Show/_STUDY_METADATA.TXT 
+## https://testing.sysmo-db.org/data_files/2130?version=1 
+## |........................&gt;_________________________| 6/12
+## _S_Show/_A_Private-R/_Assay_METADATA.TXT
+## Create: assays &#39;_A_Private-R&#39; (no_access)
+## Status: 200 
+## Object: https://testing.sysmo-db.org/assays/917 
+## Path  : /assays/917 
+## Title : _A_Private-R 
+## ... Uploading: _S_Show/_A_Private-R/_Assay_METADATA.TXT 
+## https://testing.sysmo-db.org/data_files/2131?version=1 
+## |............................&gt;____________________| 7/12
 ## _S_Show/_A_Work-R/_Assay_METADATA.TXT
-## Create: assays&#39;_A_Work-R&#39;
-## ---&gt; Uploading  _S_Show/_A_Work-R/_Assay_METADATA.TXT 
-## |------------------------------------------&gt;      | 7/8
+## Create: assays &#39;_A_Work-R&#39; (download)
+## Status: 200 
+## Object: https://testing.sysmo-db.org/assays/918 
+## Path  : /assays/918 
+## Title : _A_Work-R 
+## ... Uploading: _S_Show/_A_Work-R/_Assay_METADATA.TXT 
+## https://testing.sysmo-db.org/data_files/2132?version=1 
+## |................................&gt;________________| 8/12
+## _S_Show/_A_Private-R/input/some-data.txt
+##             id           type          title 
+##          &quot;917&quot;       &quot;assays&quot; &quot;_A_Private-R&quot; 
+## ... Uploading: _S_Show/_A_Private-R/input/some-data.txt 
+## https://testing.sysmo-db.org/data_files/2133?version=1 
+## |....................................&gt;____________| 9/12
+## _S_Show/_A_Private-R/reports/README.MD
+## ... Uploading: _S_Show/_A_Private-R/reports/README.MD 
+## https://testing.sysmo-db.org/documents/1079?version=1 
+## |........................................&gt;________| 10/12
+## _S_Show/_A_Work-R/input/filename with blanks.txt
+##          id        type       title 
+##       &quot;918&quot;    &quot;assays&quot; &quot;_A_Work-R&quot; 
+## ... Uploading: _S_Show/_A_Work-R/input/filename with blanks.txt 
+## https://testing.sysmo-db.org/data_files/2134?version=1 
+## |............................................&gt;____| 11/12
 ## _S_Show/_A_Work-R/input/some-data.txt
-## ---&gt; Uploading  _S_Show/_A_Work-R/input/some-data.txt 
-## |-------------------------------------------------&gt;| 8/8
+## ... Uploading: _S_Show/_A_Work-R/input/some-data.txt 
+## https://testing.sysmo-db.org/data_files/2135?version=1 
+## |.................................................&gt;| 12/12
 ## _S_Show/_A_Work-R/reports/README.MD
-## ---&gt; Uploading  _S_Show/_A_Work-R/reports/README.MD</code></pre>
+## ... Uploading: _S_Show/_A_Work-R/reports/README.MD 
+## https://testing.sysmo-db.org/documents/1080?version=1</code></pre>
 </div>
 <div id="after-upload" class="section level1">
 <h1>After upload</h1>
@@ -528,22 +604,29 @@ if( skFindTitle(&quot;projects&quot;, skGetOption(&quot;proj&quot;))[&quot;title
 <pre><code>## [1] &quot;FAIRDOM.log&quot;</code></pre>
 <pre class="r"><code>fn &lt;- rev(dir(pattern=&quot;Upload*&quot;))[1]
 fn</code></pre>
-<pre><code>## [1] &quot;Upload-2021-11-08_20_04_38.txt&quot;</code></pre>
+<pre><code>## [1] &quot;Upload-2022-01-07_18_56_42.txt&quot;</code></pre>
 <pre class="r"><code>head(read.table(fn,sep=&quot;\t&quot;, header=TRUE))</code></pre>
-<pre><code>##                                 Path                   File_name
-## 1                   _p_Demo/_I_Test/ _INVESTIGATION_METADATA.TXT
-## 2                   _p_Demo/_I_Test/      phenodata_20191015.txt
-## 3                   _p_Demo/_I_Test/                   README.MD
-## 4                   _p_Demo/_I_Test/              seekignore.txt
-## 5           _p_Demo/_I_Test/_S_Show/         _STUDY_METADATA.TXT
-## 6 _p_Demo/_I_Test/_S_Show/_A_Work-R/         _Assay_METADATA.TXT
-##                                                      URL       Date     Time  X
-## 1 https://testing.sysmo-db.org/data_files/1686?version=1 2021-11-08 20:05:16 NA
-## 2 https://testing.sysmo-db.org/data_files/1687?version=1 2021-11-08 20:05:18 NA
-## 3   https://testing.sysmo-db.org/documents/600?version=1 2021-11-08 20:05:19 NA
-## 4 https://testing.sysmo-db.org/data_files/1688?version=1 2021-11-08 20:05:22 NA
-## 5 https://testing.sysmo-db.org/data_files/1689?version=1 2021-11-08 20:05:27 NA
-## 6 https://testing.sysmo-db.org/data_files/1690?version=1 2021-11-08 20:05:30 NA</code></pre>
+<pre><code>##                                    Path                   File_name
+## 1                      _p_Demo/_I_Test/ _INVESTIGATION_METADATA.TXT
+## 2                      _p_Demo/_I_Test/      phenodata_20191015.txt
+## 3                      _p_Demo/_I_Test/                   README.MD
+## 4                      _p_Demo/_I_Test/              seekignore.txt
+## 5              _p_Demo/_I_Test/_S_Show/         _STUDY_METADATA.TXT
+## 6 _p_Demo/_I_Test/_S_Show/_A_Private-R/         _Assay_METADATA.TXT
+##                                                      URL       Date     Time
+## 1 https://testing.sysmo-db.org/data_files/2127?version=1 2022-01-07 18:56:48
+## 2 https://testing.sysmo-db.org/data_files/2128?version=1 2022-01-07 18:56:50
+## 3  https://testing.sysmo-db.org/documents/1078?version=1 2022-01-07 18:56:52
+## 4 https://testing.sysmo-db.org/data_files/2129?version=1 2022-01-07 18:56:54
+## 5 https://testing.sysmo-db.org/data_files/2130?version=1 2022-01-07 18:56:59
+## 6 https://testing.sysmo-db.org/data_files/2131?version=1 2022-01-07 18:57:03
+##   Public_access  X
+## 1      download NA
+## 2      download NA
+## 3      download NA
+## 4      download NA
+## 5      download NA
+## 6     no_access NA</code></pre>
 </div>
 
 
