@@ -1,0 +1,13 @@
+Path	File_name	URL	Date	Time	Public_access	
+_p_Demo/_I_Test/	_INVESTIGATION_METADATA.TXT	https://testing.sysmo-db.org/data_files/2127?version=1	2022-01-07	18:56:48	download	
+_p_Demo/_I_Test/	phenodata_20191015.txt	https://testing.sysmo-db.org/data_files/2128?version=1	2022-01-07	18:56:50	download	
+_p_Demo/_I_Test/	README.MD	https://testing.sysmo-db.org/documents/1078?version=1	2022-01-07	18:56:52	download	
+_p_Demo/_I_Test/	seekignore.txt	https://testing.sysmo-db.org/data_files/2129?version=1	2022-01-07	18:56:54	download	
+_p_Demo/_I_Test/_S_Show/	_STUDY_METADATA.TXT	https://testing.sysmo-db.org/data_files/2130?version=1	2022-01-07	18:56:59	download	
+_p_Demo/_I_Test/_S_Show/_A_Private-R/	_Assay_METADATA.TXT	https://testing.sysmo-db.org/data_files/2131?version=1	2022-01-07	18:57:03	no_access	
+_p_Demo/_I_Test/_S_Show/_A_Work-R/	_Assay_METADATA.TXT	https://testing.sysmo-db.org/data_files/2132?version=1	2022-01-07	18:57:06	download	
+_p_Demo/_I_Test/_S_Show/_A_Private-R/	input/some-data.txt	https://testing.sysmo-db.org/data_files/2133?version=1	2022-01-07	18:57:10	no_access	
+_p_Demo/_I_Test/_S_Show/_A_Private-R/	reports/README.MD	https://testing.sysmo-db.org/documents/1079?version=1	2022-01-07	18:57:12	no_access	
+_p_Demo/_I_Test/_S_Show/_A_Work-R/	input/filename with blanks.txt	https://testing.sysmo-db.org/data_files/2134?version=1	2022-01-07	18:57:15	download	
+_p_Demo/_I_Test/_S_Show/_A_Work-R/	input/some-data.txt	https://testing.sysmo-db.org/data_files/2135?version=1	2022-01-07	18:57:17	download	
+_p_Demo/_I_Test/_S_Show/_A_Work-R/	reports/README.MD	https://testing.sysmo-db.org/documents/1080?version=1	2022-01-07	18:57:19	download	
