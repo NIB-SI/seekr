@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-.testing <- TRUE
+.testing <- !TRUE
 ```
 
 ## Introduction
@@ -46,7 +46,7 @@ For a short orientation, here is the structure of the information about the pISA
 str(pini)
 ```
 
-Information can be extracted from the list with information, e.g. assay name: 
+Information can be extracted from the list with information, e.g. assay name:
 ```{r}
 pini$A$name
 ```
@@ -67,7 +67,7 @@ pini$inroot
 
 ## Prepare list of files
 
-The most important task is to prepare the list of files to be uploaded. Typically one will upload files in one investigation, usually with all related branches (studies and assays). The metadata key "Upload to FAIRDOMHub" (Yes/No) controls if the layer (together with all subordinated layers) should be included or ignored by the upload process. In addition,  specific files or paths can be declared as ignored by the upload process. 
+The most important task is to prepare the list of files to be uploaded. Typically one will upload files in one investigation, usually with all related branches (studies and assays). The metadata key "Upload to FAIRDOMHub" (Yes/No) controls if the layer (together with all subordinated layers) should be included or ignored by the upload process. In addition,  specific files or paths can be declared as ignored by the upload process.
 File `seekignore.txt` in the investigation layer contains file names, directory names or name patterns that are used to filter and exclude the list of files to be uploaded. An example of the seekignore file is here:
 
 ```{r}

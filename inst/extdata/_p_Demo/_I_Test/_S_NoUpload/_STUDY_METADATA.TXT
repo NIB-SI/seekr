@@ -4,7 +4,7 @@ Title:	Testing study
 Description:	This study should not be uploaded to FAIRDOMHub.
 Raw Data:	
 pISA Study creation date:	2019-10-15
-pISA Study creator:	AB
+pISA Study creator:	Andrej Blejec
 Principal investigator:	*
 License:	CC BY 4.0
 Sharing permission:	Private

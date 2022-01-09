@@ -1,4 +1,4 @@
-## ----c,echo=FALSE---------------------------------------------------------------------------
+## ----c,echo=FALSE---------------------------------------------------
 ###############################################
 ##                                           ##
 ## (c) Andrej Blejec (andrej.blejec@nib.si)  ##
@@ -8,7 +8,7 @@
 
 
 
-## ----skOptions------------------------------------------------------------------------------
+## ----skOptions------------------------------------------------------
 #' Show all seekr related options
 #'
 #' Lists selected seekr related options that are set in via
@@ -63,7 +63,7 @@ skOptions <- function(end="", start="sk.", hide="sk.pwd"){
 }
 
 
-## ----skSetOption----------------------------------------------------------------------------
+## ----skSetOption----------------------------------------------------
 #' Sets seekr option according to the type.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -124,7 +124,7 @@ skSetOption <- function( type, id){
 
 
 
-## ----skGetOption----------------------------------------------------------------------------
+## ----skGetOption----------------------------------------------------
 #' Get seekr option according to the type.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -175,7 +175,7 @@ skGetOption <- function( type ){
 }
 
 
-## ----skReset--------------------------------------------------------------------------------
+## ----skReset--------------------------------------------------------
 #' Reset seekr related options
 #'
 #' @param all logical. Reset all options (including user and server related).
@@ -210,7 +210,7 @@ skReset <- function(all=FALSE){
 
 
 
-## ----skParse--------------------------------------------------------------------------------
+## ----skParse--------------------------------------------------------
 #' Parse the response from SEEK API and convert to a list.
 #'
 #' @param resp response from SEEK API.
@@ -243,7 +243,7 @@ skParse <- function(resp, ...){
      if (http_error(resp)) {
      stop(
       sprintf(
-        "SEEK API request failed [%s]\n%s\n<%s>",
+        "seekr: SEEK API request failed [%s]\n%s\n<%s>",
         status_code(resp),
         resp$header$status,
         "https://app.swaggerhub.com/apis/FAIRDOM/SEEK/0.3.1"
@@ -270,7 +270,7 @@ skParse <- function(resp, ...){
 }
 
 
-## ----print.seek_api-------------------------------------------------------------------------
+## ----print.seek_api-------------------------------------------------
 #' Print method for seek_api object
 #'
 #' @param x object of class \code{seek_api}.
@@ -311,7 +311,7 @@ invisible(x)
 }
 
 
-## ----skExpand-------------------------------------------------------------------------------
+## ----skExpand-------------------------------------------------------
 #' Expand shortened type name into full name.
 #'
 #' @param type Component type (possibly shortened e.g. 'pe' for 'people',
@@ -338,7 +338,7 @@ skExpand <- function(type){
 
 
 
-## ----skLog----------------------------------------------------------------------------------
+## ----skLog----------------------------------------------------------
 #' Writes a note to a log file.
 #'
 #' @param ... Objects to form a line.
@@ -366,7 +366,7 @@ skLog <- function( ..., file="FAIRDOM.log",append=TRUE){
    }
 
 
-## ----skGet----------------------------------------------------------------------------------
+## ----skGet----------------------------------------------------------
 #' Get information from repository.
 #'
 #' @param type Type of information (e.g. "person").
@@ -425,7 +425,7 @@ skGet <- function(type, id, filter,
 
 
 
-## ----skRead---------------------------------------------------------------------------------
+## ----skRead---------------------------------------------------------
 #' Read operation will return information about the instance identified.
 #'
 #' @param type Type of information (e.g. "person").
@@ -462,7 +462,7 @@ skRead <- function(type, id,
   }
 
 
-## ----skList---------------------------------------------------------------------------------
+## ----skList---------------------------------------------------------
 #' List operations return a list of all objects of the specified type,
 #' to which the authenticated user has access.
 #'
@@ -500,7 +500,7 @@ skList <- function(type, filter="" ,
   }
 
 
-## ----skListp--------------------------------------------------------------------------------
+## ----skListp--------------------------------------------------------
 #' List of all objects of the specified type within the project.
 #'
 #' @param class Type of parent layer (e.g. "projects").
@@ -538,7 +538,7 @@ skListp <- function(class=projects, type, pid=getOption("sk.pid"),
   }
 
 
-## ----skRelated------------------------------------------------------------------------------
+## ----skRelated------------------------------------------------------
 #' List of relationships within an object.
 #'
 #' @param type Object type (e.g. "project").
@@ -601,7 +601,7 @@ skRelated <- function( type, id, select=NULL,
 
 
 
-## ----skSearch-------------------------------------------------------------------------------
+## ----skSearch-------------------------------------------------------
 #' Search operation returns a list of references to resources.
 #'
 #' @param type Type of information (e.g. "person", default is "data_files").
@@ -667,7 +667,7 @@ skSearch <- function(type="data_files", q,
 
 
 
-## ----skDelete-------------------------------------------------------------------------------
+## ----skDelete-------------------------------------------------------
 #' Delete component.
 #'
 #' @param type Component type (e.g. "assay").
@@ -722,7 +722,7 @@ skDelete <- function(type, id,
 
 
 
-## ----skContent------------------------------------------------------------------------------
+## ----skContent------------------------------------------------------
 #' Get content from an *sk* object.
 #'
 #' @param r object retrieved by skGet.
@@ -774,7 +774,7 @@ skContent <- function(r, node, ...){
 # skContents <- skContent
 
 
-## ----skFindId-------------------------------------------------------------------------------
+## ----skFindId-------------------------------------------------------
 #' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -820,10 +820,10 @@ skFindId <- function(type, title){
 
 
 
-## ----skCheck--------------------------------------------------------------------------------
+## ----skCheck--------------------------------------------------------
 #' Check if component exists within the parent layer.
 #'
-#' This is a faster version of skExists, intended mostly to check existence 
+#' This is a faster version of skExists, intended mostly to check existence
 #'     of ISA layers in the parent layer.
 #' @param type Component type (possibly shortened e.g. 'pe' for 'people',
 #' 'proj' for 'projects', ...).
@@ -891,7 +891,7 @@ skCheck <- function(type, title, ptype, pid = skGetOption(ptype),  verbose=FALSE
      r <- skSearch(type, title)
      d <- skContent(r)
      ok <- length(d) > 0
-     if(!ok)  { 
+     if(!ok)  {
          skSetOption(type, NULL)
          return(FALSE)
          } else {
@@ -960,7 +960,7 @@ skCheck <- function(type, title, ptype, pid = skGetOption(ptype),  verbose=FALSE
 
 
 
-## ----skExistsa------------------------------------------------------------------------------
+## ----skExistsa------------------------------------------------------
 #' Check if component exist anywhere in the repository.
 #'
 #' @param type Component type (possibly shortened e.g. 'pe' for 'people',
@@ -990,7 +990,7 @@ skExistsa <- function(type, title, verbose=FALSE) {
 
 
 
-## ----skExistsp------------------------------------------------------------------------------
+## ----skExistsp------------------------------------------------------
 #' Check if component exist within the project.
 #'
 #' @param type Component type (possibly shortened e.g. 'pe' for 'people',
@@ -1024,7 +1024,7 @@ skExistsp <- function(type, title, pid=getOption("sk.pid"), verbose=FALSE) {
 
 
 
-## ----skExists-------------------------------------------------------------------------------
+## ----skExists-------------------------------------------------------
 #' Check if component exists within the layer.
 #'
 #' @param type Component type (possibly shortened e.g. 'pe' for 'people',
@@ -1069,7 +1069,7 @@ skExists <- function(type, title, ptype, pid , verbose=FALSE) {
 
 
 
-## ----skFindTitle----------------------------------------------------------------------------
+## ----skFindTitle----------------------------------------------------
 #' Get details of component with id from an *sk* object.
 #'
 #' @param type Components name (e.g. 'people', 'projects', ...).
@@ -1103,7 +1103,7 @@ skFindTitle <- function(type, id){
      }
 
 
-## ----skSkeleton-----------------------------------------------------------------------------
+## ----skSkeleton-----------------------------------------------------
 #' Create *sk* skeleton.
 #'
 #' Creates *sk* object with required structure.
@@ -1555,7 +1555,7 @@ return(sr)
 }
 
 
-## ----contentType----------------------------------------------------------------------------
+## ----contentType----------------------------------------------------
 #' Determine MIME type for file.
 #'
 #' @param file file name.
@@ -1604,7 +1604,7 @@ contentType <- function(file){
 }
 
 
-## ----skCreate-------------------------------------------------------------------------------
+## ----skCreate-------------------------------------------------------
 #' Create pISA layer or *sk* component.
 #'
 #' @param type Component type (e.g. 'people', 'projects', ...).
@@ -1669,7 +1669,7 @@ contentType <- function(file){
 #'       Study=paste("Test study", Sys.time())
 #'     , Title="Test Study"
 #'     , Description="Testing upload")
-#'  ss <- skCreate( type = "studies", meta)
+#'  ss <- skCreate( type = "studies", meta, access="no_access")
 #'  ss
 #' ss$id
 #'  skFindId("studies",meta$Study)
@@ -1713,7 +1713,7 @@ contentType <- function(file){
 #' item_link <- paste0(res$meta$base_url,res$links$self)
 #' if(interactive()) shell.exec(item_link)
 #' }
-skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", file="NA.TXT"){
+skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", file="NA.TXT", access="no_access"){
      type <- skExpand(type)
      myid <- as.character(getOption("sk.myid"))
      prid <- as.character(getOption("sk.prid"))
@@ -1726,9 +1726,9 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
      instid <- skContent(skRead("people",myid))$relationships$institutions$data[[1]]$id
      options(sk.instid=instid)
      }
-     tags <- c("pISA")
+     tags <- c("pISA-tree")
      s <- skSkeleton(type)
-# Common fileds
+# Common fields
 
 # Type specific fields
      switch(s$data$type,
@@ -1738,6 +1738,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
        s$data$attributes$description  <-  pasteMeta(meta)
        s$data$attributes$members <- list(list(person_id = myid,
        institution_id = instid))
+       s$data$attributes$policy$access <- access
        s$data$attributes$default_policy$permissions$resource$id <- myid
         if(length(prid)==0) stop("No programme id. Set 'sk.prid' in options", prid) else
        s$data$relationships$programmes$data$id <- prid
@@ -1750,6 +1751,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$title  <- title
         s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$projects$data$id <- pid
+        s$data$attributes$policy$access <- access
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$creators$data$type <- "people"
@@ -1760,6 +1762,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$investigation$data$id <-iid
         s$data$attributes$person_responsible_id <- myid
+        s$data$attributes$policy$access <- access
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$creators$data$type <- "people"
@@ -1770,6 +1773,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$description  <-  pasteMeta(meta)
         s$data$relationships$study$data$id <-sid
         s$data$attributes$person_responsible_id <- myid
+        s$data$attributes$policy$access <- access
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$creators$data$type <- "people"
@@ -1787,14 +1791,15 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$attributes$title  <-  document_title
         s$data$attributes$description  <-  document_description
         s$data$attributes$tags  <- c("data")
-       s$data$attributes$content_blobs$original_filename <- document_title
+        s$data$attributes$content_blobs$original_filename <- document_title
         s$data$attributes$content_blobs$content_type <- content_type
+        s$data$attributes$policy$access <- access
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$projects$data$id <- pid
         s$data$relationships$assays$data$id <- aid
         s$data$attributes$other_creators <- ""
-        s$data$attributes$tags <- c("pISA", "data")
+        s$data$attributes$tags <- c("pISA-tree", "data")
       }
       , documents = {
         document_title <- getMeta(meta,"Title")
@@ -1806,11 +1811,12 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
         s$data$relationships$creators$data$id <- myid
         s$data$relationships$projects$data$id <- pid
         s$data$relationships$assays$data$id <- aid
+        s$data$attributes$policy$access <- access
         s$data$attributes$policy$permissions$resource$id <- pid
         s$data$attributes$content_blobs$content_type <- content_type
         s$data$attributes$content_blobs$original_filename <- document_title
         s$data$attributes$other_creators <- ""
-        s$data$attributes$tags <- c("pISA", "document")
+        s$data$attributes$tags <- c("pISA-tree", "document")
       }
      )
      baseurl <- getOption("sk.url")
@@ -1834,6 +1840,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
          , ua
          )
          )
+     if(as.numeric(resp$status) !=200) print( resp$status)
      parsed <- skParse(resp)
      skLog( resp$headers$status, round(fht["elapsed"],2), parsed$url)
 # Upload file blob
@@ -1877,7 +1884,7 @@ skCreate <- function (type = "assays", meta=list(), title=NULL, class="EXP", fil
 #skCreate("projects", .pmeta)
 
 
-## ----skUpload-------------------------------------------------------------------------------
+## ----skUpload-------------------------------------------------------
 #' Upload file content as a blob.
 #'
 #' Upload file to a created object of type 'documents' or 'data_files'.
@@ -1938,7 +1945,7 @@ skUpload <- function( object, file){
 }
 
 
-## ----skUploadFile---------------------------------------------------------------------------
+## ----skUploadFile---------------------------------------------------
 #' Upload file.
 #'
 #' Create an object of type 'documents' or 'data_files'
@@ -1957,7 +1964,7 @@ skUpload <- function( object, file){
 #' skUploadFile(file)
 #' }
 #'
-skUploadFile <- function(file, root = skGetOption("root"),verbose=FALSE,  reportFile=NULL){
+skUploadFile <- function(file, root = skGetOption("root"),verbose=FALSE,  reportFile=NULL, access="no_access"){
   uplimit <- 3*10^9
 path <- normalizePath(file.path(root))
 description <- paste(basename(dirname(path)),basename(path),sep="/")
@@ -1976,20 +1983,20 @@ meta <- list(
   if(isreadable) {
   type <- "data_files" } else {type <- "documents"}
 #type <- "documents"
-s <- skCreate(type, meta, file = file)
+s <- skCreate(type, meta, file = file, access=access)
 if(.testing) print(names(s))
 #
 f_size <- file.size(file.path(root,file))
 if(!is.na(f_size)){
    if(f_size< uplimit) {
-        cat("---> Uploading ", file,"\n")
+        cat("... Uploading:", file,"\n")
         f <- skUpload(s, file)
         if(verbose) cat(s$url,"\n")
         #
         day <- format(Sys.time(), '%Y-%m-%d')
         tajm <- format(Sys.time(), '%H:%M:%S')
         if(!is.null(reportFile)) cat( layers$fdesc, layers$fname, s$url,
-        day, tajm, "\n", sep="\t", file=reportFile, append=TRUE)
+        day, tajm, layers$access, "\n", sep="\t", file=reportFile, append=TRUE)
         return(s)
    } else {
    f <- paste( "Not uploaded, File too large", f_size ,">",  uplimit/10^9,"GB")
@@ -1999,12 +2006,12 @@ if(!is.na(f_size)){
         day <- format(Sys.time(), '%Y-%m-%d')
         tajm <- format(Sys.time(), '%H:%M:%S')
         cat(layers$fdesc, layers$fname, f ,
-        day,tajm, "\n", sep="\t", file=reportFile, append=TRUE)
+        day,tajm, layers$access, "\n", sep="\t", file=reportFile, append=TRUE)
         }
 }
 
 
-## ----skUploadFiles--------------------------------------------------------------------------
+## ----skUploadFiles--------------------------------------------------
 #' Create appropriate layers and upload files.
 #'
 #' Create an object of type 'documents' or 'data_files'
@@ -2035,7 +2042,7 @@ skLog("Start of upload")
 skLog("############################")
 oldLayers <- list(pname="", iname="", sname="", aname="")
 if(is.null(reportFile) ) reportFile <- paste0("Upload-",gsub("[ :]","_",Sys.time()),".txt")
-cat("Path", "File_name",  "URL" ,"Date", "Time", "\n", sep="\t", file=reportFile)
+cat("Path", "File_name",  "URL" ,"Date", "Time", "Public_access", "\n", sep="\t", file=reportFile)
 if(test&missing(invname)) {
   invname <- paste(skGetLayer("I",normalizePath(root)),Sys.time(),sep=" | ")
   skLog("############################")
@@ -2046,28 +2053,28 @@ ind <- 1:length(files)
 nind <- length(ind)
 #
 for( i in ind ){
-file <- files[i]
- cat("|", rep("-",50*i/nind-1),">", rep(" ",50*(nind-i)/nind),"| ", i, "/", nind, "\n", file, "\n", sep="")
-layers <- skSetLayers(file)
-if(test) layers$iname <- invname
-#
-# Investigation
-if(layers$iname!=oldLayers$iname){
-  skCheckAndCreate("investigations", layers)
-}
-# Study
-if(layers$sname!=oldLayers$sname){
-  skCheckAndCreate("studies", layers)
-}
-# Assay
-if(layers$aname!=oldLayers$aname){
-  meta <- ""
-  skCheckAndCreate("assays", layers)
-}
-# File
-skLog("Uploading file: ", layers$fdesc," | ", layers$fname)
-r <- skUploadFile(file, verbose=verbose, reportFile=reportFile)
-oldLayers <- layers
+  file <- files[i]
+   cat("|", rep(".",50*i/nind-1),">", rep("_",50*(nind-i)/nind),"| ", i, "/", nind, "\n", file, "\n", sep="")
+  layers <- skSetLayers(file)
+  if(test) layers$iname <- invname
+  #
+  # Investigation
+  if(layers$iname!=oldLayers$iname){
+    skCheckAndCreate("investigations", layers)
+  }
+  # Study
+  if(layers$sname!=oldLayers$sname){
+    skCheckAndCreate("studies", layers)
+  }
+  # Assay
+  if(layers$aname!=oldLayers$aname){
+    meta <- ""
+    skCheckAndCreate("assays", layers)
+  }
+  # File
+  skLog("Uploading file: ", layers$fdesc," | ", layers$fname)
+  r <- skUploadFile(file, verbose=verbose, reportFile=reportFile, access=layers$access)
+  oldLayers <- layers
 }
 skLog("############################")
 skLog("End of upload")
@@ -2079,7 +2086,7 @@ skLog("############################")
 
 
 
-## ----skFilesToUpload------------------------------------------------------------------------
+## ----skFilesToUpload------------------------------------------------
 #' Prepare the list of files for upload
 #'
 #' @param root character string. Directory, pointing to the branch
@@ -2266,7 +2273,7 @@ return(dirs)
 #
 
 
-## ----skGetLayer-----------------------------------------------------------------------------
+## ----skGetLayer-----------------------------------------------------
 #' Get layer name from path.
 #'
 #' @param layer character. pISA-tree layer prefix (one of characters "p",
@@ -2308,7 +2315,7 @@ skGetLayer <- function (layer="p", path = getwd(), verbose=FALSE)
 }
 
 
-## ----skSetLayers----------------------------------------------------------------------------
+## ----skSetLayers----------------------------------------------------
 #' Set seek layer names based on pISA-tree file path.
 #'
 #' @param layer character. pISA-tree layer prefix (one of characters "p",
@@ -2336,6 +2343,7 @@ skGetLayer <- function (layer="p", path = getwd(), verbose=FALSE)
 #' skSetLayers(dirs[1], root=.iroot)
 #' skSetLayers(dirs[2], root=.iroot)
 #' skSetLayers(dirs[length(dirs)], root=.iroot)
+#' skSetLayers(dirs[10], root=.iroot)
 #' sapply(dirs, function(x) skSetLayers(x))
 #' if(interactive()) setwd(oldwd)
 #' getwd()
@@ -2356,27 +2364,67 @@ skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investig
     ad <- ""
     fd <- paste0(c(pl,il,sl,al,""),collapse="/")
     fd <- gsub("/+","/",fd)
+    if( al!="") {
+         meta <- readMeta(file.path(root,sl,al))
+         access <- setPublicAccess(meta)
+         }
     if( (al=="") & sl=="" ) {
-           sd <- data.frame(Key="Investigation files",Value=il)
-           sl <- "Investigation files"
+           meta <- readMeta(root)
+           access <- setPublicAccess(meta)
+           sd <- data.frame(Key=studyForFiles,Value=il)
+           sl <- studyForFiles
            al <- paste0(il,assaySuffix)
            ad <- data.frame(Key="Files connected to investigation:"
                           , Value=il)
      }
      if( al=="" ) {
+         meta <- readMeta(file.path(root,sl))
+           access <- setPublicAccess(meta)
          ad <- data.frame(Key="Files connected to study:"
                           , Value=sl)
          al <- paste0(sl,assaySuffix)
      }
      r <- list(pname=pl, iname=il, sname=sl, aname=al, fname=fl,
-                pdesc=pd, idesc=id, sdesc=sd, adesc=ad, fdesc=fd)
+                pmeta=pd, imeta=id, smeta=sd, ameta=ad, fdesc=fd,
+                access = access)
      if(verbose) print.simple.list(r)
     return(r)
 }
 
 
-## ----skCheckAndCreate-----------------------------------------------------------------------
-#' Check if layer exists and create if not.
+## ----setPublicAccess------------------------------------------------
+#' Set public access permission.
+#'
+#' Set public access permission according to the "Sharing permission:"
+#' key in metadata.
+#'
+#' @param meta data frame or list. pISA metadata object.
+#' @param na.access character string. Default access, either 'no_access' for #'      Private layer or 'download' for Public layer.
+#' @export
+#' @examples
+#' \dontrun{
+#' meta = data.frame(
+#' Key=c("Assay:","Sharing permission:"), Value=c("_A_Test","Public"))
+#' setPublicAccess(meta)
+#' meta = data.frame(
+#' Key=c("Assay:","Sharing permission:"), Value=c("_A_Test","Private"))
+#' setPublicAccess(meta)
+#' meta = data.frame(
+#' Key=c("Assay:"), Value=c("_A_Test"))
+#' setPublicAccess(meta)
+#' setPublicAccess(meta, "download")
+#' }
+#'
+setPublicAccess <- function(meta, na.access="no_access") {
+            access <- getMeta(meta,"Sharing permission:")
+            if(is.na(access)) access <- na.access else
+            if(access == "Private") access <- "no_access" else access <- "download"
+            return(access)
+            }
+
+
+## ----skCheckAndCreate-----------------------------------------------
+#' Check if layer exists and create it if not.
 #'
 #' @param type character. ISA layer type (words starting with
 #'    I, S, or A, can be lowercase)
@@ -2420,15 +2468,15 @@ skSetLayers <- function(path, root=skGetOption("root") , studyForFiles="Investig
 #' getwd()
 #' }
 #
-skCheckAndCreate <- 
+skCheckAndCreate <-
 function (type, layers, root = skGetOption("root"), create = TRUE,
-    verbose = FALSE, quiet = FALSE)
+    verbose = FALSE, quiet = FALSE, na.access="no_access")
 {type <- toupper(substr(type, 1, 1))
     if (type == "I") {
         layer <- "investigations"
         parent <- "projects"
         name <- layers$iname
-        meta <- layers$idesc
+        meta <- layers$imeta
         root <- root
         layerExists <- skCheck(layer, name, parent, verbose = verbose)
     }
@@ -2436,7 +2484,7 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
         layer <- "studies"
         parent <- "investigations"
         name <- layers$sname
-        meta <- layers$sdesc
+        meta <- layers$smeta
         root <- file.path(root, layers$sname)
         layerExists <- skExists(layer, name, parent, verbose = verbose)
     }
@@ -2444,7 +2492,7 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
         layer <- "assays"
         parent <- "studies"
         name <- layers$aname
-        meta <- layers$adesc
+        meta <- layers$ameta
         root <- file.path(root, layers$sname, layers$aname)
         layerExists <- skExists(layer, name, parent, verbose = verbose)
     }
@@ -2453,22 +2501,27 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
     if (!layerExists) {
         if (length(meta) == 1) {
             meta <- readMeta(root)
-        }
+#            access <- setPublicAccess(meta)
+        }  
+        access <- layers$access
         if (!quiet)
-            cat("Create: ", layer, "'", name, "'\n",
+            cat("Create: ", layer, " '", name, "' (",access, ")\n",
                 sep = "")
-        if (create)
-            r <- skCreate(layer, meta, title = name)
+        if (create){
+                r <- skCreate(layer, meta, title = name, access = access)
+        }    
     }
     else r <- skFindId(layer, name)
+    print(r)
+#    cat(r$url,"\n")
     return(r)
 }
 
 
-## ----skCheckAndCreate2----------------------------------------------------------------------
+## ----skCheckAndCreate2----------------------------------------------
 #' Check if layer exists and create if not.
 #'
-#' New function that wouldnt depend on the position of the 
+#' New function that wouldn't depend on the position of the
 #'   working directory within the pISA-tree.
 #' @param type character. ISA layer type (words starting with
 #'    I, S, or A, can be lowercase)
@@ -2514,7 +2567,7 @@ root=skGetOption("root")
        layer <- "investigations"
        parent <- "projects"
        name <- layers$iname
-       meta <- layers$idesc
+       meta <- layers$imeta
        ly <- substr(basename(root),2,2)
        root <- switch( ly,
                "I" = root,
@@ -2526,7 +2579,7 @@ root=skGetOption("root")
        layer <- "studies"
        parent <- "investigations"
        name <- layers$sname
-       meta <- layers$sdesc
+       meta <- layers$smeta
        ly <- substr(basename(root),2,2)
        root = switch( ly,
                "I" = file.path(root,layers$sname),
@@ -2538,7 +2591,7 @@ root=skGetOption("root")
        layer <- "assays"
        parent <- "studies"
        name <- layers$aname
-       meta <- layers$adesc
+       meta <- layers$ameta
        ly <- substr(basename(root),2,2)
        test(ly)
        root = switch( ly,

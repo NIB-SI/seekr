@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-.testing <- !TRUE
+.testing <- TRUE
 ```
 
 
@@ -31,7 +31,8 @@ Package `seekr` contains demo pISA-tree project. For this demonstration we can u
 Note: If R is already started in an existing assay, the following chunk is not needed, set eval to FALSE.
 
 ```{r eval=!TRUE}
-if(FALSE){astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
+if(FALSE){
+astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
 oldwd <- setwd(system.file("extdata", astring, package="seekr"))
 oldwd
 dir()
@@ -84,7 +85,7 @@ seekignore
 To keep the number of files shorter we will add a pattern, excluding files in folder Interactive:
 
 ```{r}
-seekignore <- c(seekignore, "/Interacitve", "Upload*")
+seekignore <- c(seekignore, "/Interacitve")
 seekignore
 ```
 
@@ -146,7 +147,7 @@ skOptions()
 We can test if the settings are set correctly by finding user's name
 
 ```{r}
-skFindTitle("people", skGetOption("myid"))
+skFindTitle("people",  skGetOption("myid") )
 skOptions()
 ```
 
@@ -170,7 +171,7 @@ pini$p$name <- .pname
 .prname <- "pISA-tree"
 ```
 
-By checking the existence of the programme and project, the seekr options will be set. SEEK snforces unique programme and project names. For other ISA layers uniqness must be checked within the parent levels. pISA-tree layer names are also folder names and therefore unique within the parent layer. This is very important for finding appropriate layer for updates. 
+By checking the existence of the programme and project, the seekr options will be set. SEEK snforces unique programme and project names. For other ISA layers uniqness must be checked within the parent levels. pISA-tree layer names are also folder names and therefore unique within the parent layer. This is very important for finding appropriate layer for updates.
 
 ```{r}
 skFindId("programme", .prname)
@@ -186,16 +187,13 @@ print.simple.list(skOptions("id"))
 Communication with the host is logged in the log-file. Let's start a new log-file.
 
 ```{r restart_log_file}
-skLog("Testing upload", 
+skLog("Testing upload",
     file="FAIRDOM.log", append=FALSE)
 ```
 
 ```{r check_project}
 # project already exists
-if( skFindTitle("projects", skGetOption("proj"))["title"] != .pname) {
-  cat("Wrong project name or id. Create project", layers[1],"\n")} else {
-    cat("Project exists:", .pname, "\n")
-    }
+if( skFindTitle("projects", skGetOption("proj"))["title"]!=.pname) {cat("Wrong project name or id. Create project", layers[1],"\n")} else {cat("Project exists:", .pname, "\n")}
 ```
 
 
@@ -204,12 +202,18 @@ To enable unique investigation name date and time will be appended to the origin
 For each file in the list of files function 'skUploadFiles' ensures that necessary layers exist and uploads the file itself. The argument 'test' creates unique investigation name, which is useful in the test period.
 
 ```{r upload_files}
-skUploadFiles(forUpload, verbose=TRUE, test=TRUE, append=FALSE) #, invname="Test Public access")
+ind <- c(1:5,sample(1:length(forUpload),100))
+ind <- 1:8
+head(forUpload[ind])
+ind <- 1:length(forUpload)
+#
+#skUploadFiles(forUpload, test=TRUE, append=FALSE)
+skUploadFiles(forUpload[ind], test=TRUE, append=FALSE, verbose=TRUE, invname="_I_01_LabTrials-test-private4")
 ```
 
 # After upload
 
-You can follow the progress of the upload in console. In addition, you get the upload details in two files: the log-file (FAIRDOM.log) and and file with the name that starts with 'Upload ..." and date tim (e.g. Upload-2021-11-07_16_20_23.txt). This file contains uploaded file names and links to uploaded files on FAIRBOMHub. Both files appear in the working directory.
+You can follow the progress of the upload in console. In addition, you get the upload details in two files: the log-file (FAIRDOM.log) and and file with the name that starts with 'Upload ...' and date-time (e.g. Upload-2021-11-07_16_20_23.txt). This file contains uploaded file names and links to uploaded files on FAIRBOMHub. Both files appear in the working directory.
 
 ```{r}
 dir(pattern="*.log")
@@ -221,4 +225,7 @@ fn
 head(read.table(fn,sep="\t", header=TRUE))
 ```
 
+```{r}
+
+```
 

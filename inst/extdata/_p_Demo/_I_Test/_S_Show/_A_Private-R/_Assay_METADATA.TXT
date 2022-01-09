@@ -1,4 +1,4 @@
-Assay:	_A_Work-R
+Assay:	_A_Private-R
 Short Name:	Work-R
 Assay Class:	DRY
 Assay Type:	R
@@ -7,6 +7,7 @@ Description:	Not really working, just testing :)
 pISA Assay creation date:	2019-10-15
 pISA Assay creator:	Andrej Blejec
 Analyst:	Andrej Blejec
+Sharing permission:	Private
 Phenodata:	../../phenodata_20191015.txt
 Featuredata:	
 Data:	

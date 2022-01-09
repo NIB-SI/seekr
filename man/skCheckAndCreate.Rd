@@ -2,7 +2,7 @@
 % Please edit documentation in R/seekr-api.R
 \name{skCheckAndCreate}
 \alias{skCheckAndCreate}
-\title{Check if layer exists and create if not.}
+\title{Check if layer exists and create it if not.}
 \usage{
 skCheckAndCreate(
   type,
@@ -10,7 +10,8 @@ skCheckAndCreate(
   root = skGetOption("root"),
   create = TRUE,
   verbose = FALSE,
-  quiet = FALSE
+  quiet = FALSE,
+  na.access = "no_access"
 )
 }
 \arguments{
@@ -30,7 +31,7 @@ usually the result of a call to skSetLayers.}
 \item{quiet}{logical. Print result?}
 }
 \description{
-Check if layer exists and create if not.
+Check if layer exists and create it if not.
 }
 \examples{
 \dontrun{

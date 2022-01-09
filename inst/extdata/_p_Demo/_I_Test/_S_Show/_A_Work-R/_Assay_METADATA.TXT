@@ -5,8 +5,9 @@ Assay Type:	R
 Title:	Working in assay
 Description:	Not really working, just testing :)
 pISA Assay creation date:	2019-10-15
-pISA Assay creator:	AB
-Analyst:	AB
+pISA Assay creator:	Andrej Blejec
+Analyst:	Andrej Blejec
+Sharing permission:	Public
 Phenodata:	../../phenodata_20191015.txt
 Featuredata:	
 Data:	

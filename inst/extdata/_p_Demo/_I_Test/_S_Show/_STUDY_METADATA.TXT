@@ -4,8 +4,8 @@ Title:	Testing study
 Description:	Test study for demonstration only.
 Raw Data:	
 pISA Study creation date:	2019-10-15
-pISA Study creator:	AB
+pISA Study creator:	Andrej Blejec
 Principal investigator:	*
 License:	CC BY 4.0
-Sharing permission:	Private
+Sharing permission:	Public
 Upload to FAIRDOMHub:	Yes
