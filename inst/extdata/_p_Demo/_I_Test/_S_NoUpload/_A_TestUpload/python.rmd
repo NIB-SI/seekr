@@ -1,0 +1,62 @@
+---
+title: "python"
+author: "A. Blejec"
+date: "12 1 2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+You can use python scripts as well:
+```{python}
+a, b = 0, 1
+while a < 1000:
+  print(a, end=',')
+  a, b = b, a+b
+```
+
+## How python values are visible in R?
+
+Look at [this blog](https://notast.netlify.app/post/r-you-ready-for-python-gentle-introduction-to-reticulate-package/).
+
+```{r warning=FALSE}
+library(tidyverse)
+library(reticulate)
+```
+
+
+```{python}
+Plist= [11,22,33,44,55,66]
+
+print(Plist)
+```
+
+```{r}
+py_eval("Plist")
+py$Plist
+```
+
+
+
+```{python}
+
+def Psq_fun (x):
+  value= x*x 
+  return(value)
+  
+print(Psq_fun(9))
+```
+
+
+

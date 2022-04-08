@@ -2459,9 +2459,12 @@ if(file.exists(skignore)) seekignore <- readLines(skignore)
     }
      else seekignore <- skignore
 seekignore <- seekignore[!grepl("^#",seekignore)] # get rid of comment lines
-seekignore <- c(seekignore,skDoNotUpload(root,exclude.nokey, verbose, quiet, recursive))
+seekignore <- gsub("([~$])","\\\\\\1",seekignore) # escape special characters
+seekignore <- c(seekignore,skDoNotUpload(root, exclude.nokey, 
+verbose, quiet, recursive=TRUE))
 if(exclude.md) {
-     mdignore <- skIgnoreBlankReadme(root, verbose, quiet, recursive)
+     mdignore <- skIgnoreBlankReadme(root, verbose, quiet, 
+     recursive=TRUE)
      #  Protect files in the root directory
        ind <- substr(mdignore,1,1)!="_"
      #  rootName <- rev(strsplit(normalizePath(root),"\\\\")[[1]])[1]
@@ -2470,13 +2473,14 @@ if(exclude.md) {
      seekignore <- c(seekignore,mdignore)
 }
 # Create directory listing
-dirs <- list.files(root, full.names=FALSE, recursive=TRUE)
+dirs <- list.files(root, full.names=FALSE, recursive=recursive)
 #  Protect files in the root directory
   ind <- substr(dirs,1,1)!="_"
   dirs[ind] <- paste0("XX/",dirs[ind])
 
 # Ignore files with patterns in seekignore file
 dirlength <- length(dirs)
+print(dirs)
 for(pat in seekignore){
   ldir <- length(dirs)
   pat <- gsub("\\.","\\\\.",pat)
@@ -2488,11 +2492,19 @@ for(pat in seekignore){
 
 dirs <- gsub("^XX/","",dirs)
 dirs <- dirs[order(sapply(strsplit(dirs,"/"),length))]
+# Remove directories
+xdirs <- list.dirs(path = uploadRoot, full.names = FALSE,
+recursive = recursive)
+xdirs=list.dirs(path = uploadRoot, full.names = FALSE,
+recursive = recursive)
+dirs <- dirs[!(dirs %in% xdirs)]
 if(!quiet) cat("Files to upload:", length(dirs), "/",dirlength,"\n")
 return(dirs)
 }
 #
 @
+
+
 
 <<skGetLayer>>=
 #' Get layer name from path.
@@ -2723,14 +2735,14 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
         if (length(meta) == 1) {
             meta <- readMeta(root)
 #            access <- setPublicAccess(meta)
-        }  
+        }
         access <- layers$access
         if (!quiet)
             cat("Create: ", layer, " '", name, "' (",access, ")\n",
                 sep = "")
         if (create){
                 r <- skCreate(layer, meta, title = name, access = access)
-        }    
+        }
     }
     else r <- skFindId(layer, name)
     print(r)

@@ -6,6 +6,8 @@ Raw Data:
 pISA Study creation date:	2019-10-15
 pISA Study creator:	Andrej Blejec
 Principal investigator:	*
+Study Person Address:	https://orcid.org/0000-0001-7484-6031
+Study Person Address:	https://orcid.org/0000-0003-3644-7827
 License:	CC BY 4.0
 Sharing permission:	Public
 Upload to FAIRDOMHub:	Yes

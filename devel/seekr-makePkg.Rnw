@@ -165,6 +165,7 @@ miss
 check()
 
 @
+
 \clearpage
 \subsection{Build a package}
 
@@ -198,6 +199,7 @@ devtools::load_all()
 cat("Package:",pkgName,"\n")
 library(pkgName, character.only=TRUE)
 help(package=eval(pkgName))
+
 @
 
 

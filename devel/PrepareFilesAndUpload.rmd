@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-.testing <- TRUE
+.testing <- FALSE
 ```
 
 
@@ -28,10 +28,10 @@ library(seekr)
 
 Package `seekr` contains demo pISA-tree project. For this demonstration we can use the demo project. It is assumed, that our working directory is a layer of the pISA project. It is recommended that working directory is an assay, so we will start in an assay that is available in the package `seekr`.
 
-Note: If R is already started in an existing assay, the following chunk is not needed, set eval to FALSE.
+Note: If R is already started in an existing assay, the following chunk is not needed, set \Sexpr{eval} to FALSE.
 
 ```{r eval=!TRUE}
-if(FALSE){
+if(!FALSE){
 astring <- "_p_Demo/_I_Test/_S_Show/_A_Work-R/"
 oldwd <- setwd(system.file("extdata", astring, package="seekr"))
 oldwd
@@ -86,6 +86,9 @@ To keep the number of files shorter we will add a pattern, excluding files in fo
 
 ```{r}
 seekignore <- c(seekignore, "/Interacitve")
+seekignore <- c(seekignore, "~$*")
+#seekignore <- c(seekignore, "\\~\\$*")
+
 seekignore
 ```
 
@@ -100,14 +103,20 @@ Then it will filter it according to declarations in the combined seekignore patt
 ```{r prepare_list_of_files_for_upload}
 uploadRoot <- pini$I$root
 uploadRoot
-forUpload <- skFilesToUpload( root = uploadRoot, skignore = seekignore)
+recursive <- TRUE
+forUpload <- skFilesToUpload( root = uploadRoot
+    , skignore = seekignore
+    , recursive = recursive
+    )
 ```
 
 Final list of files for upload is
 
 ```{r}
-forUpload
+if(length(forUpload) < 15) forUpload else {
 head(forUpload)
+tail(forUpload)
+}
 ```
 
 ## Connect with the FAIRDOMHub
