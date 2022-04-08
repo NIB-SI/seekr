@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-.testing <- TRUE
+.testing <- FALSE
 ```
 
 
@@ -28,7 +28,7 @@ library(seekr)
 
 Package `seekr` contains demo pISA-tree project. For this demonstration we can use the demo project. It is assumed, that our working directory is a layer of the pISA project. It is recommended that working directory is an assay, so we will start in an assay that is available in the package `seekr`.
 
-Note: If R is already started in an existing assay, the following chunk is not needed, set eval to FALSE.
+Note: If R is already started in an existing assay, the following chunk is not needed, set \Sexpr{eval} to FALSE.
 
 ```{r eval=!TRUE}
 if(FALSE){
@@ -86,6 +86,9 @@ To keep the number of files shorter we will add a pattern, excluding files in fo
 
 ```{r}
 seekignore <- c(seekignore, "/Interacitve")
+seekignore <- c(seekignore, "~$*")
+#seekignore <- c(seekignore, "\\~\\$*")
+
 seekignore
 ```
 

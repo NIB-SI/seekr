@@ -2459,6 +2459,7 @@ if(file.exists(skignore)) seekignore <- readLines(skignore)
     }
      else seekignore <- skignore
 seekignore <- seekignore[!grepl("^#",seekignore)] # get rid of comment lines
+seekignore <- gsub("([~$])","\\\\\\1",seekignore) # escape special characters
 seekignore <- c(seekignore,skDoNotUpload(root,exclude.nokey, verbose, quiet, recursive))
 if(exclude.md) {
      mdignore <- skIgnoreBlankReadme(root, verbose, quiet, recursive)
@@ -2723,14 +2724,14 @@ function (type, layers, root = skGetOption("root"), create = TRUE,
         if (length(meta) == 1) {
             meta <- readMeta(root)
 #            access <- setPublicAccess(meta)
-        }  
+        }
         access <- layers$access
         if (!quiet)
             cat("Create: ", layer, " '", name, "' (",access, ")\n",
                 sep = "")
         if (create){
                 r <- skCreate(layer, meta, title = name, access = access)
-        }    
+        }
     }
     else r <- skFindId(layer, name)
     print(r)
