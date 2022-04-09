@@ -9,3 +9,4 @@ common.ini
 *.tmp
 *.log
 _outputFile.R
+\^\%

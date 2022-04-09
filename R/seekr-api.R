@@ -2165,7 +2165,8 @@ mlength <- length(mdir)
 ignore <- NULL
 for(fn in mdir) {
 #fn <- mdir[2]
-    mdata <- read.table(file.path(root,fn), sep="\t",header=TRUE)
+    mdata <- read.table(file.path(root,fn), sep="\t", 
+    header=TRUE, fill=TRUE)
     select <- mdata[,1]=="Upload to FAIRDOMHub:"
     value <- substr(mdata[select,2][1],1,1)
     if(  value %in% c("n", "N")  | (is.na(value)& exclude.nokey)  ) {
@@ -2237,12 +2238,17 @@ if(length(skignore)==1 ){
 if(file.exists(skignore)) seekignore <- readLines(skignore)
     }
      else seekignore <- skignore
+#
 seekignore <- seekignore[!grepl("^#",seekignore)] # get rid of comment lines
 seekignore <- gsub("([~$])","\\\\\\1",seekignore) # escape special characters
-seekignore <- c(seekignore,skDoNotUpload(root, exclude.nokey, 
+types <- grepl("\\.",seekignore)
+seekignore[types] <- paste0(seekignore[types],"$")
+seekignore <- gsub("\\.","\\\\.",seekignore)
+#
+seekignore <- c(seekignore,skDoNotUpload(root, exclude.nokey,
 verbose, quiet, recursive=TRUE))
 if(exclude.md) {
-     mdignore <- skIgnoreBlankReadme(root, verbose, quiet, 
+     mdignore <- skIgnoreBlankReadme(root, verbose, quiet,
      recursive=TRUE)
      #  Protect files in the root directory
        ind <- substr(mdignore,1,1)!="_"
@@ -2259,10 +2265,10 @@ dirs <- list.files(root, full.names=FALSE, recursive=recursive)
 
 # Ignore files with patterns in seekignore file
 dirlength <- length(dirs)
-print(dirs)
+#print(dirs)
 for(pat in seekignore){
   ldir <- length(dirs)
-  pat <- gsub("\\.","\\\\.",pat)
+#  pat <- gsub("\\.","\\\\.",pat)
   dirs <- dirs[!grepl(pat, dirs, ignore.case=TRUE)]
   if(verbose & !quiet) cat("Ignoring" , ldir-length(dirs), "files [",pat," ]\n")
 }
