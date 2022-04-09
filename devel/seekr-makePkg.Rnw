@@ -225,7 +225,7 @@ Send package to R Windows builder
 
 <<eval=FALSE>>=
 devtools:::check_win(pkgPath, email="andrej.blejec@nib.si")
-
+1
 @
 
 %<<child='encChild2.Rnw'>>=
