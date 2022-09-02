@@ -21,6 +21,7 @@ conda config --add channels conda-forge
 
 11. R
 ```
+> .libPaths()
 > install.packages("reticulate", dependencies = TRUE)
 > install.packages("cli", dependencies = TRUE) # https://github.com/r-lib/cli
 > install.packages('R.oo', dependencies = TRUE)
