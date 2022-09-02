@@ -24,6 +24,7 @@ conda config --add channels conda-forge
 > install.packages("reticulate", dependencies = TRUE)
 > install.packages("cli", dependencies = TRUE) # https://github.com/r-lib/cli
 > install.packages('R.oo', dependencies = TRUE)
+> devtools::install_dev_deps()
 ```
 12. ```mamba install r-r.utils```
 
