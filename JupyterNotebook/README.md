@@ -53,6 +53,6 @@ R
 16.
 ```
 jupyter notebook --no-browser --port=XXXX
-ssh -L 8080:localhost:XXXX uname@server
+ssh -L XXXX:localhost:XXXX uname@server
 ```
 new R [conda env your-enviroment-name]
