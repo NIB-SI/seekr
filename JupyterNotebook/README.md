@@ -31,7 +31,7 @@ conda config --add channels conda-forge
 
 option 1) ```> devtools::install_github("NIB-SI/pisar", build_vignettes = TRUE)```
 
-option 2) ```> remotes::install_github("NIB-SI/pisar")```
+option 2) ```> remotes::install_github("NIB-SI/pisar", dependencies = TRUE)```
 
 option 3) 
 ```
@@ -39,7 +39,7 @@ wget https://github.com/NIB-SI/pisar/archive/refs/heads/master.zip
 R
 > install.packages("pisar-master", repos = NULL, lib = "/patho/to/conda/envs/your-enviroment-name/lib/R/library")
 ```
-14. ```> devtools::install_github("nib-si/seekr")```
+14. ```> devtools::install_github("nib-si/seekr", dependencies = TRUE)```
 15. 
 ```
 > library(seekr)
