@@ -49,7 +49,8 @@ R
 > devtools::session_info()
 ```
 16.
-```jupyter notebook --no-browser --port=XXXX
+```
+jupyter notebook --no-browser --port=XXXX
 ssh -L 8080:localhost:XXXX uname@server
 ```
 16. new R [conda env your-enviroment-name]
